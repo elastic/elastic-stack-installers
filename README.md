@@ -26,3 +26,6 @@ Discussion topics
 - [ ] run Kibana dashboard setup
 - [ ] configure/enable available modules
 - [ ] Direct user to the guide page for the beat to continue/modify/extend configuration.
+
+### CM / Fleet integration
+- [ ] ...
