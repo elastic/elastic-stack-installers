@@ -29,3 +29,6 @@ Discussion topics
 
 ### CM / Fleet integration
 - [ ] ...
+
+### Testing / CI
+- [ ] ...
