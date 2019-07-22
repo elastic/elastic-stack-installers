@@ -20,11 +20,9 @@ Discussion topics
 - [ ] Provide x86 version. Do we still care about x86/32bit variants?
 - [ ] Provide x64 version. 
 
-### UI
-- [ ] Provide per-beat configuration UI to:
- - [ ] allow the beat to be installed as a service.
- - [ ] allow the beat to connect to downstream component.
- - [ ] run Kibana dashboard setup
- - [ ] configure/enable available modules
-
+### UI - Provide per-beat configuration UI to:
+- [ ] allow the beat to be installed as a service.
+- [ ] allow the beat to connect to downstream component.
+- [ ] run Kibana dashboard setup
+- [ ] configure/enable available modules
 - [ ] Direct user to the guide page for the beat to continue/modify/extend configuration.
