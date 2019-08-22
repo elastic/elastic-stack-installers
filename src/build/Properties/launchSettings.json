@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BeatsBuild": {
+      "commandName": "Project",
+      "commandLineArgs": "--skip-tests"
+    }
+  }
+}
