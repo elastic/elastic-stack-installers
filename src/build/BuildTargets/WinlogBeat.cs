@@ -10,6 +10,8 @@ namespace ElastiBuild.BuildTarget
     {
         public async Task Build()
         {
+            Environment.SetEnvironmentVariable("WIXSHARP_WIXDIR", Path.Combine(Context.SrcDir, @"packages\WixSharp.wix.bin.3.11.0\tools\bin"));
+            
             await RunAsync(
                 "dotnet", "msbuild \"" +
                 Path.Combine(Context.SrcDir, "installer", "WinlogBeat") +
