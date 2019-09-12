@@ -3,22 +3,21 @@ using System.IO;
 using System.Threading.Tasks;
 
 using static SimpleExec.Command;
+using static Bullseye.Targets;
 
 namespace ElastiBuild.BuildTarget
 {
-    public class WinlogBeat : BuildTargetBase<WinlogBeat>
+    // unused atm
+    public class Winlogbeat : BuildTargetBase<Winlogbeat>
     {
         public async Task Build()
         {
-            await RunAsync(
-                "dotnet", "msbuild \"" +
-                Path.Combine(Context.SrcDir, "installer", "WinlogBeat") +
-                "\" -nr:false -t:Build -p:Configuration=Release");
+            //await RunTargetsWithoutExitingAsync(nameof(ResolveArtifact), context: );
 
-            await RunAsync(
-                Path.Combine(Context.SrcDir, "installer", "WinlogBeat", "bin", "Release", "WinlogBeat-compiler.exe"),
-                "--package-dir=winlogbeat-7.3.0-windows-x86_64", 
-                Context.InDir);
+            // TODO: better command runner
+            // TODO: check exit codes
+
+            await Task.Yield();
         }
     }
 }

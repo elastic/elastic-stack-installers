@@ -1,5 +1,12 @@
-﻿namespace ElastiBuild.BuildTarget
+﻿using System.Threading.Tasks;
+
+namespace ElastiBuild.BuildTarget
 {
+    public interface IBuildTarget
+    {
+        Task Build();
+    }
+
     public abstract class BuildTargetBase<T>
         where T: BuildTargetBase<T>, new()
     {

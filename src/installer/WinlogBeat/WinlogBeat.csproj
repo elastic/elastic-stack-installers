@@ -67,7 +67,7 @@
     <Compile Include="..\shared\CmdLineOptions.cs">
       <Link>CmdLineOptions.cs</Link>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="WinlogBeat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -7,8 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElastiBuild", "build\Elasti
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F89-0C6E-4BBC-88F6-5DF297901196}"
 	ProjectSection(SolutionItems) = preProject
-		..\elastibuild.bat = ..\elastibuild.bat
+		..\build.bat = ..\build.bat
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinlogBeat", "installer\WinlogBeat\WinlogBeat.csproj", "{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,14 @@ Global
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|x86.ActiveCfg = Release|Any CPU
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|x86.Build.0 = Release|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|x86.Build.0 = Debug|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|x86.ActiveCfg = Release|Any CPU
+		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,67 +1,153 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
-using Bullseye.Internal;
+using CommandLine.Text;
+
+using ElastiBuild.Options;
+using ElastiBuild.Commands;
 
 namespace ElastiBuild
 {
     partial class Program
     {
-        static async Task Main(string[] args)
+        static async Task Main(string[] args_)
         {
-            var parser = new Parser(config =>
+            await new Program().Run(args_);
+        }
+
+        async Task Run(string[] args_)
+        {
+#if DEBUG
+            //args_ = "build --cid 7.4 winlogbeat --bitness x64".Split();
+            //Console.WriteLine("ARGS: " + string.Join(",", args_));
+#endif
+
+            Action<ParserSettings> parserCfg = cfg =>
             {
-                config.CaseSensitive = false;
-                config.AutoHelp = false;
-                config.AutoVersion = false;
-                config.IgnoreUnknownArguments = true;
-            });
+                cfg.AutoHelp = true;
+                cfg.CaseSensitive = false;
+                cfg.AutoVersion = false;
+                cfg.IgnoreUnknownArguments = false;
+                cfg.HelpWriter = null;
+            };
 
-            var opts = CmdLineOptions.Default;
+            var parser = new Parser(parserCfg);
 
-            parser
-                .ParseArguments<CmdLineOptions>(args)
-                .WithParsed(o =>
+            var result = parser
+                .ParseArguments<
+                    ShowCommand,
+                    DiscoverCommand,
+                    FetchCommand,
+                    BuildCommand
+                >(args_);
+
+            var ctx = BuildContext.Create();
+
+            await result.MapResult(
+                async (IElastiBuildCommand cmd) => await cmd.RunAsync(ctx),
+                async (errs) => await HandleErrorsAndShowHelp(result));
+        }
+
+        Task HandleErrorsAndShowHelp(ParserResult<object> result_)
+        {
+            SentenceBuilder.Factory = () => new TweakedSentenceBuilder();
+
+            var pr = new Parser(cfg =>
+            {
+                cfg.IgnoreUnknownArguments = true;
+                cfg.AutoHelp = false;
+                cfg.AutoVersion = false;
+                cfg.HelpWriter = null;
+            })
+            .ParseArguments<GlobalOptions>("".Split(' '));
+
+            HelpText htGlobals = new HelpText("ElastiBuild v1.0.0", "Copyright (c) 2019, Elastic.co")
+            {
+                AdditionalNewLineAfterOption = false,
+                AutoHelp = false,
+                AutoVersion = false,
+                AddDashesToOption = true
+            };
+
+            htGlobals.AddPreOptionsLine(Environment.NewLine + "GLOBAL OPTIONS:");
+            htGlobals.AddOptions(pr);
+            Console.WriteLine(htGlobals.ToString());
+
+            bool isGlobalHelp = result_.TypeInfo.Current == typeof(NullInstance);
+
+            if (isGlobalHelp)
+            {
+                var htVerbs = new HelpText()
                 {
-                    opts = o;
+                    AddDashesToOption = false,
+                    AutoHelp = false,
+                    AutoVersion = false,
+                    AdditionalNewLineAfterOption = false,
+                };
 
-                    if (string.IsNullOrWhiteSpace(opts.BuildRoot))
-                    {
-                        var dir = new DirectoryInfo(
-                            Path.GetDirectoryName(
-                                Assembly.GetExecutingAssembly().Location));
+                htVerbs.AddPreOptionsLine("COMMANDS:");
 
-                        const string buildrootMarkerName = ".buildroot";
+                htVerbs.AddVerbs(
+                    typeof(ShowCommand),
+                    typeof(DiscoverCommand),
+                    typeof(FetchCommand),
+                    typeof(BuildCommand));
 
-                        while (dir != null && !File.Exists(Path.Combine(dir.FullName, buildrootMarkerName)))
-                            dir = dir.Parent;
+                Console.WriteLine(htVerbs.ToString());
+            }
 
-                        opts.BuildRoot = dir?.FullName ??
-                            throw new Exception(buildrootMarkerName + " marker is missing, should be present in " +
-                                                "the root of the repository, next to src, readme.md and license files");
-                    }
-                })
-                .WithNotParsed((errors) =>
+            var htOptions = new HelpText(string.Empty, string.Empty)
+            {
+                AddDashesToOption = true,
+                AutoHelp = false,
+                AutoVersion = false
+            };
+
+            string text = string.Empty;
+
+            if (!isGlobalHelp)
+            {
+                htOptions.AddOptions(result_);
+
+                text = htOptions.ToString();
+                if (text.Length > 0)
                 {
-                    var log = new Logger(
-                        Console.Out, true, false, false,
-                        new Palette(false, Host.Unknown, Bullseye.Internal.OperatingSystem.Unknown), false);
+                    var cmdName = result_
+                        .TypeInfo.Current
+                        .GetCustomAttributes(typeof(VerbAttribute), true)
+                        .Cast<VerbAttribute>()
+                        .FirstOrDefault()
+                        ?.Name ?? string.Empty;
 
-                    log.Failed(
-                        "Command Line",
-                        new Exception(
-                            Environment.NewLine +
-                            string.Join(
-                                Environment.NewLine,
-                                errors.Select(err => err.Tag + " " + ((err as TokenError)?.Token) ?? "")) +
-                            Environment.NewLine),
-                        0);
-                });
+                    Console.WriteLine(
+                        $"{cmdName.ToUpper()} OPTIONS:" + text);
+                }
 
-            await new Program().BuildTaskSetup(parser, new BuildContext(opts));
+                text = HelpText.RenderUsageText(result_);
+                if (text.Length > 0)
+                {
+                    Console.WriteLine(
+                        "USAGE EXAMPLES:" +
+                        Environment.NewLine +
+                        text +
+                        Environment.NewLine);
+                }
+            };
+
+            var tsb = SentenceBuilder.Factory();
+            text =
+                HelpText.RenderParsingErrorsText(
+                    result_,
+                    err => tsb.FormatError(err),
+                    mex => tsb.FormatMutuallyExclusiveSetErrors(mex),
+                    2);
+
+            if (text.Length > 0)
+                Console.WriteLine("ERROR(s):" + Environment.NewLine + text);
+
+            return Task.CompletedTask;
         }
     }
 }

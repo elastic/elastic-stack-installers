@@ -9,7 +9,7 @@ namespace Elastic.Installer.Shared
         // Initialized to the directory of .buildroot file
         public string BuildRoot { get; private set; }
 
-        [Option("package-dir")]
+        [Option("package-dir", Required = true)]
         public string PackageDir { get; set; }
 
         public static CmdLineOptions Parse(string[] args_)
@@ -41,8 +41,8 @@ namespace Elastic.Installer.Shared
                     dir = dir.Parent;
 
                 opts.BuildRoot = dir?.FullName ??
-                    throw new Exception(buildrootMarker + " marker is missing, should be present in " +
-                                        "the root of the repository, next to src, readme.md and license files");
+                    throw new Exception(buildrootMarker + " marker is missing, should be present in the " +
+                                        "root of the repository, next to src, readme.md and license files");
             }
 
             return opts;
