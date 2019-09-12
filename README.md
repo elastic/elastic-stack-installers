@@ -34,6 +34,6 @@ Get help:
 .\build 
 ```
 
-### Knonwn issues
+### Known issues
 - License text
 - Configuration yaml in the wrong place, service doesn't start yet
