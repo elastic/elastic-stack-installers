@@ -68,7 +68,7 @@ namespace ElastiBuild
                 AddDashesToOption = true
             };
 
-            htGlobals.AddPreOptionsLine(Environment.NewLine + "GLOBAL OPTIONS:");
+            htGlobals.AddPreOptionsLine(Environment.NewLine + "Global Flags:");
             htGlobals.AddOptions(pr);
             Console.WriteLine(htGlobals.ToString());
 
@@ -84,7 +84,7 @@ namespace ElastiBuild
                     AdditionalNewLineAfterOption = false,
                 };
 
-                htVerbs.AddPreOptionsLine("COMMANDS:");
+                htVerbs.AddPreOptionsLine("Available Commands:");
                 htVerbs.AddVerbs(commands_);
 
                 Console.WriteLine(htVerbs.ToString());
@@ -114,14 +114,14 @@ namespace ElastiBuild
                         ?.Name ?? string.Empty;
 
                     Console.WriteLine(
-                        $"{cmdName.ToUpper()} OPTIONS:" + text);
+                        $"{cmdName.ToUpper()} Flags:" + text);
                 }
 
                 text = HelpText.RenderUsageText(result_);
                 if (text.Length > 0)
                 {
                     Console.WriteLine(
-                        "USAGE EXAMPLES:" +
+                        "Usage Examples:" +
                         Environment.NewLine +
                         text +
                         Environment.NewLine);
@@ -137,7 +137,7 @@ namespace ElastiBuild
                     2);
 
             if (text.Length > 0)
-                Console.WriteLine("ERROR(s):" + Environment.NewLine + text);
+                Console.WriteLine("Error(s):" + Environment.NewLine + text);
 
             return Task.CompletedTask;
         }

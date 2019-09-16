@@ -61,17 +61,17 @@ namespace ElastiBuild.Commands
                         new FetchCommand
                         {
                             ContainerId = "7.4.0",
-                            Targets = new List<string> { "winlogbeat" },
+                            Targets = "winlogbeat".Split(),
                         }),
 
                     new Example(Environment.NewLine +
-                        "Fetch Winlogbeat packages for alias 6.8",
+                        "Fetch Winlogbeat OSS packages for alias 6.8",
                         new FetchCommand
                         {
                             ContainerId = "6.8",
-                            Targets = new List<string> { "winlogbeat" },
+                            ShowOss = true,
+                            Targets = "winlogbeat".Split(),
                         })
-
                 };
             }
         }

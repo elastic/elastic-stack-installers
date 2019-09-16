@@ -65,11 +65,11 @@ namespace ElastiBuild.Commands
 
                 // TODO: check exit code
                 await Command.RunAsync(
-                    "dotnet", "msbuild \"" + ctx_.MakeInstallerDir("winlogbeat") +
+                    "dotnet", "msbuild \"" + ctx_.MakeInstallerDir(ap.TargetName) +
                     "\" -nr:false -t:Build -p:Configuration=Release");
 
                 await Command.RunAsync(
-                    ctx_.MakeCompilerFilename("winlogbeat"),
+                    ctx_.MakeCompilerFilename(ap.TargetName),
                     "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
                     ctx_.InDir);
             }
@@ -90,19 +90,22 @@ namespace ElastiBuild.Commands
                 return new List<Example>()
                 {
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat version 7.4.0",
+                        "Build Winlogbeat x86 version 7.4.0",
                         new BuildCommand
                         {
                             ContainerId = "7.4.0",
-                            Targets = new List<string> { "winlogbeat" },
+                            Bitness = eBitness.x86,
+                            Targets = "winlogbeat".Split(),
                         }),
 
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat for alias 6.8",
+                        "Build Winlogbeat x64 OSS for alias 6.8",
                         new BuildCommand
                         {
                             ContainerId = "6.8",
-                            Targets = new List<string> { "winlogbeat" },
+                            ShowOss = true,
+                            Bitness = eBitness.x64,
+                            Targets = "winlogbeat".Split(),
                         })
                 };
             }
