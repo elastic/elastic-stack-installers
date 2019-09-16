@@ -31,7 +31,7 @@ namespace ElastiBuild.Commands
             foreach (var target in Targets)
             {
                 await Console.Out.WriteLineAsync(Environment.NewLine +
-                $"Fetching '{target}' in '{ContainerId}' ...");
+                $"Fetching '{target}' in '{ContainerId}':");
 
                 var items = await ArtifactsApi.FindArtifact(target, filter =>
                 {
@@ -42,7 +42,7 @@ namespace ElastiBuild.Commands
 
                 foreach (var ap in items)
                 {
-                    await Console.Out.WriteAsync("  " + ap.Name + " ... ");
+                    await Console.Out.WriteAsync("  " + ap.FileName + " ... ");
                     await ArtifactsApi.FetchArtifact(ctx_, ap);
                     await Console.Out.WriteLineAsync("done");
                 }

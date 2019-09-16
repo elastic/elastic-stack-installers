@@ -5,6 +5,22 @@ namespace ElastiBuild
 {
     public class BuildContext
     {
+        public string BuildRoot { get; set; }
+
+        public Options.GlobalOptions Options { get; private set; }
+
+        // TODO: cache these
+        public string SrcDir => Path.Combine(BuildRoot, "src");
+        public string BinDir => Path.Combine(BuildRoot, "bin");
+        public string InDir => Path.Combine(BinDir, "in");
+        public string OutDir => Path.Combine(BinDir, "out");
+
+        public string MakeInstallerDir(string targetName_) =>
+            Path.Combine(SrcDir, "installer", targetName_ + "Compiler");
+
+        public string MakeCompilerFilename(string targetName_) =>
+            Path.Combine(MakeInstallerDir(targetName_), "bin", "Release", targetName_ + "Compiler.exe");
+
         public static BuildContext Create()
         {
             var dir = new DirectoryInfo(
@@ -25,15 +41,5 @@ namespace ElastiBuild
 
             return ctx;
         }
-
-        public string BuildRoot { get; set; }
-
-        public Options.GlobalOptions Options { get; private set; }
-
-        // TODO: remember these
-        public string SrcDir => Path.Combine(BuildRoot, "src");
-        public string BinDir => Path.Combine(BuildRoot, "bin");
-        public string InDir => Path.Combine(BinDir, "in");
-        public string OutDir => Path.Combine(BinDir, "out");
     }
 }

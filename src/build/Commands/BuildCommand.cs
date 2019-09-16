@@ -28,8 +28,12 @@ namespace ElastiBuild.Commands
         {
             foreach (var target in Targets)
             {
+                // TODO: remove hack
+                if (target.ToLower() != "winlogbeat")
+                    continue;
+
                 await Console.Out.WriteLineAsync(Environment.NewLine +
-                $"Building '{target}' in '{ContainerId}' ...");
+                $"Building '{target}' in '{ContainerId}':");
 
                 var items = await ArtifactsApi.FindArtifact(target, filter =>
                 {
@@ -38,29 +42,36 @@ namespace ElastiBuild.Commands
                     filter.Bitness = Bitness;
                 });
 
-                await Console.Out.WriteLineAsync(string.Join(
-                    Environment.NewLine,
-                    items
-                        .Select(itm => "  " + itm.Name)
-                    ));
-
                 if (items.Count() > 1)
+                {
+                    await Console.Out.WriteLineAsync(string.Join(
+                        Environment.NewLine,
+                        items
+                            .Select(itm => "  " + itm.FileName)
+                        ));
+
                     throw new Exception("More than one possibility for package. Try specifying --bitness.");
+                }
 
                 var ap = items.Single();
 
+                await Console.Out.WriteAsync("Downloading " + ap.FileName + " ... ");
                 await ArtifactsApi.FetchArtifact(ctx_, ap);
-                await ArtifactsApi.UnpackArtifact(ctx_, ap);
+                await Console.Out.WriteLineAsync("done");
 
+                await Console.Out.WriteAsync("Unpacking " + ap.FileName + " ... ");
+                await ArtifactsApi.UnpackArtifact(ctx_, ap);
+                await Console.Out.WriteLineAsync("done");
+
+                // TODO: check exit code
                 await Command.RunAsync(
-                    "dotnet", "msbuild \"" + Path.Combine(ctx_.SrcDir, "installer", "Winlogbeat") +
+                    "dotnet", "msbuild \"" + ctx_.MakeInstallerDir("winlogbeat") +
                     "\" -nr:false -t:Build -p:Configuration=Release");
 
                 await Command.RunAsync(
-                    Path.Combine(ctx_.SrcDir, "installer", "Winlogbeat", "bin", "Release", "Winlogbeat-compiler.exe"),
-                    "--package-dir=\"" + Path.GetFileNameWithoutExtension(ap.Name) + "\"",
+                    ctx_.MakeCompilerFilename("winlogbeat"),
+                    "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
                     ctx_.InDir);
-
             }
         }
 
@@ -93,7 +104,6 @@ namespace ElastiBuild.Commands
                             ContainerId = "6.8",
                             Targets = new List<string> { "winlogbeat" },
                         })
-
                 };
             }
         }

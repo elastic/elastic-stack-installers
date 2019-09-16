@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F
 		..\build.bat = ..\build.bat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinlogBeat", "installer\WinlogBeat\WinlogBeat.csproj", "{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinlogbeatCompiler", "installer\WinlogbeatCompiler\WinlogbeatCompiler.csproj", "{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

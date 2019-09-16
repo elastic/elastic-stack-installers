@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
@@ -20,9 +19,14 @@ namespace ElastiBuild
         async Task Run(string[] args_)
         {
 #if DEBUG
-            //args_ = "build --cid 7.4 winlogbeat --bitness x64".Split();
+            //args_ = "build --cid 7.x winlogbeat --bitness x64".Split();
             //Console.WriteLine("ARGS: " + string.Join(",", args_));
 #endif
+
+            var commands = typeof(Program).Assembly
+                .GetTypes()
+                .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), true).Length > 0)
+                .ToArray();
 
             Action<ParserSettings> parserCfg = cfg =>
             {
@@ -34,23 +38,16 @@ namespace ElastiBuild
             };
 
             var parser = new Parser(parserCfg);
-
-            var result = parser
-                .ParseArguments<
-                    ShowCommand,
-                    DiscoverCommand,
-                    FetchCommand,
-                    BuildCommand
-                >(args_);
+            var result = parser.ParseArguments(args_, commands);
 
             var ctx = BuildContext.Create();
 
             await result.MapResult(
                 async (IElastiBuildCommand cmd) => await cmd.RunAsync(ctx),
-                async (errs) => await HandleErrorsAndShowHelp(result));
+                async (errs) => await HandleErrorsAndShowHelp(result, commands));
         }
 
-        Task HandleErrorsAndShowHelp(ParserResult<object> result_)
+        Task HandleErrorsAndShowHelp(ParserResult<object> result_, Type[] commands_)
         {
             SentenceBuilder.Factory = () => new TweakedSentenceBuilder();
 
@@ -88,12 +85,7 @@ namespace ElastiBuild
                 };
 
                 htVerbs.AddPreOptionsLine("COMMANDS:");
-
-                htVerbs.AddVerbs(
-                    typeof(ShowCommand),
-                    typeof(DiscoverCommand),
-                    typeof(FetchCommand),
-                    typeof(BuildCommand));
+                htVerbs.AddVerbs(commands_);
 
                 Console.WriteLine(htVerbs.ToString());
             }

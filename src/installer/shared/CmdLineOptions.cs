@@ -6,11 +6,19 @@ namespace Elastic.Installer.Shared
 {
     public class CmdLineOptions
     {
+        [Option("package", Required = true, 
+            HelpText = "Full package name without extension, ex: winlogbeat-7.4.0-SNAPSHOT-windows-x86_64")]
+        public string PackageName { get; private set; }
+
         // Initialized to the directory of .buildroot file
         public string BuildRoot { get; private set; }
 
-        [Option("package-dir", Required = true)]
-        public string PackageDir { get; set; }
+        // TODO: cache these
+        public string SrcDir => Path.Combine(BuildRoot, "src");
+        public string BinDir => Path.Combine(BuildRoot, "bin");
+        public string InDir => Path.Combine(BinDir, "in", PackageName);
+        public string OutDir => Path.Combine(BinDir, "out", PackageName);
+        public string ResDir => Path.Combine(SrcDir, "installer", "shared", "resources");
 
         public static CmdLineOptions Parse(string[] args_)
         {
@@ -19,7 +27,7 @@ namespace Elastic.Installer.Shared
                 config.CaseSensitive = false;
                 config.AutoHelp = false;
                 config.AutoVersion = false;
-                config.IgnoreUnknownArguments = true;
+                config.IgnoreUnknownArguments = false;
             });
 
             var res = parser.ParseArguments(() => new CmdLineOptions(), args_);

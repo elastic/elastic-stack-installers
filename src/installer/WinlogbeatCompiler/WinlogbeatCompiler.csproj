@@ -7,7 +7,7 @@
     <ProjectGuid>{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Elastic.Installer.Beats</RootNamespace>
-    <AssemblyName>WinlogBeat-compiler</AssemblyName>
+    <AssemblyName>WinlogbeatCompiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -64,10 +64,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\build\Infra\ArtifactPackage.cs">
+      <Link>ArtifactPackage.cs</Link>
+    </Compile>
     <Compile Include="..\shared\CmdLineOptions.cs">
       <Link>CmdLineOptions.cs</Link>
     </Compile>
-    <Compile Include="WinlogBeat.cs" />
+    <Compile Include="WinlogbeatCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

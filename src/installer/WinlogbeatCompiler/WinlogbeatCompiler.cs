@@ -3,37 +3,32 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Elastic.Installer.Shared;
 using WixSharp;
-using WixSharp.CommonTasks;
 
 namespace Elastic.Installer.Beats
 {
-    public class Winlogbeat
+    public class WinlogbeatCompiler
     {
         static void Main(string[] args_)
         {
             var opts = CmdLineOptions.Parse(args_);
-            var srcdir = Path.Combine(opts.BuildRoot, "bin", "in", opts.PackageDir);
-            var outdir = Path.Combine(opts.BuildRoot, "bin", "out", opts.PackageDir);
-            var resourceDir = Path.Combine(opts.BuildRoot, "src", "installer", "shared", "resources");
 
-            var rx = new Regex(@"(?<version>\d+\.\d+\.\d+)-(?<snapshot>SNAPSHOT)?", RegexOptions.Compiled);
-            var rxVersion = rx.Match(opts.PackageDir);
+            Directory.CreateDirectory(opts.OutDir);
 
-            Directory.CreateDirectory(outdir);
+            var package = new ElastiBuild.ArtifactPackage(opts.PackageName, string.Empty);
 
             var project = new Project("Winlogbeat")
             {
-                Name = "Winlogbeat " + rxVersion.Value, //{bitness}
+                Name = $"Winlogbeat {package.SemVer} ({package.Architecture})",
                 Description = "...",
-                OutFileName = Path.Combine(outdir, opts.PackageDir),
-                Version = new Version(rxVersion.Groups["version"].Value),
+                OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
+                Version = new Version(package.Version),
                 ControlPanelInfo = new ProductInfo
                 {
                     Manufacturer = "Elastic",
                 },
 
                 // TODO: RichEdit control doesn't like plain-text license
-                LicenceFile = Path.Combine(srcdir, "LICENSE.rtf"),
+                LicenceFile = Path.Combine(opts.InDir, "LICENSE.rtf"),
 
                 // TODO: x64/x86
                 Platform = Platform.x64,
@@ -46,8 +41,8 @@ namespace Elastic.Installer.Beats
 
                 UI = WUI.WixUI_Minimal,
 
-                BannerImage = Path.Combine(resourceDir, "topbanner.bmp"),
-                BackgroundImage = Path.Combine(resourceDir, "leftbanner.bmp"),
+                BannerImage = Path.Combine(opts.ResDir, "topbanner.bmp"),
+                BackgroundImage = Path.Combine(opts.ResDir, "leftbanner.bmp"),
 
                 MajorUpgrade = new MajorUpgrade
                 {
@@ -59,23 +54,27 @@ namespace Elastic.Installer.Beats
                 },
             };
 
-            // Hack in LICENSE.rtf file
+            // TODO: Localization?
+            // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(srcdir, "LICENSE.rtf"), 
-                @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
-{\*\generator Riched20 10.0.18362}\viewkind4\uc1 
-\pard\sa200\sl276\slmult1\f0\fs22\lang9 Proper license will come from LICENSE.txt\par
-}
-");
+                Path.Combine(opts.InDir, "LICENSE.rtf"), 
+                @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
+                @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
+                @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " + 
+                System.IO.File
+                    .ReadAllText(Path.Combine(opts.InDir, "LICENSE.txt"))
+                    .Replace("\r\n\r\n", "\n\n")
+                    .Replace("\n\n", @"\par" + "\r\n") +
+                @"\par}");
 
             //project.Include(WixExtension.Util);
             //WixExtension.Util.ToXName("");
 
-            var service = new WixSharp.File(Path.Combine(srcdir, "winlogbeat.exe"));
+            var service = new WixSharp.File(Path.Combine(opts.InDir, "winlogbeat.exe"));
             service.ServiceInstaller = new ServiceInstaller
             {
                 Name = "winlogbeat",
-                DisplayName = "Winlogbeat " + rxVersion.Value,
+                DisplayName = $"Winlogbeat {package.SemVer}",
                 Description = "Elastic Winlogbeat service",
                 Arguments = 
                     "-path.home \"c:/staging/wlb\" " +
@@ -93,7 +92,7 @@ namespace Elastic.Installer.Beats
             };
 
             var installDir = new InstallDir("Winlogbeat",
-                new Files(srcdir + @"\*.*", filter =>
+                new Files(opts.InDir + @"\*.*", filter =>
                 {
                     var itm = filter.ToLower();
 

@@ -82,7 +82,7 @@ namespace ElastiBuild.Commands
                     await Console.Out.WriteLineAsync(string.Join(
                         Environment.NewLine,
                         items
-                            .Select(itm => "  " + itm.Name)
+                            .Select(itm => "  " + itm.FileName)
                         ));
                 }
             }
