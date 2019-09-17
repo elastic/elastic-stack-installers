@@ -63,10 +63,17 @@ namespace ElastiBuild.Commands
                 await ArtifactsApi.UnpackArtifact(ctx_, ap);
                 await Console.Out.WriteLineAsync("done");
 
+                var quotedInstallerDir = ctx_.MakeInstallerDir(ap.TargetName, quote_: true);
+                var quotedPackagesDir = ctx_.MakePackagesDir(quote_: true);
+
                 // TODO: check exit code
                 await Command.RunAsync(
-                    "dotnet", "msbuild \"" + ctx_.MakeInstallerDir(ap.TargetName) +
-                    "\" -nr:false -t:Build -p:Configuration=Release");
+                    Path.Combine(ctx_.BinDir, "nuget.exe"),
+                    "restore " + quotedInstallerDir + " -PackagesDirectory " + quotedPackagesDir);
+                
+                await Command.RunAsync(
+                    "dotnet", 
+                    "msbuild -r:true -t:Build -nr:false -p:Configuration=Release " + quotedInstallerDir);
 
                 await Command.RunAsync(
                     ctx_.MakeCompilerFilename(ap.TargetName),
