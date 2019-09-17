@@ -16,24 +16,33 @@ namespace Elastic.Installer.Beats
 
             var package = new ElastiBuild.ArtifactPackage(opts.PackageName, string.Empty);
 
-            var project = new Project("Winlogbeat")
+            var companyName = "Elastic";
+            var productSetName = "Beats";
+            var displayName = "Winlogbeat";
+            var serviceName = "winlogbeat";
+            var fileName = "winlogbeat.exe";
+
+            var project = new Project(displayName)
             {
-                Name = $"Winlogbeat {package.SemVer} ({package.Architecture})",
-                Description = "...",
+                Name = $"{displayName} {package.SemVer} ({package.Architecture})",
+
+                // TODO: Grab this text from README.md
+                Description = "Winlogbeat ships Windows event logs to Elasticsearch or Logstash",
+
                 OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
                 Version = new Version(package.Version),
+
                 ControlPanelInfo = new ProductInfo
                 {
-                    Manufacturer = "Elastic",
+                    Manufacturer = companyName,
                 },
 
-                // TODO: RichEdit control doesn't like plain-text license
+                // We massage LICENSE.txt into .rtf below
                 LicenceFile = Path.Combine(opts.InDir, "LICENSE.rtf"),
 
                 // TODO: x64/x86
                 Platform = Platform.x64,
 
-                // TODO: x64/x86
                 // TODO: GUID versioning
                 GUID = Guid.Parse("{A6CFAAFA-623D-4CB4-95B2-3AB11DD52478}"),
 
@@ -41,6 +50,7 @@ namespace Elastic.Installer.Beats
 
                 UI = WUI.WixUI_Minimal,
 
+                // TODO: Custom images?
                 BannerImage = Path.Combine(opts.ResDir, "topbanner.bmp"),
                 BackgroundImage = Path.Combine(opts.ResDir, "leftbanner.bmp"),
 
@@ -55,12 +65,13 @@ namespace Elastic.Installer.Beats
             };
 
             // TODO: Localization?
+
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.InDir, "LICENSE.rtf"), 
+                Path.Combine(opts.InDir, "LICENSE.rtf"),
                 @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
                 @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
-                @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " + 
+                @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
                 System.IO.File
                     .ReadAllText(Path.Combine(opts.InDir, "LICENSE.txt"))
                     .Replace("\r\n\r\n", "\n\n")
@@ -70,74 +81,67 @@ namespace Elastic.Installer.Beats
             //project.Include(WixExtension.Util);
             //WixExtension.Util.ToXName("");
 
-            var service = new WixSharp.File(Path.Combine(opts.InDir, "winlogbeat.exe"));
-            service.ServiceInstaller = new ServiceInstaller
-            {
-                Name = "winlogbeat",
-                DisplayName = $"Winlogbeat {package.SemVer}",
-                Description = "Elastic Winlogbeat service",
-                Arguments = 
-                    "-path.home \"c:/staging/wlb\" " +
-                    "-path.data \"c:/staging/wlb/data\" " +
-                    "-path.logs \"c:/staging/wlb/logs\" " +
-                    "-E logging.files.redirect_stderr=true",
+            var service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
 
-                Interactive = false,
-                DependsOn = new[] { new ServiceDependency("Tcpip") },
-                Start = SvcStartType.auto,
-                //StartOn = SvcEvent.Install,
-                StopOn = SvcEvent.InstallUninstall_Wait,
-                RemoveOn = SvcEvent.Uninstall_Wait,
-                DelayedAutoStart = true,
-            };
+            var installSubPath = $@"{companyName}\{package.Version}\{productSetName}\{displayName}";
 
-            var installDir = new InstallDir("Winlogbeat",
-                new Files(opts.InDir + @"\*.*", filter =>
+            var mainInstallDir = new InstallDir(
+                $@"ProgramFiles64Folder\{installSubPath}",
+                new DirFiles(opts.InDir + @"\*.*", filter =>
                 {
                     var itm = filter.ToLower();
 
                     return !(
-                        itm.EndsWith("ps1") ||
-                        itm.EndsWith("winlogbeat.exe")
+                        itm.EndsWith("ps1") ||  // we install/remove service ourselves
+                        itm.EndsWith("yml") ||  // configuration will go into mutable location
+                        itm.EndsWith(fileName)  // .exe must be excluded for service configuration to work
                     );
                 }),
                 service);
 
+            // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
+            //                  "not [work] as expected." Consider replacing ServiceConfig with the 
+            //                  WixUtilExtension ServiceConfig element.
+
+            service.ServiceInstaller = new ServiceInstaller
+            {
+                Interactive = false,
+
+                Name = serviceName,
+                DisplayName = $"{displayName} {package.SemVer}",
+                Description = $"{companyName} {displayName} service",
+                DependsOn = new[] { new ServiceDependency("Tcpip") },
+
+                Arguments =
+                    $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
+                    //$" -path.data \"[CommonAppDataFolder]{installSubPath}\\data\"" +
+                    //$" -path.logs \"[CommonAppDataFolder]{installSubPath}\\logs\"" +
+                    $" -E logging.files.redirect_stderr=true",
+
+                DelayedAutoStart = true,
+                Start = SvcStartType.auto,
+
+                //StartOn = SvcEvent.Install,
+                StopOn = SvcEvent.InstallUninstall_Wait,
+                RemoveOn = SvcEvent.Uninstall_Wait,
+            };
+
+            // TODO: Get directory names from FS
+            var mutableInstallDir = new Dir(
+                $@"CommonAppDataFolder\{installSubPath}",
+                new DirFiles(opts.InDir + @"\*.yml"), 
+                new Dir("kibana", new Files(Path.Combine(opts.InDir, "kibana") + @"\*.*")),
+                new Dir("module", new Files(Path.Combine(opts.InDir, "module") + @"\*.*")));
+
             project.Dirs = new[]
             {
-                new Dir("ProgramFiles64Folder")
-                {
-                    Dirs = new []
-                    {
-                        new Dir("Elastic")
-                        {
-                            Dirs = new []
-                            {
-                                new Dir("7.4.0")
-                                {
-                                    Dirs = new[]
-                                    {
-                                        new Dir("Beats")
-                                        {
-                                            Dirs = new[]
-                                            {
-                                                installDir
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                mainInstallDir,
+                mutableInstallDir
             };
 
-            Compiler.WixSourceGenerated += (/*XDocument*/ document) =>
-            {
+            //Compiler.WixSourceGenerated += (/*XDocument*/ document) => { };
 
-            };
-
-            Compiler.AllowNonRtfLicense = true;
+            //Compiler.AllowNonRtfLicense = true;
             Compiler.PreserveTempFiles = true;
 
             //Compiler.BuildWxs(project, Compiler.OutputType.MSI);
