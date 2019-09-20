@@ -31,12 +31,7 @@ namespace Elastic.Installer.Beats
 
                 OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
                 Version = new Version(package.Version),
-
-                ControlPanelInfo = new ProductInfo
-                {
-                    Manufacturer = companyName,
-                },
-
+                
                 // We massage LICENSE.txt into .rtf below
                 LicenceFile = Path.Combine(opts.InDir, "LICENSE.rtf"),
 
@@ -62,6 +57,19 @@ namespace Elastic.Installer.Beats
                     //DisallowUpgradeErrorMessage = "An existing version is already installed, please uninstall before continuing.",
                     DowngradeErrorMessage = "A more recent version is already installed, please uninstall before continuing.",
                 },
+            };
+
+            project.ControlPanelInfo = new ProductInfo
+            {
+                Contact = companyName,
+                Manufacturer = companyName,
+                UrlInfoAbout = "https://www.elastic.co/downloads/beats",
+
+                Comments = "Beats is the platform for single-purpose data shippers. They send data " +
+                           "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
+
+                // TODO: Beat specific icon
+                //ProductIcon = "",
             };
 
             // TODO: Localization?
@@ -114,8 +122,6 @@ namespace Elastic.Installer.Beats
 
                 Arguments =
                     $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
-                    //$" -path.data \"[CommonAppDataFolder]{installSubPath}\\data\"" +
-                    //$" -path.logs \"[CommonAppDataFolder]{installSubPath}\\logs\"" +
                     $" -E logging.files.redirect_stderr=true",
 
                 DelayedAutoStart = true,
