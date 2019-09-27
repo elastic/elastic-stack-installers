@@ -18,7 +18,8 @@ namespace Elastic.Installer.Shared
         public string BinDir => Path.Combine(BuildRoot, "bin");
         public string InDir => Path.Combine(BinDir, "in", PackageName);
         public string OutDir => Path.Combine(BinDir, "out", PackageName);
-        public string ResDir => Path.Combine(SrcDir, "installer", "shared", "resources");
+        public string SharedDir => Path.Combine(SrcDir, "installer", "shared");
+        public string ResDir => Path.Combine(SharedDir, "resources");
 
         public static CmdLineOptions Parse(string[] args_)
         {

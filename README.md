@@ -3,8 +3,8 @@
 ### Feature set
 - Discover branches, versions and aliases
 - Fetch any beat from above
-- Build Winlogbeat setup in non-OSS, x64 variant
-- Configuration and misc files installed into ProgramData/Elastic/{version}/Beats/Winlogbeat/
+- Build any setup in non-OSS, x64 variant
+- Configuration and misc files installed into ProgramData/Elastic/{version}/Beats/{beat}/
 
 ### Get help:
 ```
@@ -25,7 +25,7 @@ COMMANDS:
 
 - Discover branches, versions, aliases.
 - Download and unpack artifacts.
-- (WIP ~90%) Build Winlogbeat from downloaded artifact.
+- (WIP ~95%) Build all from downloaded artifacts.
 
 ### Example: building 7.4 SNAPSHOT:
 ```

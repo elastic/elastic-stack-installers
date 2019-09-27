@@ -15,21 +15,6 @@ namespace ElastiBuild
         public string InDir => Path.Combine(BinDir, "in");
         public string OutDir => Path.Combine(BinDir, "out");
 
-        public string MakePackagesDir(bool quote_ = false) =>
-            (quote_ ? "\"" : string.Empty) + 
-            Path.Combine(SrcDir, "packages") + 
-            (quote_ ? "\"" : string.Empty);
-
-        public string MakeInstallerDir(string targetName_, bool quote_ = false) =>
-            (quote_ ? "\"" : string.Empty) +
-            Path.Combine(SrcDir, "installer", targetName_ + "Compiler") +
-            (quote_? "\"" : string.Empty);
-
-        public string MakeCompilerFilename(string targetName_, bool quote_ = false) =>
-            (quote_ ? "\"" : string.Empty) +
-            Path.Combine(MakeInstallerDir(targetName_), "bin", "Release", targetName_ + "Compiler.exe") +
-            (quote_ ? "\"" : string.Empty);
-
         public static BuildContext Create()
         {
             var dir = new DirectoryInfo(

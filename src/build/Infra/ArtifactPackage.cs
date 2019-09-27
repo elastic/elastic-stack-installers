@@ -19,10 +19,10 @@ namespace ElastiBuild
 
             var rx = new Regex(
                 @"(?<target>[^-]+)-" +
-                @"(?<semver>(?<version>\d+\.\d+\.\d+)(?:-SNAPSHOT)?)-" +
+                @"(?<semver>(?<version>\d+\.\d+\.\d+)(-[^-]+)?)-" +
                 @"(?<os>[^-]+)-" +
                 @"(?<arch>[^\.]+)",
-                RegexOptions.Compiled);
+                RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
             var rxVersion = rx.Match(FileName);
 

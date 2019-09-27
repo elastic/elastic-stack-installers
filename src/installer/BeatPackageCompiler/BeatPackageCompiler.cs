@@ -1,12 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using Elastic.Installer.Shared;
+using System.Linq;
 using WixSharp;
+using SharpYaml.Serialization;
+using Elastic.Installer.Shared;
 
 namespace Elastic.Installer.Beats
 {
-    public class WinlogbeatCompiler
+    public class BeatInfo
+    {
+        [YamlMember("upgrade_code")]
+        public Guid UpgradeCode { get; set; }
+
+        [YamlMember("known_versions")]
+        public Dictionary<string, Guid> KnownVersions { get; set; }
+    }
+
+    public class BeatPackageCompiler
     {
         static void Main(string[] args_)
         {
@@ -18,28 +29,31 @@ namespace Elastic.Installer.Beats
 
             var companyName = "Elastic";
             var productSetName = "Beats";
-            var displayName = "Winlogbeat";
-            var serviceName = "winlogbeat";
-            var fileName = "winlogbeat.exe";
+            var displayName = package.TargetName;
+            var serviceName = package.TargetName;
+            var fileName = package.TargetName + ".exe";
+
+            // TODO: ping beats team to tell them we depend on this
+            var beatDescription = System.IO.File
+                .ReadAllLines(Path.Combine(opts.InDir, "README.md"))
+                .Skip(2)
+                .Take(1)
+                .First();
 
             var project = new Project(displayName)
             {
                 Name = $"{displayName} {package.SemVer} ({package.Architecture})",
 
-                // TODO: Grab this text from README.md
-                Description = "Winlogbeat ships Windows event logs to Elasticsearch or Logstash",
+                Description = beatDescription,
 
                 OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
                 Version = new Version(package.Version),
-                
+
                 // We massage LICENSE.txt into .rtf below
-                LicenceFile = Path.Combine(opts.InDir, "LICENSE.rtf"),
+                LicenceFile = Path.Combine(opts.OutDir, "LICENSE.rtf"),
 
-                // TODO: x64/x86
-                Platform = Platform.x64,
-
-                // TODO: GUID versioning
-                GUID = Guid.Parse("{A6CFAAFA-623D-4CB4-95B2-3AB11DD52478}"),
+                // TODO: More robust test
+                Platform = package.Architecture == "x86" ? Platform.x86 : Platform.x64,
 
                 InstallScope = InstallScope.perMachine,
 
@@ -59,6 +73,21 @@ namespace Elastic.Installer.Beats
                 },
             };
 
+            var fname = Path.Combine(opts.SharedDir, "beats-guids.yaml");
+            using (var guidsYaml = System.IO.File.OpenRead(fname))
+            {
+                var ser = new Serializer();
+                var yaml = ser.Deserialize<Dictionary<string, BeatInfo>>(guidsYaml);
+
+                if (!yaml.TryGetValue(package.TargetName, out BeatInfo bi))
+                    throw new ArgumentException($"Unable to find {package.TargetName} section in {fname}");
+
+                // This GUID must be unique per-beat
+                project.GUID = bi.UpgradeCode;
+
+                // TODO: validate/proces Product Id
+            }
+
             project.ControlPanelInfo = new ProductInfo
             {
                 Contact = companyName,
@@ -69,14 +98,12 @@ namespace Elastic.Installer.Beats
                            "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
 
                 // TODO: Beat specific icon
-                //ProductIcon = "",
+                ProductIcon = Path.Combine(opts.ResDir, Path.GetFileNameWithoutExtension(fileName) + ".ico"),
             };
-
-            // TODO: Localization?
 
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.InDir, "LICENSE.rtf"),
+                Path.Combine(opts.OutDir, "LICENSE.rtf"),
                 @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
                 @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
                 @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
@@ -86,8 +113,6 @@ namespace Elastic.Installer.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            //project.Include(WixExtension.Util);
-            //WixExtension.Util.ToXName("");
 
             var service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
 
@@ -127,17 +152,36 @@ namespace Elastic.Installer.Beats
                 DelayedAutoStart = true,
                 Start = SvcStartType.auto,
 
+                // Don't start on install, config file is likely not ready yet
                 //StartOn = SvcEvent.Install,
+
                 StopOn = SvcEvent.InstallUninstall_Wait,
                 RemoveOn = SvcEvent.Uninstall_Wait,
             };
 
-            // TODO: Get directory names from FS
+            var mutableDirs = new List<WixEntity>
+            {
+                new DirFiles(opts.InDir + @"\*.yml")
+            };
+
+            // TODO: evaluate adding metadata file into beats repo that lists these per-beat
+
+            // These are the directories that we know of
+            mutableDirs.AddRange(
+                "kibana|module|modules.d|monitors.d"
+                    .Split('|')
+                    .Select(dirName =>
+                    {
+                        var dirPath = Path.Combine(opts.InDir, dirName);
+                        return Directory.Exists(dirPath)
+                            ? new Dir(dirName, new Files(dirPath + @"\*.*"))
+                            : null;
+                    })
+                    .Where(dir => dir != null));
+
             var mutableInstallDir = new Dir(
                 $@"CommonAppDataFolder\{installSubPath}",
-                new DirFiles(opts.InDir + @"\*.yml"), 
-                new Dir("kibana", new Files(Path.Combine(opts.InDir, "kibana") + @"\*.*")),
-                new Dir("module", new Files(Path.Combine(opts.InDir, "module") + @"\*.*")));
+                mutableDirs.ToArray());
 
             project.Dirs = new[]
             {

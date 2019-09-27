@@ -7,7 +7,7 @@
     <ProjectGuid>{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Elastic.Installer.Beats</RootNamespace>
-    <AssemblyName>WinlogbeatCompiler</AssemblyName>
+    <AssemblyName>BeatPackageCompiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -45,6 +45,9 @@
     <Reference Include="Microsoft.Deployment.WindowsInstaller, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL">
       <HintPath>..\..\packages\WixSharp.bin.1.12.0\lib\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
     </Reference>
+    <Reference Include="SharpYaml, Version=1.6.5.0, Culture=neutral, PublicKeyToken=1ced8108e942bc02, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SharpYaml.1.6.5\lib\net45\SharpYaml.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -70,7 +73,7 @@
     <Compile Include="..\shared\CmdLineOptions.cs">
       <Link>CmdLineOptions.cs</Link>
     </Compile>
-    <Compile Include="WinlogbeatCompiler.cs" />
+    <Compile Include="BeatPackageCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
