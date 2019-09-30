@@ -42,9 +42,9 @@ namespace ElastiBuild.Commands
         x64
     }
 
-    public interface ISupportPlatformChoice
+    public interface ISupportBitnessChoice
     {
-        [Option("bitness", Default = eBitness.both, HelpText = "Show artifacts of specific bitness: x86, x64"),]
+        [Option("bitness", Default = eBitness.x64, HelpText = "Show artifacts of specific bitness: x86, x64"),]
         eBitness Bitness { get; set; }
     }
 }

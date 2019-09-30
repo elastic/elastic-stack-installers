@@ -12,27 +12,33 @@ namespace ElastiBuild
         public string FileName { get; }
         public string Location { get; }
 
-        public ArtifactPackage(string name_, string location_)
+        public bool IsDownloadable => 
+            !string.IsNullOrWhiteSpace(Location);
+
+        public ArtifactPackage(string name_)
+            : this(name_, null)
+        { }
+
+        public ArtifactPackage(string fileName_, string location_)
         {
-            FileName = name_;
+            FileName = fileName_;
             Location = location_;
 
-            var rx = new Regex(
+            var rxVersion = rx.Match(FileName);
+            if (rxVersion.Groups.Count != 6)
+                throw new Exception("Unable to parse package file name: " + FileName);
+
+            TargetName = rxVersion.Groups["target"].Value?.ToLower();
+            Version = rxVersion.Groups["version"].Value?.ToLower();
+            SemVer = rxVersion.Groups["semver"].Value?.ToLower();
+            Architecture = rxVersion.Groups["arch"].Value?.ToLower();
+        }
+
+        static Regex rx = new Regex(
                 @"(?<target>[^-]+)-" +
                 @"(?<semver>(?<version>\d+\.\d+\.\d+)(-[^-]+)?)-" +
                 @"(?<os>[^-]+)-" +
                 @"(?<arch>[^\.]+)",
                 RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-
-            var rxVersion = rx.Match(FileName);
-
-            if (rxVersion.Groups.Count != 6)
-                throw new Exception("Unable to parse package file name: " + FileName);
-
-            TargetName = rxVersion.Groups["target"].Value;
-            Version = rxVersion.Groups["version"].Value;
-            SemVer = rxVersion.Groups["semver"].Value;
-            Architecture = rxVersion.Groups["arch"].Value;
-        }
     }
 }

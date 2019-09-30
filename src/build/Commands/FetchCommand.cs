@@ -19,7 +19,7 @@ namespace ElastiBuild.Commands
         , ISupportTargets
         , ISupportContainerId
         , ISupportOssChoice
-        , ISupportPlatformChoice
+        , ISupportBitnessChoice
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }

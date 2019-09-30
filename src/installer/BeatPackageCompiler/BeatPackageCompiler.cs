@@ -8,15 +8,6 @@ using Elastic.Installer.Shared;
 
 namespace Elastic.Installer.Beats
 {
-    public class BeatInfo
-    {
-        [YamlMember("upgrade_code")]
-        public Guid UpgradeCode { get; set; }
-
-        [YamlMember("known_versions")]
-        public Dictionary<string, Guid> KnownVersions { get; set; }
-    }
-
     public class BeatPackageCompiler
     {
         static void Main(string[] args_)
@@ -25,7 +16,7 @@ namespace Elastic.Installer.Beats
 
             Directory.CreateDirectory(opts.OutDir);
 
-            var package = new ElastiBuild.ArtifactPackage(opts.PackageName, string.Empty);
+            var package = new ElastiBuild.ArtifactPackage(opts.PackageName);
 
             var companyName = "Elastic";
             var productSetName = "Beats";
@@ -40,8 +31,26 @@ namespace Elastic.Installer.Beats
                 .Take(1)
                 .First();
 
+            BeatInfo bi = null;
+
+            var fname = Path.Combine(opts.SharedDir, "config.yaml");
+            using (var yamlConfig = System.IO.File.OpenRead(fname))
+            {
+                var ser = new Serializer();
+                var yaml = ser.Deserialize<Dictionary<string, BeatInfo>>(yamlConfig);
+
+                if (!yaml.TryGetValue(package.TargetName, out bi))
+                    throw new ArgumentException($"Unable to find {package.TargetName} section in {fname}");
+            }
+
+            // TODO: validate/process Product Id
+            //       bi.KnownVersions
+
             var project = new Project(displayName)
             {
+                // This GUID *must* be stable and unique per-beat
+                GUID = bi.UpgradeCode,
+
                 Name = $"{displayName} {package.SemVer} ({package.Architecture})",
 
                 Description = beatDescription,
@@ -73,21 +82,6 @@ namespace Elastic.Installer.Beats
                 },
             };
 
-            var fname = Path.Combine(opts.SharedDir, "beats-guids.yaml");
-            using (var guidsYaml = System.IO.File.OpenRead(fname))
-            {
-                var ser = new Serializer();
-                var yaml = ser.Deserialize<Dictionary<string, BeatInfo>>(guidsYaml);
-
-                if (!yaml.TryGetValue(package.TargetName, out BeatInfo bi))
-                    throw new ArgumentException($"Unable to find {package.TargetName} section in {fname}");
-
-                // This GUID must be unique per-beat
-                project.GUID = bi.UpgradeCode;
-
-                // TODO: validate/proces Product Id
-            }
-
             project.ControlPanelInfo = new ProductInfo
             {
                 Contact = companyName,
@@ -97,8 +91,9 @@ namespace Elastic.Installer.Beats
                 Comments = "Beats is the platform for single-purpose data shippers. They send data " +
                            "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
 
-                // TODO: Beat specific icon
-                ProductIcon = Path.Combine(opts.ResDir, Path.GetFileNameWithoutExtension(fileName) + ".ico"),
+                ProductIcon = Path.Combine(
+                    opts.ResDir,
+                    Path.GetFileNameWithoutExtension(fileName) + ".ico"),
             };
 
             // Convert LICENSE.txt to something richedit control can render
@@ -113,63 +108,84 @@ namespace Elastic.Installer.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-
-            var service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
-
             var installSubPath = $@"{companyName}\{package.Version}\{productSetName}\{displayName}";
+
+            WixSharp.File service = null;
+            if (bi.IsWindowsService)
+            {
+                service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
+
+                // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
+                //                  "not [work] as expected." Consider replacing ServiceConfig with the 
+                //                  WixUtilExtension ServiceConfig element.
+
+                service.ServiceInstaller = new ServiceInstaller
+                {
+                    Interactive = false,
+
+                    Name = serviceName,
+                    DisplayName = $"{displayName} {package.SemVer}",
+                    Description = $"{companyName} {displayName} service",
+                    DependsOn = new[] { new ServiceDependency("Tcpip") },
+
+                    Arguments =
+                        $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
+                        $" -E logging.files.redirect_stderr=true",
+
+                    DelayedAutoStart = true,
+                    Start = SvcStartType.auto,
+
+                    // Don't start on install, config file is likely not ready yet
+                    //StartOn = SvcEvent.Install,
+
+                    StopOn = SvcEvent.InstallUninstall_Wait,
+                    RemoveOn = SvcEvent.Uninstall_Wait,
+                };
+            }
+
+            var elements = new List<WixEntity>
+            {
+                new DirFiles(opts.InDir + @"\*.*", path =>
+                {
+                    var itm = path.ToLower();
+
+                    bool include = !(
+                        // configuration will go into mutable location
+                        itm.EndsWith("yml") ||
+
+                        // we install/remove service ourselves
+                        itm.EndsWith("ps1") ||
+
+                        // .exe must be excluded for service configuration to work
+                        (bi.IsWindowsService ? itm.EndsWith(fileName) : false)
+                    );
+
+                    return include;
+                })
+            };
+
+            elements.AddRange(
+                new DirectoryInfo(opts.InDir)
+                    .GetDirectories()
+                    .Select(dirName => dirName.Name)
+                    .Except(bi.MutableDirs)
+                    .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName) + @"\*.*"))));
+
+            elements.Add(bi.IsWindowsService ? (WixEntity)service : new DummyEntity());
 
             var mainInstallDir = new InstallDir(
                 $@"ProgramFiles64Folder\{installSubPath}",
-                new DirFiles(opts.InDir + @"\*.*", filter =>
-                {
-                    var itm = filter.ToLower();
+                elements.ToArray());
 
-                    return !(
-                        itm.EndsWith("ps1") ||  // we install/remove service ourselves
-                        itm.EndsWith("yml") ||  // configuration will go into mutable location
-                        itm.EndsWith(fileName)  // .exe must be excluded for service configuration to work
-                    );
-                }),
-                service);
-
-            // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
-            //                  "not [work] as expected." Consider replacing ServiceConfig with the 
-            //                  WixUtilExtension ServiceConfig element.
-
-            service.ServiceInstaller = new ServiceInstaller
-            {
-                Interactive = false,
-
-                Name = serviceName,
-                DisplayName = $"{displayName} {package.SemVer}",
-                Description = $"{companyName} {displayName} service",
-                DependsOn = new[] { new ServiceDependency("Tcpip") },
-
-                Arguments =
-                    $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
-                    $" -E logging.files.redirect_stderr=true",
-
-                DelayedAutoStart = true,
-                Start = SvcStartType.auto,
-
-                // Don't start on install, config file is likely not ready yet
-                //StartOn = SvcEvent.Install,
-
-                StopOn = SvcEvent.InstallUninstall_Wait,
-                RemoveOn = SvcEvent.Uninstall_Wait,
-            };
-
-            var mutableDirs = new List<WixEntity>
+            // TODO: evaluate adding metadata file into beats repo that lists these per-beat
+            var mutablePaths = new List<WixEntity>
             {
                 new DirFiles(opts.InDir + @"\*.yml")
             };
 
-            // TODO: evaluate adding metadata file into beats repo that lists these per-beat
-
             // These are the directories that we know of
-            mutableDirs.AddRange(
-                "kibana|module|modules.d|monitors.d"
-                    .Split('|')
+            mutablePaths.AddRange(
+                bi.MutableDirs
                     .Select(dirName =>
                     {
                         var dirPath = Path.Combine(opts.InDir, dirName);
@@ -179,15 +195,17 @@ namespace Elastic.Installer.Beats
                     })
                     .Where(dir => dir != null));
 
-            var mutableInstallDir = new Dir(
-                $@"CommonAppDataFolder\{installSubPath}",
-                mutableDirs.ToArray());
-
             project.Dirs = new[]
             {
                 mainInstallDir,
-                mutableInstallDir
+
+                // Mutable path
+                new Dir(
+                    $@"CommonAppDataFolder\{installSubPath}",
+                    mutablePaths.ToArray())
             };
+
+            project.ResolveWildCards();
 
             //Compiler.WixSourceGenerated += (/*XDocument*/ document) => { };
 

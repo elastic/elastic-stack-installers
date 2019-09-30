@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using ElastiBuild.Commands;
+using System.Diagnostics;
 
 namespace ElastiBuild
 {
@@ -113,7 +114,12 @@ namespace ElastiBuild
 
         public static async Task FetchArtifact(BuildContext ctx_, ArtifactPackage ap_)
         {
+            // TODO: Proper check
+            Debug.Assert(ap_.IsDownloadable);
+
             var fname = Path.Combine(ctx_.InDir, Path.GetFileName(ap_.Location));
+
+            // TODO: support "force overwrite"
             if (File.Exists(fname))
                 return;
 
@@ -145,15 +151,16 @@ namespace ElastiBuild
         {
             var unpackedDir = Path.Combine(
                 ctx_.InDir, 
-                Path.GetFileNameWithoutExtension(ap_.Location));
+                Path.GetFileNameWithoutExtension(ap_.FileName));
 
             if (Directory.Exists(unpackedDir))
                 return Task.CompletedTask;
 
-            return Task.Run(() => ZipFile.ExtractToDirectory(
-                Path.Combine(ctx_.InDir, Path.GetFileName(ap_.Location)),
-                Path.Combine(ctx_.InDir),
-                overwriteFiles: true));
+            return Task.Run(() => 
+                ZipFile.ExtractToDirectory(
+                    Path.Combine(ctx_.InDir, Path.GetFileName(ap_.FileName)),
+                    Path.Combine(ctx_.InDir),
+                    overwriteFiles: true));
         }
     }
 }
