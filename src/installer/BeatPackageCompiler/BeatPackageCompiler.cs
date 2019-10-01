@@ -20,7 +20,7 @@ namespace Elastic.Installer.Beats
 
             var companyName = "Elastic";
             var productSetName = "Beats";
-            var displayName = package.TargetName;
+            var displayName = "Beats " + package.TargetName;
             var serviceName = package.TargetName;
             var fileName = package.TargetName + ".exe";
 
@@ -80,7 +80,8 @@ namespace Elastic.Installer.Beats
                 Manufacturer = companyName,
                 UrlInfoAbout = "https://www.elastic.co/downloads/beats",
 
-                Comments = "Beats is the platform for single-purpose data shippers. They send data " +
+                Comments = bi.Description + 
+                           ". Beats is the platform for single-purpose data shippers. They send data " +
                            "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
 
                 ProductIcon = Path.Combine(
@@ -117,7 +118,7 @@ namespace Elastic.Installer.Beats
 
                     Name = serviceName,
                     DisplayName = $"{displayName} {package.SemVer}",
-                    Description = $"{companyName} {displayName} service",
+                    Description = bi.Description,
                     DependsOn = new[] { new ServiceDependency("Tcpip") },
 
                     Arguments =
