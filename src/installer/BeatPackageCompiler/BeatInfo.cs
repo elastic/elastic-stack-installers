@@ -6,6 +6,9 @@ namespace Elastic.Installer.Beats
 {
     public sealed class BeatInfo
     {
+        [YamlMember("description")]
+        public string Description { get; set; } = "(add 'description' field to config.yaml)";
+
         [YamlMember("service")]
         public bool IsWindowsService { get; set; } = true;
 

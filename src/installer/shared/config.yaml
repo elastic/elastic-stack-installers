@@ -1,41 +1,48 @@
 ---
 auditbeat:
+  description: Audit the activities of users and processes on your system
   mutable_dirs: [ kibana ]
   upgrade_code: 89EAA6B0-0CAC-4DA4-AA58-C6C2632AA341
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 filebeat:
+  description: Filebeat sends log files to Logstash or directly to Elasticsearch
   mutable_dirs: [ kibana, module, modules.d ]
   upgrade_code: 830E6D05-2CDB-4F5D-AACC-80B7EED19D43
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 functionbeat:
+  description: Functionbeat is a beat implementation for a serverless architecture
   service: false
   upgrade_code: B28584E2-4F91-4CE2-9B49-A467632E80E4
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 heartbeat:
+  description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
   mutable_dirs: [ kibana, monitors.d ]
   upgrade_code: E3C93134-2403-4FCD-B816-85DD37B2C7BC
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 metricbeat:
+  description: Metricbeat is a lightweight shipper for metrics
   mutable_dirs: [ kibana, module, modules.d ]
   upgrade_code: 79A65434-259C-4E71-9A10-B69FA34848A3
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 packetbeat:
+  description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
   mutable_dirs: [ kibana ]
   upgrade_code: 48C5CD3B-C42A-4D6C-9D4A-D8BAF83F05BA
   known_versions:
     0.0.0 : 00000000-0000-0000-0000-000000000000
 
 winlogbeat:
+  description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
   mutable_dirs: [ kibana, module ]
   upgrade_code: 18DE3315-EA8A-4B00-9394-2CF1523F3968
   known_versions:

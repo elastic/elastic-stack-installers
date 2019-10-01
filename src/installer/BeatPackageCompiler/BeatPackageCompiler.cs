@@ -24,11 +24,6 @@ namespace Elastic.Installer.Beats
             var serviceName = package.TargetName;
             var fileName = package.TargetName + ".exe";
 
-            // TODO: make less brittle, lots of assumptions here
-            var beatDescription = System.IO.File
-                .ReadAllLines(Path.Combine(opts.InDir, "README.md"))
-                .Skip(2).Take(1).First().Trim();
-
             BeatInfo bi = null;
 
             var fname = Path.Combine(opts.SharedDir, "config.yaml");
@@ -51,7 +46,7 @@ namespace Elastic.Installer.Beats
 
                 Name = $"{displayName} {package.SemVer} ({package.Architecture})",
 
-                Description = beatDescription,
+                Description = bi.Description,
 
                 OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
                 Version = new Version(package.Version),
