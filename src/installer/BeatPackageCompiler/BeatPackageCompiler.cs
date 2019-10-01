@@ -24,12 +24,10 @@ namespace Elastic.Installer.Beats
             var serviceName = package.TargetName;
             var fileName = package.TargetName + ".exe";
 
-            // TODO: ping beats team to tell them we depend on this
+            // TODO: make less brittle, lots of assumptions here
             var beatDescription = System.IO.File
                 .ReadAllLines(Path.Combine(opts.InDir, "README.md"))
-                .Skip(2)
-                .Take(1)
-                .First();
+                .Skip(2).Take(1).First().Trim();
 
             BeatInfo bi = null;
 
@@ -61,8 +59,7 @@ namespace Elastic.Installer.Beats
                 // We massage LICENSE.txt into .rtf below
                 LicenceFile = Path.Combine(opts.OutDir, "LICENSE.rtf"),
 
-                // TODO: More robust test
-                Platform = package.Architecture == "x86" ? Platform.x86 : Platform.x64,
+                Platform = package.Is32bit ? Platform.x86 : Platform.x64,
 
                 InstallScope = InstallScope.perMachine,
 
@@ -174,7 +171,7 @@ namespace Elastic.Installer.Beats
             elements.Add(bi.IsWindowsService ? (WixEntity)service : new DummyEntity());
 
             var mainInstallDir = new InstallDir(
-                $@"ProgramFiles64Folder\{installSubPath}",
+                $@"ProgramFiles{(package.Is64Bit ? "64" : string.Empty)}Folder\{installSubPath}",
                 elements.ToArray());
 
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat

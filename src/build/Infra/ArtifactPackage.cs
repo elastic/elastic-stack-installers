@@ -15,6 +15,9 @@ namespace ElastiBuild
         public bool IsDownloadable => 
             !string.IsNullOrWhiteSpace(Location);
 
+        public bool Is32bit => Architecture == "x86";
+        public bool Is64Bit => !Is32bit;
+
         public ArtifactPackage(string name_)
             : this(name_, null)
         { }
