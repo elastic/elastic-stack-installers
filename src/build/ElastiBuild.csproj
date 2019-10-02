@@ -17,6 +17,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath></OutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
+    <Compile Include="..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Bullseye" Version="3.0.0-beta.1" />
@@ -28,13 +33,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Shared\" />
+  </ItemGroup>
 
   <!-- $(PkgNuGet_CommandLine) is created by GeneratePathProperty="true" above -->
   <Target Name="CopyNugetBinary" AfterTargets="Compile">
     <Message Text="Copying NuGet.exe to bin dir ..." Importance="High" />
-    <Copy
-        SourceFiles="$(PkgNuGet_CommandLine)/tools/nuget.exe"
-        DestinationFolder="$(MSBuildProjectDirectory)/../../bin/"
-        SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(PkgNuGet_CommandLine)/tools/nuget.exe" DestinationFolder="$(MSBuildProjectDirectory)/../../bin/" SkipUnchangedFiles="true" />
   </Target>
 </Project>

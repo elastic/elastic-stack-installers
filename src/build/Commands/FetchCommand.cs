@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Elastic.Installer;
 using ElastiBuild.Options;
-using static Bullseye.Targets;
 
 namespace ElastiBuild.Commands
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace ElastiBuild
+namespace Elastic.Installer
 {
     public class ArtifactPackage
     {

@@ -1,6 +1,6 @@
 ﻿using WixSharp;
 
-namespace Elastic.Installer.Beats
+namespace Elastic.PackageCompiler
 {
     public class DummyEntity : WixEntity, IGenericEntity
     {

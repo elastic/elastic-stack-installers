@@ -1,13 +1,15 @@
 ﻿using System;
 using System.IO;
+using ElastiBuild;
+using ElastiBuild.Options;
 
-namespace ElastiBuild
+namespace Elastic.Installer
 {
     public class BuildContext
     {
         public string BuildRoot { get; set; }
 
-        public Options.GlobalOptions Options { get; private set; }
+        public GlobalOptions Options { get; private set; }
 
         // TODO: cache these
         public string SrcDir => Path.Combine(BuildRoot, "src");

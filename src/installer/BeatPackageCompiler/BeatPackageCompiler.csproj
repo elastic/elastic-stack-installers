@@ -67,14 +67,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\build\Infra\ArtifactPackage.cs">
-      <Link>ArtifactPackage.cs</Link>
+    <Compile Include="..\..\shared\ArtifactPackage.cs">
+      <Link>Shared\ArtifactPackage.cs</Link>
     </Compile>
-    <Compile Include="..\shared\CmdLineOptions.cs">
-      <Link>CmdLineOptions.cs</Link>
+    <Compile Include="..\..\shared\BuildConfiguration.cs">
+      <Link>Shared\BuildConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\shared\CmdLineOptions.cs">
+      <Link>Shared\CmdLineOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\..\shared\MagicStrings.cs">
+      <Link>Shared\MagicStrings.cs</Link>
     </Compile>
     <Compile Include="DummyEntity.cs" />
-    <Compile Include="BeatInfo.cs" />
+    <Compile Include="PackageInfo.cs" />
     <Compile Include="BeatPackageCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

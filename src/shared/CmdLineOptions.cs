@@ -2,7 +2,7 @@
 using System.IO;
 using CommandLine;
 
-namespace Elastic.Installer.Shared
+namespace Elastic.PackageCompiler
 {
     public class CmdLineOptions
     {
@@ -18,8 +18,8 @@ namespace Elastic.Installer.Shared
         public string BinDir => Path.Combine(BuildRoot, "bin");
         public string InDir => Path.Combine(BinDir, "in", PackageName);
         public string OutDir => Path.Combine(BinDir, "out", PackageName);
-        public string SharedDir => Path.Combine(SrcDir, "installer", "shared");
-        public string ResDir => Path.Combine(SharedDir, "resources");
+        public string ResDir => Path.Combine(SrcDir, "installer", "resources");
+        public string ConfigDir => Path.Combine(SrcDir, "config");
 
         public static CmdLineOptions Parse(string[] args_)
         {

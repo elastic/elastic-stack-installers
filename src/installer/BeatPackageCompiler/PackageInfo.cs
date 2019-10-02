@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using SharpYaml.Serialization;
 
-namespace Elastic.Installer.Beats
+namespace Elastic.Installer
 {
-    public sealed class BeatInfo
+    public sealed class PackageInfo
     {
         [YamlMember("description")]
         public string Description { get; set; } = "(add 'description' field to config.yaml)";
@@ -21,7 +21,7 @@ namespace Elastic.Installer.Beats
         [YamlMember("known_versions", SerializeMemberMode.Content)]
         public Dictionary<string, Guid> KnownVersions { get; }
 
-        public BeatInfo()
+        public PackageInfo()
         {
             MutableDirs = new List<string>();
             KnownVersions = new Dictionary<string, Guid>();

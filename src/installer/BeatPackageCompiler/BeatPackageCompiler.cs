@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using WixSharp;
-using SharpYaml.Serialization;
-using Elastic.Installer.Shared;
+using Elastic.Installer;
 
-namespace Elastic.Installer.Beats
+namespace Elastic.PackageCompiler.Beats
 {
     public class BeatPackageCompiler
     {
@@ -16,25 +15,15 @@ namespace Elastic.Installer.Beats
 
             Directory.CreateDirectory(opts.OutDir);
 
-            var package = new ElastiBuild.ArtifactPackage(opts.PackageName);
+            var ap = new ArtifactPackage(opts.PackageName);
+            var config = BuildConfiguration.Read(Path.Combine(opts.ConfigDir, MagicStrings.ConfigYaml));
+            var pi = config.GetPackageInfo(ap.TargetName);
 
-            var companyName = "Elastic";
-            var productSetName = "Beats";
-            var displayName = "Beats " + package.TargetName;
-            var serviceName = package.TargetName;
-            var fileName = package.TargetName + ".exe";
-
-            BeatInfo bi = null;
-
-            var fname = Path.Combine(opts.SharedDir, "config.yaml");
-            using (var yamlConfig = System.IO.File.OpenRead(fname))
-            {
-                var ser = new Serializer();
-                var yaml = ser.Deserialize<Dictionary<string, BeatInfo>>(yamlConfig);
-
-                if (!yaml.TryGetValue(package.TargetName, out bi))
-                    throw new ArgumentException($"Unable to find {package.TargetName} section in {fname}");
-            }
+            var companyName = MagicStrings.Elastic;
+            var productSetName = MagicStrings.Beats;
+            var displayName = MagicStrings.Beats + " " + ap.TargetName;
+            var serviceName = ap.TargetName;
+            var fileName = ap.TargetName + ".exe";
 
             // TODO: validate/process Product Id
             //       bi.KnownVersions
@@ -42,19 +31,19 @@ namespace Elastic.Installer.Beats
             var project = new Project(displayName)
             {
                 // This GUID *must* be stable and unique per-beat
-                GUID = bi.UpgradeCode,
+                GUID = pi.UpgradeCode,
 
-                Name = $"{displayName} {package.SemVer} ({package.Architecture})",
+                Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
 
-                Description = bi.Description,
+                Description = pi.Description,
 
                 OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
-                Version = new Version(package.Version),
+                Version = new Version(ap.Version),
 
                 // We massage LICENSE.txt into .rtf below
                 LicenceFile = Path.Combine(opts.OutDir, "LICENSE.rtf"),
 
-                Platform = package.Is32bit ? Platform.x86 : Platform.x64,
+                Platform = ap.Is32bit ? Platform.x86 : Platform.x64,
 
                 InstallScope = InstallScope.perMachine,
 
@@ -80,7 +69,7 @@ namespace Elastic.Installer.Beats
                 Manufacturer = companyName,
                 UrlInfoAbout = "https://www.elastic.co/downloads/beats",
 
-                Comments = bi.Description + 
+                Comments = pi.Description + 
                            ". Beats is the platform for single-purpose data shippers. They send data " +
                            "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
 
@@ -101,10 +90,10 @@ namespace Elastic.Installer.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var installSubPath = $@"{companyName}\{package.Version}\{productSetName}\{serviceName}";
+            var installSubPath = $@"{companyName}\{ap.Version}\{productSetName}\{serviceName}";
 
             WixSharp.File service = null;
-            if (bi.IsWindowsService)
+            if (pi.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
 
@@ -117,8 +106,8 @@ namespace Elastic.Installer.Beats
                     Interactive = false,
 
                     Name = serviceName,
-                    DisplayName = $"{displayName} {package.SemVer}",
-                    Description = bi.Description,
+                    DisplayName = $"{displayName} {ap.SemVer}",
+                    Description = pi.Description,
                     DependsOn = new[] { new ServiceDependency("Tcpip") },
 
                     Arguments =
@@ -150,7 +139,7 @@ namespace Elastic.Installer.Beats
                         itm.EndsWith("ps1") ||
 
                         // .exe must be excluded for service configuration to work
-                        (bi.IsWindowsService ? itm.EndsWith(fileName) : false)
+                        (pi.IsWindowsService ? itm.EndsWith(fileName) : false)
                     );
 
                     return include;
@@ -161,13 +150,13 @@ namespace Elastic.Installer.Beats
                 new DirectoryInfo(opts.InDir)
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
-                    .Except(bi.MutableDirs)
+                    .Except(pi.MutableDirs)
                     .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName) + @"\*.*"))));
 
-            elements.Add(bi.IsWindowsService ? (WixEntity)service : new DummyEntity());
+            elements.Add(pi.IsWindowsService ? (WixEntity)service : new DummyEntity());
 
             var mainInstallDir = new InstallDir(
-                $@"ProgramFiles{(package.Is64Bit ? "64" : string.Empty)}Folder\{installSubPath}",
+                $@"ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder\{installSubPath}",
                 elements.ToArray());
 
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
@@ -178,7 +167,7 @@ namespace Elastic.Installer.Beats
 
             // These are the directories that we know of
             mutablePaths.AddRange(
-                bi.MutableDirs
+                pi.MutableDirs
                     .Select(dirName =>
                     {
                         var dirPath = Path.Combine(opts.InDir, dirName);

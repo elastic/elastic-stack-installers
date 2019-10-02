@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using static Bullseye.Targets;
+using Elastic.Installer;
 using ElastiBuild.Options;
 
 namespace ElastiBuild.Commands
@@ -21,9 +21,10 @@ namespace ElastiBuild.Commands
 
         public Task RunAsync(BuildContext ctx_)
         {
-            Program.CreateBuildTargeTree();
             Console.WriteLine("Available build TARGETS:" + Environment.NewLine);
-            return RunTargetsAndExitAsync("-t".Split());
+
+            // TODO: setup and show target tree
+            return Task.CompletedTask;
         }
     }
 }

@@ -8,7 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F89-0C6E-4BBC-88F6-5DF297901196}"
 	ProjectSection(SolutionItems) = preProject
 		..\build.bat = ..\build.bat
-		installer\shared\config.yaml = installer\shared\config.yaml
+		config\config.yaml = config\config.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeatPackageCompiler", "installer\BeatPackageCompiler\BeatPackageCompiler.csproj", "{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}"
