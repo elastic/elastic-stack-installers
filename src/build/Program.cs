@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using Elastic.Installer;
-using ElastiBuild.Options;
 using ElastiBuild.Commands;
+using ElastiBuild.Infra;
+using ElastiBuild.Options;
 
 namespace ElastiBuild
 {

@@ -2,24 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using CommandLine;
 using CommandLine.Text;
 
-namespace ElastiBuild
+namespace ElastiBuild.Infra
 {
-    public static class StringExtensions
-    {
-        public static string JoinTo(this string value, params string[] others)
-        {
-            var builder = new StringBuilder(value);
-            foreach (var v in others)
-                builder.Append(v);
-
-            return builder.ToString();
-        }
-    }
-
     public class TweakedSentenceBuilder : SentenceBuilder
     {
         public override Func<string> RequiredWord =>

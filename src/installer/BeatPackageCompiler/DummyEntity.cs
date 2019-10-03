@@ -4,7 +4,7 @@ namespace Elastic.PackageCompiler
 {
     public class DummyEntity : WixEntity, IGenericEntity
     {
-        public void Process(ProcessingContext context)
+        public void Process(ProcessingContext context_)
         {
             // Dummy
         }

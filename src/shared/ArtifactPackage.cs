@@ -37,7 +37,7 @@ namespace Elastic.Installer
             Architecture = rxVersion.Groups["arch"].Value?.ToLower();
         }
 
-        static Regex rx = new Regex(
+        static readonly Regex rx = new Regex(
                 @"(?<target>[^-]+)-" +
                 @"(?<semver>(?<version>\d+\.\d+\.\d+)(-[^-]+)?)-" +
                 @"(?<os>[^-]+)-" +
