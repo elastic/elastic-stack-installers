@@ -37,7 +37,7 @@ namespace ElastiBuild
                 cfg.HelpWriter = null;
             };
 
-            var parser = new Parser(parserCfg);
+            using var parser = new Parser(parserCfg);
             var result = parser.ParseArguments(args_, commands);
 
             var ctx = BuildContext.Create();
@@ -51,14 +51,15 @@ namespace ElastiBuild
         {
             SentenceBuilder.Factory = () => new TweakedSentenceBuilder();
 
-            var pr = new Parser(cfg =>
+            using var parser = new Parser(cfg =>
             {
                 cfg.IgnoreUnknownArguments = true;
                 cfg.AutoHelp = false;
                 cfg.AutoVersion = false;
                 cfg.HelpWriter = null;
-            })
-            .ParseArguments<GlobalOptions>("".Split(' '));
+            });
+
+            var result = parser.ParseArguments<GlobalOptions>("".Split(' '));
 
             HelpText htGlobals = new HelpText("ElastiBuild v1.0.0", "Copyright (c) 2019, Elastic.co")
             {
@@ -69,7 +70,7 @@ namespace ElastiBuild
             };
 
             htGlobals.AddPreOptionsLine(Environment.NewLine + "Global Flags:");
-            htGlobals.AddOptions(pr);
+            htGlobals.AddOptions(result);
             Console.WriteLine(htGlobals.ToString());
 
             bool isGlobalHelp = result_.TypeInfo.Current == typeof(NullInstance);

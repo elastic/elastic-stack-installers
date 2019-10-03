@@ -23,7 +23,7 @@ namespace Elastic.PackageCompiler
 
         public static CmdLineOptions Parse(string[] args_)
         {
-            var parser = new Parser(config =>
+            using var parser = new Parser(config =>
             {
                 config.CaseSensitive = false;
                 config.AutoHelp = false;

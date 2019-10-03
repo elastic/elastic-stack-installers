@@ -1,27 +1,28 @@
-# Windows MSI packages for Elastic Beats (POC)
+# Windows MSI packages for Elastic Beats (and soon other Elastic products)
 
 ### Feature set
 - Discover branches, versions and aliases
 - Fetch any beat from above
-- Build any setup in non-OSS, x64 variant
+- Build any beat from downloaded archives in non-OSS variant
 - Configuration and misc files installed into ProgramData/Elastic/{version}/Beats/{beat}/
 
 ### Get help:
 ```
 $ .\build 
+ElastiBuild v1.0.0
+Copyright (c) 2019, Elastic.co
 
-GLOBAL OPTIONS:
+Global Flags:
 
   --help    Shows this help screen as well as help for specific commands
 
+Available Commands:
 
-COMMANDS:
-
-  show        Show available build targets
+  build       Build Targets
   discover    Discover Container Id's used for build and fetch commands
   fetch       Download and optionally unpack input artifacts
-  build       Build Targets
-```
+  show        Show available build targets
+  ```
 
 - Discover branches, versions, aliases.
 - Download and unpack artifacts.
@@ -29,15 +30,16 @@ COMMANDS:
 
 ### Example: building 7.4 SNAPSHOT:
 ```
-.\build.bat build winlogbeat --cid 7.4 --bitness x64
+.\build.bat build --cid 7.4 --bitness x64
 ```
 
 ### Requirements
 
-- .net core sdk v2.2.401 (https://dotnet.microsoft.com/download/thank-you/dotnet-sdk-2.2.401-windows-x64-installer)
+- Visual Studio 2019 v16.3 (with .Net Core v3.0, SDK v3.0.100)
 - Wix Toolset v3.11.1 (https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311.exe)
 or a newer v3.14: https://wixtoolset.org/releases/development/
 
-### Knonwn issues
-- x64, non-OSS install only
-- 
+### Known issues
+- See #4
+- Non-OSS only.
+- Command `show` is disabled for now, refactoring usage of BullsEye.

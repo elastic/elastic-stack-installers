@@ -8,15 +8,14 @@ namespace Elastic.Installer
     {
         public static BuildConfiguration Read(string fileName)
         {
-            using (var yamlConfig = System.IO.File.OpenRead(fileName))
+            using var yamlConfig = System.IO.File.OpenRead(fileName);
+
+            var ser = new Serializer();
+            return new BuildConfiguration
             {
-                var ser = new Serializer();
-                return new BuildConfiguration
-                {
-                    fileName = fileName,
-                    packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
-                };
-            }
+                fileName = fileName,
+                packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
+            };
         }
 
         public PackageInfo GetPackageInfo(string targetName_)
