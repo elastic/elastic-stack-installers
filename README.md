@@ -28,9 +28,9 @@ Available Commands:
 - Download and unpack artifacts.
 - (WIP ~95%) Build all from downloaded artifacts.
 
-### Example: building 7.4 SNAPSHOT:
+### Example: building 7.4 SNAPSHOT for winlogbeat, filebeat and functionbeat:
 ```
-.\build.bat build --cid 7.4 --bitness x64
+.\build.bat build --cid 7.4 --bitness x64 winlogbeat filebeat functionbeat
 ```
 
 ### Requirements
