@@ -1,4 +1,4 @@
-# Windows MSI packages for Elastic Beats (and soon other Elastic products)
+# Windows MSI packages for Elastic stack
 
 ### Feature set
 - Discover branches, versions and aliases
