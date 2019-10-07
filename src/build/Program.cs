@@ -43,6 +43,9 @@ namespace ElastiBuild
 
             var ctx = BuildContext.Create();
 
+            var config = BuildConfiguration.Read(
+                System.IO.Path.Combine(ctx.ConfigDir, MagicStrings.ConfigYaml));
+
             await result.MapResult(
                 async (IElastiBuildCommand cmd) => await cmd.RunAsync(ctx),
                 async (errs) => await HandleErrorsAndShowHelp(result, commands));

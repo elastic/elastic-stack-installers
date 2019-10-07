@@ -16,7 +16,10 @@ namespace Elastic.PackageCompiler.Beats
             Directory.CreateDirectory(opts.OutDir);
 
             var ap = new ArtifactPackage(opts.PackageName);
-            var config = BuildConfiguration.Read(Path.Combine(opts.ConfigDir, MagicStrings.ConfigYaml));
+
+            var config = BuildConfiguration.Read(
+                Path.Combine(opts.ConfigDir, MagicStrings.ConfigYaml));
+
             var pi = config.GetPackageInfo(ap.TargetName);
 
             var companyName = MagicStrings.Elastic;

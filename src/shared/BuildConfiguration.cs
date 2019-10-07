@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using SharpYaml.Serialization;
 
 namespace Elastic.Installer
@@ -8,14 +9,31 @@ namespace Elastic.Installer
     {
         public static BuildConfiguration Read(string fileName_)
         {
-            using var yamlConfig = System.IO.File.OpenRead(fileName_);
-
+            BuildConfiguration bc = null;
             var ser = new Serializer();
-            return new BuildConfiguration
+
+            using (var yamlConfig = File.OpenRead(fileName_))
             {
-                fileName = fileName_,
-                packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
-            };
+                bc = new BuildConfiguration
+                {
+                    fileName = fileName_,
+                    packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
+                };
+            }
+
+            var packageConfigFilePrefix = Path.Combine(
+                Path.GetDirectoryName(fileName_),
+                Path.GetFileNameWithoutExtension(fileName_));
+
+            foreach (var itm in bc.packageMap.Keys)
+            {
+                using var yamlConfig = new StreamReader(
+                    packageConfigFilePrefix + "-" + itm + MagicStrings.YamlExtension);
+
+                ser.Deserialize<PackageInfo>(yamlConfig, bc.packageMap[itm]);
+            }
+
+            return bc;
         }
 
         public PackageInfo GetPackageInfo(string targetName_)

@@ -19,7 +19,7 @@ namespace Elastic.Installer
         public Guid UpgradeCode { get; set; }
 
         [YamlMember("known_versions", SerializeMemberMode.Content)]
-        public Dictionary<string, Guid> KnownVersions { get; }
+        public Dictionary<string, Guid> KnownVersions { get; /*internal set;*/ }
 
         public PackageInfo()
         {

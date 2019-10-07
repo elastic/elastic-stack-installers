@@ -21,7 +21,9 @@
 
   <ItemGroup>
     <Compile Include="..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
+    <Compile Include="..\shared\BuildConfiguration.cs" Link="Shared\BuildConfiguration.cs" />
     <Compile Include="..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
+    <Compile Include="..\shared\PackageInfo.cs" Link="Shared\PackageInfo.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -29,6 +31,7 @@
     <PackageReference Include="commandlineparser" Version="2.6.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="SimpleExec" Version="6.0.0" />
+    <PackageReference Include="SharpYaml" Version="1.6.5" />
   </ItemGroup>
   
 </Project>

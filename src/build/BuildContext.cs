@@ -17,6 +17,7 @@ namespace Elastic.Installer
         public string OutDir => Path.Combine(BinDir, "out");
         public string BinDir => Path.Combine(BuildRoot, "bin");
         public string CompilerDir => Path.Combine(BinDir, "compiler");
+        public string ConfigDir => Path.Combine(SrcDir, "config");
 
         public static BuildContext Create()
         {
