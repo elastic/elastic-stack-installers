@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BeatPackageCompiler.netcore": {
+      "commandName": "Project",
+      "commandLineArgs": "--package=functionbeat-8.0.0-SNAPSHOT-windows-x86_64"
+    }
+  }
+}

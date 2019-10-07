@@ -27,18 +27,11 @@ namespace ElastiBuild.Commands
 
         public async Task RunAsync(BuildContext ctx_)
         {
-            var packageCompilerDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler");
-            var packageCompilerExe = Path.Combine(packageCompilerDir, "bin", "Release", "BeatPackageCompiler.exe").Quote();
-
-            var nugetExe = Path.Combine(ctx_.BinDir, "nuget.exe").Quote();
-            var nugetPackagesDir = Path.Combine(ctx_.SrcDir, "packages").Quote();
-
-            // TODO: check exit code
-            await Command.RunAsync(
-                nugetExe, "restore " + packageCompilerDir.Quote() + " -PackagesDirectory " + nugetPackagesDir);
+            var compilerSrcDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler");
+            var compilerExe = Path.Combine(ctx_.CompilerDir, "BeatPackageCompiler.exe").Quote();
 
             await Command.RunAsync(
-                "dotnet", "msbuild -r:true -t:Build -nr:false -p:Configuration=Release " + packageCompilerDir.Quote());
+                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx_.CompilerDir}");
 
             foreach (var target in Targets)
             {
@@ -73,10 +66,8 @@ namespace ElastiBuild.Commands
                 await ArtifactsApi.UnpackArtifact(ctx_, ap);
                 await Console.Out.WriteLineAsync("done");
 
-                // TODO: check exit code
                 await Command.RunAsync(
-                    packageCompilerExe,
-                    "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
+                    compilerExe, "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
                     ctx_.InDir);
             }
         }

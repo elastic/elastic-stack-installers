@@ -11,32 +11,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F
 		config\config.yaml = config\config.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeatPackageCompiler", "installer\BeatPackageCompiler\BeatPackageCompiler.csproj", "{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeatPackageCompiler", "installer\BeatPackageCompiler\BeatPackageCompiler.csproj", "{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Debug|x86.Build.0 = Debug|Any CPU
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|x86.ActiveCfg = Release|Any CPU
-		{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}.Release|x86.Build.0 = Release|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Debug|x86.Build.0 = Debug|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|x86.ActiveCfg = Release|Any CPU
-		{F49E9F7B-B6F9-4422-9366-8A48D6C39D44}.Release|x86.Build.0 = Release|Any CPU
+		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,5 @@
 @echo off
-set  DOTNET_CLI_TELEMETRY_OPTOUT=1
+set DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 pushd .
 cd %~dp0%

@@ -13,9 +13,10 @@ namespace Elastic.Installer
 
         // TODO: cache these
         public string SrcDir => Path.Combine(BuildRoot, "src");
-        public string BinDir => Path.Combine(BuildRoot, "bin");
         public string InDir => Path.Combine(BinDir, "in");
         public string OutDir => Path.Combine(BinDir, "out");
+        public string BinDir => Path.Combine(BuildRoot, "bin");
+        public string CompilerDir => Path.Combine(BinDir, "compiler");
 
         public static BuildContext Create()
         {
