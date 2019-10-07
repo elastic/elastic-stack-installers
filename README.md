@@ -35,7 +35,7 @@ Available Commands:
 
 ### Requirements
 
-- Visual Studio 2019 v16.3 (with .Net Core v3.0, SDK v3.0.100)
+- .Net Core v3.0, SDK v3.0.100, Full Framework >= 4.5
 - Wix Toolset v3.11.1 (https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311.exe)
 or a newer v3.14: https://wixtoolset.org/releases/development/
 
