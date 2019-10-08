@@ -40,9 +40,9 @@ Available Commands:
 or a newer v3.14: https://wixtoolset.org/releases/development/
 
 ### Known issues
-- See https://github.com/elastic/msi-elastic-stack/issues/4
+- See #4 https://github.com/elastic/msi-elastic-stack/issues/4
 - Non-OSS only.
 - Command `show` is disabled for now, refactoring usage of BullsEye.
 
 ### ToDo's:
-- See https://github.com/elastic/msi-elastic-stack/issues/3
+- See #3 https://github.com/elastic/msi-elastic-stack/issues/3
