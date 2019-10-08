@@ -1,39 +1,31 @@
 <!-- 
-** Please read the guidelines below. **
+** Issues that do not follow these guidelines are likely to be closed. **
 
-Issues that do not follow these guidelines are likely to be closed.
+GitHub is reserved for bug reports and feature requests. The best place to ask a general question is at the Elastic forums: PUT LINK TO INSTALLERS SUB-FORUM HERE GitHub is not the place for general questions.
 
-GitHub is reserved for bug reports and feature requests. The best place to
-ask a general question is at the Elastic forums: https://discuss.elastic.co/c/elasticsearch
-GitHub is not the place for general questions.
-
-Be sure to select the documentation version relevant to the installer version you
-are using.
-
-### Failed Installations
-
-If you are reporting an issue that occurred during installation, we ask that you
-attach the installation log file to your issue to help diagnose the root cause.
-
-The log file can be found in the %TEMP% directory with a randomly generated name adhering to the format MSI<random>.LOG. It should be the most recent log file.
-
-When installing from the command-line, the log file can be captured by passing the /l*v <logfilename>
+Be sure to select the documentation version relevant to the installer version you are using.
 -->
+### How to capture log file:
+```msiexec /l!*vx "<full path to log file to be created>" /i "<full path to msi file>"```
+
+Please **attach** log file to the issue you create and provide as much information about your environment as you can below
 
 ### Environment
-
+...
 <!-- Operating system -->
 <!-- Are you running behind a corporate proxy? -->
 <!-- Where are you based geographically? -->
 
-### Expected Behaviour
+### Expected Behavior
+...
 
-### Actual Behaviour
+### Actual Behavior
+...
 
 ### Steps to reproduce the behaviour
-
 1.
-2.
-3.
+1.
+1.
 
 <!-- Attach any screenshots that may help -->
+
