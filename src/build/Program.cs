@@ -24,9 +24,9 @@ namespace ElastiBuild
             //Console.WriteLine("ARGS: " + string.Join(",", args_));
 #endif
 
-            var commands = typeof(Program).Assembly
-                .GetTypes()
-                .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), true).Length > 0)
+            var commands = typeof(Program)
+                .Assembly.GetTypes()
+                .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Length > 0)
                 .ToArray();
 
             Action<ParserSettings> parserCfg = cfg =>
