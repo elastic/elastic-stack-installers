@@ -15,8 +15,8 @@ namespace Elastic.Installer
         public bool IsDownloadable => 
             !string.IsNullOrWhiteSpace(Location);
 
-        public bool Is32bit => Architecture == "x86";
-        public bool Is64Bit => !Is32bit;
+        public bool Is32bit => Architecture == MagicStrings.Arch.x86;
+        public bool Is64Bit => Architecture == MagicStrings.Arch.x86_64;
 
         public ArtifactPackage(string name_)
             : this(name_, null)

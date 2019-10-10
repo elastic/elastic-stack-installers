@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using CommandLine;
+using Elastic.Installer;
 
 namespace Elastic.PackageCompiler
 {
@@ -14,12 +15,12 @@ namespace Elastic.PackageCompiler
         public string BuildRoot { get; private set; }
 
         // TODO: cache these
-        public string SrcDir => Path.Combine(BuildRoot, "src");
-        public string BinDir => Path.Combine(BuildRoot, "bin");
-        public string InDir => Path.Combine(BinDir, "in", PackageName);
-        public string OutDir => Path.Combine(BinDir, "out", PackageName);
-        public string ResDir => Path.Combine(SrcDir, "installer", "resources");
-        public string ConfigDir => Path.Combine(SrcDir, "config");
+        public string SrcDir => Path.Combine(BuildRoot, MagicStrings.Dirs.Src);
+        public string BinDir => Path.Combine(BuildRoot, MagicStrings.Dirs.Bin);
+        public string InDir => Path.Combine(BinDir, MagicStrings.Dirs.In, PackageName);
+        public string OutDir => Path.Combine(BinDir, MagicStrings.Dirs.Out, PackageName);
+        public string ResDir => Path.Combine(SrcDir, MagicStrings.Dirs.Installer, MagicStrings.Dirs.Resources);
+        public string ConfigDir => Path.Combine(SrcDir, MagicStrings.Dirs.Config);
 
         public static CmdLineOptions Parse(string[] args_)
         {
@@ -44,13 +45,11 @@ namespace Elastic.PackageCompiler
                     Path.GetDirectoryName(
                         typeof(CmdLineOptions).Assembly.Location));
 
-                const string buildrootMarker = ".buildroot";
-
-                while (dir != null && !File.Exists(Path.Combine(dir.FullName, buildrootMarker)))
+                while (dir != null && !File.Exists(Path.Combine(dir.FullName, MagicStrings.Files.BuildRoot)))
                     dir = dir.Parent;
 
                 opts.BuildRoot = dir?.FullName ??
-                    throw new Exception(buildrootMarker + " marker is missing, should be present in the " +
+                    throw new Exception(MagicStrings.Files.BuildRoot + " marker is missing, should be present in the " +
                                         "root of the repository, next to src, readme.md and license files");
             }
 

@@ -28,7 +28,7 @@ namespace Elastic.Installer
             foreach (var itm in bc.packageMap.Keys)
             {
                 using var yamlConfig = new StreamReader(
-                    packageConfigFilePrefix + "-" + itm + MagicStrings.YamlExtension);
+                    packageConfigFilePrefix + "-" + itm + MagicStrings.Ext.DotYaml);
 
                 ser.Deserialize<PackageInfo>(yamlConfig, bc.packageMap[itm]);
             }

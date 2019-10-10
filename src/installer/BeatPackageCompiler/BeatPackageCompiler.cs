@@ -18,7 +18,7 @@ namespace Elastic.PackageCompiler.Beats
             var ap = new ArtifactPackage(opts.PackageName);
 
             var config = BuildConfiguration.Read(
-                Path.Combine(opts.ConfigDir, MagicStrings.ConfigYaml));
+                Path.Combine(opts.ConfigDir, MagicStrings.Files.ConfigYaml));
 
             var pi = config.GetPackageInfo(ap.TargetName);
 
@@ -26,7 +26,7 @@ namespace Elastic.PackageCompiler.Beats
             var productSetName = MagicStrings.Beats;
             var displayName = MagicStrings.Beats + " " + ap.TargetName;
             var serviceName = ap.TargetName;
-            var fileName = ap.TargetName + ".exe";
+            var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
 
             // TODO: validate/process Product Id
             //       bi.KnownVersions
@@ -44,7 +44,7 @@ namespace Elastic.PackageCompiler.Beats
                 Version = new Version(ap.Version),
 
                 // We massage LICENSE.txt into .rtf below
-                LicenceFile = Path.Combine(opts.OutDir, "LICENSE.rtf"),
+                LicenceFile = Path.Combine(opts.OutDir, MagicStrings.Files.LicenseRtf),
 
                 Platform = ap.Is32bit ? Platform.x86 : Platform.x64,
 
@@ -53,8 +53,8 @@ namespace Elastic.PackageCompiler.Beats
                 UI = WUI.WixUI_Minimal,
 
                 // TODO: Custom images?
-                BannerImage = Path.Combine(opts.ResDir, "topbanner.bmp"),
-                BackgroundImage = Path.Combine(opts.ResDir, "leftbanner.bmp"),
+                BannerImage = Path.Combine(opts.ResDir, MagicStrings.Files.TopBannerBmp),
+                BackgroundImage = Path.Combine(opts.ResDir, MagicStrings.Files.LeftBannerBmp),
 
                 MajorUpgrade = new MajorUpgrade
                 {
@@ -78,17 +78,17 @@ namespace Elastic.PackageCompiler.Beats
 
                 ProductIcon = Path.Combine(
                     opts.ResDir,
-                    Path.GetFileNameWithoutExtension(fileName) + ".ico"),
+                    Path.GetFileNameWithoutExtension(exeName) + MagicStrings.Ext.DotIco),
             };
 
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.OutDir, "LICENSE.rtf"),
+                Path.Combine(opts.OutDir, MagicStrings.Files.LicenseRtf),
                 @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
                 @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
                 @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
                 System.IO.File
-                    .ReadAllText(Path.Combine(opts.InDir, "LICENSE.txt"))
+                    .ReadAllText(Path.Combine(opts.InDir, MagicStrings.Files.LicenseTxt))
                     .Replace("\r\n\r\n", "\n\n")
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
@@ -98,7 +98,7 @@ namespace Elastic.PackageCompiler.Beats
             WixSharp.File service = null;
             if (pi.IsWindowsService)
             {
-                service = new WixSharp.File(Path.Combine(opts.InDir, fileName));
+                service = new WixSharp.File(Path.Combine(opts.InDir, exeName));
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -111,7 +111,7 @@ namespace Elastic.PackageCompiler.Beats
                     Name = serviceName,
                     DisplayName = $"{displayName} {ap.SemVer}",
                     Description = pi.Description,
-                    DependsOn = new[] { new ServiceDependency("Tcpip") },
+                    DependsOn = new[] { new ServiceDependency(MagicStrings.Services.Tcpip) },
 
                     Arguments =
                         $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
@@ -130,19 +130,20 @@ namespace Elastic.PackageCompiler.Beats
 
             var elements = new List<WixEntity>
             {
-                new DirFiles(opts.InDir + @"\*.*", path =>
+                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.All), path =>
                 {
                     var itm = path.ToLower();
 
                     bool include = !(
+
                         // configuration will go into mutable location
-                        itm.EndsWith("yml") ||
+                        itm.EndsWith(MagicStrings.Ext.DotYml) ||
 
                         // we install/remove service ourselves
-                        itm.EndsWith("ps1") ||
+                        itm.EndsWith(MagicStrings.Ext.DotPs1) ||
 
                         // .exe must be excluded for service configuration to work
-                        (pi.IsWindowsService ? itm.EndsWith(fileName) : false)
+                        (pi.IsWindowsService ? itm.EndsWith(exeName) : false)
                     );
 
                     return include;
@@ -154,7 +155,7 @@ namespace Elastic.PackageCompiler.Beats
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
                     .Except(pi.MutableDirs)
-                    .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName) + @"\*.*"))));
+                    .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Ext.All)))));
 
             elements.Add(pi.IsWindowsService ? (WixEntity)service : new DummyEntity());
 
@@ -165,7 +166,7 @@ namespace Elastic.PackageCompiler.Beats
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
             var mutablePaths = new List<WixEntity>
             {
-                new DirFiles(opts.InDir + @"\*.yml")
+                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.DotYml))
             };
 
             // These are the directories that we know of
@@ -175,7 +176,7 @@ namespace Elastic.PackageCompiler.Beats
                     {
                         var dirPath = Path.Combine(opts.InDir, dirName);
                         return Directory.Exists(dirPath)
-                            ? new Dir(dirName, new Files(dirPath + @"\*.*"))
+                            ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Ext.All)))
                             : null;
                     })
                     .Where(dir => dir != null));

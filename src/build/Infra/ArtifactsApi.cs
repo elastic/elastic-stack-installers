@@ -14,7 +14,7 @@ namespace ElastiBuild
 {
     public class ArtifactsApi
     {
-        public static Uri BaseAddress { get; } = new Uri("https://artifacts-api.elastic.co/v1/");
+        public static Uri BaseAddress { get; } = new Uri(MagicStrings.ArtifactsApi.BaseAddress);
 
         public static async Task<IEnumerable<ArtifactContainer>> ListNamedContainers()
         {
@@ -26,32 +26,28 @@ namespace ElastiBuild
 
             var namedItems = new List<ArtifactContainer>();
 
-            const string branches = "branches";
-
-            using (var stm = await http.GetStreamAsync(branches))
+            using (var stm = await http.GetStreamAsync(MagicStrings.ArtifactsApi.Branches))
             using (var sr = new StreamReader(stm))
             using (var jtr = new JsonTextReader(sr))
             {
                 var js = new JsonSerializer();
                 var data = js.Deserialize<JToken>(jtr);
 
-                foreach (var itm in data[branches] ?? new JArray())
+                foreach (var itm in data[MagicStrings.ArtifactsApi.Branches] ?? new JArray())
                     namedItems.Add(new ArtifactContainer((string)itm, isBranch_: true));
             }
 
-            const string versions = "versions", aliases = "aliases";
-
-            using (var stm = await http.GetStreamAsync(versions))
+            using (var stm = await http.GetStreamAsync(MagicStrings.ArtifactsApi.Versions))
             using (var sr = new StreamReader(stm))
             using (var jtr = new JsonTextReader(sr))
             {
                 var js = new JsonSerializer();
                 var data = js.Deserialize<JToken>(jtr);
 
-                foreach (var itm in data[versions] ?? new JArray())
+                foreach (var itm in data[MagicStrings.ArtifactsApi.Versions] ?? new JArray())
                     namedItems.Add(new ArtifactContainer((string)itm, isVersion_: true));
 
-                foreach (var itm in data[aliases] ?? new JArray())
+                foreach (var itm in data[MagicStrings.ArtifactsApi.Aliases] ?? new JArray())
                     namedItems.Add(new ArtifactContainer((string)itm, isAlias_: true));
             }
 
@@ -79,7 +75,7 @@ namespace ElastiBuild
                 + (filter.Bitness == eBitness.both
                     ? string.Empty
                     : (filter.Bitness == eBitness.x86
-                        ? ",-x86_64"
+                        ? (",-" + MagicStrings.Arch.x86_64)
                         : string.Empty))
                 ;
 
@@ -97,12 +93,15 @@ namespace ElastiBuild
                 if (filter.ShowOss && !itm.Name.Contains("oss"))
                     continue;
 
-                if (filter.Bitness == eBitness.x64 && (string)itm.Value["architecture"] != "x86_64")
+                if (filter.Bitness == eBitness.x64 &&
+                    (string)itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
+                {
                     continue;
+                }
 
                 var package = new ArtifactPackage(
                     itm.Name,
-                    (string)itm.Value["url"] ?? string.Empty);
+                    (string)itm.Value[MagicStrings.ArtifactsApi.Url] ?? string.Empty);
 
                 packages.Add(package);
             }

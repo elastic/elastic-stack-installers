@@ -29,23 +29,21 @@ namespace ElastiBuild
                 .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Length > 0)
                 .ToArray();
 
-            Action<ParserSettings> parserCfg = cfg =>
+            using var parser = new Parser(cfg =>
             {
                 cfg.AutoHelp = true;
                 cfg.CaseSensitive = false;
                 cfg.AutoVersion = false;
                 cfg.IgnoreUnknownArguments = false;
                 cfg.HelpWriter = null;
-            };
-
-            using var parser = new Parser(parserCfg);
-            var result = parser.ParseArguments(args_, commands);
+            });
 
             var ctx = BuildContext.Create();
 
             var config = BuildConfiguration.Read(
-                System.IO.Path.Combine(ctx.ConfigDir, MagicStrings.ConfigYaml));
+                System.IO.Path.Combine(ctx.ConfigDir, MagicStrings.Files.ConfigYaml));
 
+            var result = parser.ParseArguments(args_, commands);
             await result.MapResult(
                 async (IElastiBuildCommand cmd) => await cmd.RunAsync(ctx),
                 async (errs) => await HandleErrorsAndShowHelp(result, commands));
@@ -63,7 +61,7 @@ namespace ElastiBuild
                 cfg.HelpWriter = null;
             });
 
-            var result = parser.ParseArguments<GlobalOptions>("".Split(' '));
+            var result = parser.ParseArguments<GlobalOptions>(string.Empty.Split(' '));
 
             HelpText htGlobals = new HelpText("ElastiBuild v1.0.0", "Copyright (c) 2019, Elastic.co")
             {
@@ -116,7 +114,7 @@ namespace ElastiBuild
                         .GetCustomAttributes(typeof(VerbAttribute), true)
                         .Cast<VerbAttribute>()
                         .FirstOrDefault()
-                        ?.Name ?? string.Empty;
+                        ?.Name ?? throw new Exception("Something went horribly wrong. Command name is empty.");
 
                     Console.WriteLine(
                         $"{cmdName.ToUpper()} Flags:" + text);
