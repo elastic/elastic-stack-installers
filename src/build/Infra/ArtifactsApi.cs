@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -126,18 +127,25 @@ namespace ElastiBuild
             using var stm = await http.GetStreamAsync(ap_.Location);
             using var fs = File.OpenWrite(fname);
 
-            // TODO: use ArrayPool
+            // Buffer size just shy of one that would get onto LOH (hopefully ArrayPool will oblige...)
+            var bytes = ArrayPool<byte>.Shared.Rent(81920);
 
-            // Buffer size just shy of one that would get onto LOH
-            var bytes = new byte[81920];
-            int bytesRead = 0;
-
-            while (true)
+            try
             {
-                if ((bytesRead = await stm.ReadAsync(bytes, 0, bytes.Length)) <= 0)
-                    return;
+                int bytesRead = 0;
 
-                await fs.WriteAsync(bytes, 0, bytesRead);
+                while (true)
+                {
+                    if ((bytesRead = await stm.ReadAsync(bytes, 0, bytes.Length)) <= 0)
+                        break;
+
+                    await fs.WriteAsync(bytes, 0, bytesRead);
+                }
+            }
+            finally
+            {
+                if (bytes != null)
+                    ArrayPool<byte>.Shared.Return(bytes);
             }
         }
 
