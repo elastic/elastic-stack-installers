@@ -23,8 +23,8 @@ namespace Elastic.PackageCompiler.Beats
             var pi = config.GetPackageInfo(ap.TargetName);
 
             var companyName = MagicStrings.Elastic;
-            var productSetName = MagicStrings.Beats;
-            var displayName = MagicStrings.Beats + " " + ap.TargetName;
+            var productSetName = MagicStrings.Beats.Name;
+            var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
             var serviceName = ap.TargetName;
             var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
 
@@ -62,7 +62,7 @@ namespace Elastic.PackageCompiler.Beats
                     AllowSameVersionUpgrades = false,
                     //Disallow = true,
                     //DisallowUpgradeErrorMessage = "An existing version is already installed, please uninstall before continuing.",
-                    DowngradeErrorMessage = "A more recent version is already installed, please uninstall before continuing.",
+                    DowngradeErrorMessage = MagicStrings.Errors.NewerVersionInstalled,
                 },
             };
 
@@ -72,9 +72,7 @@ namespace Elastic.PackageCompiler.Beats
                 Manufacturer = companyName,
                 UrlInfoAbout = "https://www.elastic.co/downloads/beats",
 
-                Comments = pi.Description + 
-                           ". Beats is the platform for single-purpose data shippers. They send data " +
-                           "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.",
+                Comments = pi.Description + ". " + MagicStrings.Beats.Description,
 
                 ProductIcon = Path.Combine(
                     opts.ResDir,

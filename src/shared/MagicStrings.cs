@@ -5,7 +5,15 @@ namespace Elastic.Installer
         public const string AppAlias = "./build";
 
         public static readonly string Elastic = "Elastic";
-        public static readonly string Beats = "Beats";
+
+        public static class Beats
+        {
+            public static readonly string Name = "Beats";
+
+            public static readonly string Description = 
+                "Beats is the platform for single-purpose data shippers. They send data " +
+                "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.";
+        }
         
         public static class Ext
         {
@@ -69,7 +77,9 @@ Need --cid when TARGET specified. To discover container IDs run:
 
 Run with --help for more information.";
 
-
+            public static readonly string NewerVersionInstalled =
+                "A more recent version is already installed, " +
+                "please uninstall before continuing.";
         }
     }
 }
