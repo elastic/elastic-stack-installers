@@ -18,13 +18,9 @@ namespace Elastic.Installer
         [YamlMember("upgrade_code")]
         public Guid UpgradeCode { get; set; }
 
-        [YamlMember("known_versions", SerializeMemberMode.Content)]
-        public Dictionary<string, Guid> KnownVersions { get; }
-
         public PackageInfo()
         {
             MutableDirs = new List<string>();
-            KnownVersions = new Dictionary<string, Guid>();
         }
     }
 }

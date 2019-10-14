@@ -21,18 +21,6 @@ namespace Elastic.Installer
                 };
             }
 
-            var packageConfigFilePrefix = Path.Combine(
-                Path.GetDirectoryName(fileName_),
-                Path.GetFileNameWithoutExtension(fileName_));
-
-            foreach (var itm in bc.packageMap.Keys)
-            {
-                using var yamlConfig = new StreamReader(
-                    packageConfigFilePrefix + "-" + itm + MagicStrings.Ext.DotYaml);
-
-                ser.Deserialize<PackageInfo>(yamlConfig, bc.packageMap[itm]);
-            }
-
             return bc;
         }
 
