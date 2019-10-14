@@ -143,7 +143,7 @@ namespace Elastic.PackageCompiler.Beats
                         itm.EndsWith(MagicStrings.Ext.DotPs1) ||
 
                         // .exe must be excluded for service configuration to work
-                        (pi.IsWindowsService ? itm.EndsWith(exeName) : false)
+                        (pi.IsWindowsService && itm.EndsWith(exeName))
                     );
 
                     return include;
@@ -166,7 +166,7 @@ namespace Elastic.PackageCompiler.Beats
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
             var mutablePaths = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.DotYml))
+                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.AllDotYml))
             };
 
             // These are the directories that we know of
@@ -191,16 +191,10 @@ namespace Elastic.PackageCompiler.Beats
                     mutablePaths.ToArray())
             };
 
-            project.ResolveWildCards();
 
-            //Compiler.WixSourceGenerated += (/*XDocument*/ document) => { };
-
-            //Compiler.AllowNonRtfLicense = true;
             Compiler.PreserveTempFiles = true;
 
-            //Compiler.BuildWxs(project, Compiler.OutputType.MSI);
-            //Compiler.BuildMsiCmd(project, Path.Combine(outdir, "compile.cmd"));
-
+            project.ResolveWildCards();
             Compiler.BuildMsi(project);
         }
     }

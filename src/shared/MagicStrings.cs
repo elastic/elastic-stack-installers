@@ -13,6 +13,7 @@ namespace Elastic.Installer
             public static readonly string DotExe = ".exe";
             public static readonly string DotYaml = ".yaml";
             public static readonly string DotYml = ".yml";
+            public static readonly string AllDotYml = "*.yml";
             public static readonly string DotIco = ".ico";
             public static readonly string DotPs1 = ".ps1";
         }
@@ -32,7 +33,7 @@ namespace Elastic.Installer
             public static readonly string Src = "src";
             public static readonly string Bin = "bin";
             public static readonly string In = "in";
-            public static readonly string Out = "Out";
+            public static readonly string Out = "out";
             public static readonly string Installer = "installer";
             public static readonly string Resources = "resources";
             public static readonly string Config = "config";
