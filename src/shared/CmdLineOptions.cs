@@ -11,6 +11,9 @@ namespace Elastic.PackageCompiler
             HelpText = "Full package name without extension, ex: winlogbeat-7.4.0-SNAPSHOT-windows-x86_64")]
         public string PackageName { get; private set; }
 
+        [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
+        public bool WxsOnly { get; private set; }
+
         // Initialized to the directory of .buildroot file
         public string BuildRoot { get; private set; }
 

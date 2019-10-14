@@ -75,11 +75,18 @@ namespace ElastiBuild.Commands
                 await ArtifactsApi.UnpackArtifact(ctx_, ap);
                 await Console.Out.WriteLineAsync("done");
 
-                await Command.RunAsync(
-                    compilerExe, "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
-                    ctx_.InDir);
+                var args = string.Join(' ', new string[]
+                {
+                    "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
+                    (WxsOnly ? "--wxs-only" : string.Empty),
+                });
+
+                await Command.RunAsync(compilerExe, args, ctx_.InDir);
             }
         }
+
+        [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
+        public bool WxsOnly { get; set; }
 
         // TODO: add env support
         [Option("cert-file", Hidden = true, HelpText = "Path to signing certificate")]

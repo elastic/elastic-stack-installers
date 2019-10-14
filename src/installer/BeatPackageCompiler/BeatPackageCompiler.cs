@@ -193,7 +193,11 @@ namespace Elastic.PackageCompiler.Beats
             Compiler.PreserveTempFiles = true;
 
             project.ResolveWildCards();
-            Compiler.BuildMsi(project);
+
+            if (opts.WxsOnly)
+                project.BuildWxs();
+            else
+                Compiler.BuildMsi(project);
         }
     }
 }
