@@ -14,6 +14,7 @@
   <ItemGroup>
     <Compile Include="..\..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
     <Compile Include="..\..\shared\BuildConfiguration.cs" Link="Shared\BuildConfiguration.cs" />
+    <Compile Include="..\..\shared\BuildRootProvider.cs" Link="Shared\BuildRootProvider.cs" />
     <Compile Include="..\..\shared\CmdLineOptions.cs" Link="Shared\CmdLineOptions.cs" />
     <Compile Include="..\..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
     <Compile Include="..\..\shared\PackageInfo.cs" Link="Shared\PackageInfo.cs" />

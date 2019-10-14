@@ -5,7 +5,7 @@ using ElastiBuild.Options;
 
 namespace Elastic.Installer
 {
-    public class BuildContext
+    public class BuildContext : BuildRootPrivider
     {
         public string BuildRoot { get; set; }
 
@@ -22,18 +22,9 @@ namespace Elastic.Installer
 
         public static BuildContext Create()
         {
-            var dir = new DirectoryInfo(
-                Path.GetDirectoryName(
-                    typeof(Program).Assembly.Location));
-
-            while (dir != null && !File.Exists(Path.Combine(dir.FullName, MagicStrings.Files.BuildRoot)))
-                dir = dir.Parent;
-
             var ctx = new BuildContext
             {
-                BuildRoot = dir?.FullName 
-                    ?? throw new Exception(MagicStrings.Files.BuildRoot + " marker is missing, should be present in " +
-                                    "the root of the repository, next to src, readme.md and license files")
+                BuildRoot = LookupBuildRoot()
             };
 
             return ctx;

@@ -5,7 +5,7 @@ using Elastic.Installer;
 
 namespace Elastic.PackageCompiler
 {
-    public class CmdLineOptions
+    public class CmdLineOptions : BuildRootPrivider
     {
         [Option("package", Required = true, 
             HelpText = "Full package name without extension, ex: winlogbeat-7.4.0-SNAPSHOT-windows-x86_64")]
@@ -40,18 +40,7 @@ namespace Elastic.PackageCompiler
             var opts = (res as Parsed<CmdLineOptions>).Value;
 
             if (string.IsNullOrWhiteSpace(opts.BuildRoot))
-            {
-                var dir = new DirectoryInfo(
-                    Path.GetDirectoryName(
-                        typeof(CmdLineOptions).Assembly.Location));
-
-                while (dir != null && !File.Exists(Path.Combine(dir.FullName, MagicStrings.Files.BuildRoot)))
-                    dir = dir.Parent;
-
-                opts.BuildRoot = dir?.FullName ??
-                    throw new Exception(MagicStrings.Files.BuildRoot + " marker is missing, should be present in the " +
-                                        "root of the repository, next to src, readme.md and license files");
-            }
+                opts.BuildRoot = LookupBuildRoot();
 
             return opts;
         }
