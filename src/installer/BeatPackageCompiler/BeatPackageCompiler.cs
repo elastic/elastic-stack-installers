@@ -157,7 +157,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Except(pi.MutableDirs)
                     .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Ext.All)))));
 
-            elements.Add(pi.IsWindowsService ? (WixEntity)service : new DummyEntity());
+            elements.Add(pi.IsWindowsService ? service : null);
 
             var mainInstallDir = new InstallDir(
                 $@"ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder\{installSubPath}",
