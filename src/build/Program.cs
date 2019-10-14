@@ -38,10 +38,7 @@ namespace ElastiBuild
                 cfg.HelpWriter = null;
             });
 
-            var ctx = BuildContext.Create();
-
-            var config = BuildConfiguration.Read(
-                System.IO.Path.Combine(ctx.ConfigDir, MagicStrings.Files.ConfigYaml));
+            var ctx = new BuildContext();
 
             var result = parser.ParseArguments(args_, commands);
             await result.MapResult(

@@ -21,9 +21,9 @@ namespace ElastiBuild.Commands
 
         public Task RunAsync(BuildContext ctx_)
         {
-            Console.WriteLine("Available build TARGETS:" + Environment.NewLine);
+            foreach (var target in ctx_.Config.TargetNames)
+                Console.WriteLine(target);
 
-            // TODO: setup and show target tree
             return Task.CompletedTask;
         }
     }

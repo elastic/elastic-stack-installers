@@ -20,14 +20,13 @@ namespace Elastic.Installer
         public string ConfigDir => Path.Combine(SrcDir, MagicStrings.Dirs.Config);
         public string CompilerDir => Path.Combine(BinDir, MagicStrings.Dirs.Compiler);
 
-        public static BuildContext Create()
-        {
-            var ctx = new BuildContext
-            {
-                BuildRoot = LookupBuildRoot()
-            };
+        public BuildConfiguration Config { get; }
 
-            return ctx;
+        public BuildContext()
+        {
+            BuildRoot = LookupBuildRoot();
+            Config = BuildConfiguration.Read(
+                Path.Combine(ConfigDir, MagicStrings.Files.ConfigYaml));
         }
     }
 }

@@ -24,6 +24,8 @@ namespace Elastic.Installer
             return bc;
         }
 
+        public IEnumerable<string> TargetNames => packageMap?.Keys;
+
         public PackageInfo GetPackageInfo(string targetName_)
         {
             if (!packageMap.TryGetValue(targetName_, out PackageInfo pi))
