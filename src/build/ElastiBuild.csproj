@@ -27,10 +27,10 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Bullseye" Version="3.0.0-beta.1" />
+    <PackageReference Include="Bullseye" Version="3.0.0" />
     <PackageReference Include="commandlineparser" Version="2.6.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="SimpleExec" Version="6.0.0" />
+    <PackageReference Include="SimpleExec" Version="6.1.0" />
     <PackageReference Include="SharpYaml" Version="1.6.5" />
   </ItemGroup>
   
