@@ -51,39 +51,39 @@ namespace ElastiBuild.Commands
                         .Where(itm => itm.IsAlias)
                         .Select(itm => "  " + itm.Name)
                     ));
+
+                return;
             }
-            else
+
+            if (string.IsNullOrWhiteSpace(ContainerId))
             {
-                if (string.IsNullOrWhiteSpace(ContainerId) || ContainerId.ToLower() == "all")
+                await Console.Out.WriteLineAsync(
+                    $"ERROR(s):{Environment.NewLine}" +
+                    MagicStrings.Errors.NeedCidWhenTargetSpecified);
+                return;
+            }
+
+            foreach (var target in Targets)
+            {
+                await Console.Out.WriteLineAsync(Environment.NewLine +
+                    $"Discovering '{target}' in '{ContainerId}' ...");
+
+                var items = await ArtifactsApi.FindArtifact(target, filter =>
                 {
-                    await Console.Out.WriteLineAsync(
-                        $"ERROR(s):{Environment.NewLine}" +
-                        $"  Need --arid when TARGET specified. Run with --help for more information.");
-                    return;
-                }
+                    filter.ContainerId = ContainerId;
+                    filter.ShowOss = ShowOss;
+                    filter.Bitness = Bitness;
+                });
 
-                foreach (var target in Targets)
-                {
-                    await Console.Out.WriteLineAsync(Environment.NewLine +
-                        $"Discovering '{target}' in '{ContainerId}' ...");
-
-                    var items = await ArtifactsApi.FindArtifact(target, filter =>
-                    {
-                        filter.ContainerId = ContainerId;
-                        filter.ShowOss = ShowOss;
-                        filter.Bitness = Bitness;
-                    });
-
-                    await Console.Out.WriteLineAsync(string.Join(
-                        Environment.NewLine,
-                        items
-                            .Select(itm => "  " + itm.FileName)
-                        ));
-                }
+                await Console.Out.WriteLineAsync(string.Join(
+                    Environment.NewLine,
+                    items
+                        .Select(itm => "  " + itm.FileName)
+                    ));
             }
         }
 
-        [Usage(ApplicationAlias = GlobalOptions.AppAlias)]
+        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
         public static IEnumerable<Example> Examples
         {
             get

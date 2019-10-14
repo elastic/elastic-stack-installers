@@ -11,7 +11,7 @@ namespace ElastiBuild.Commands
     [Verb("show", HelpText = "Show available build targets")]
     public class ShowCommand : IElastiBuildCommand
     {
-        [Usage(ApplicationAlias = GlobalOptions.AppAlias)]
+        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
         public static IEnumerable<Example> Examples => new List<Example>()
         {
             new Example(Environment.NewLine +

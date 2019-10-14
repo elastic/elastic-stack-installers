@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using Elastic.Installer;
-using ElastiBuild.Options;
 
 namespace ElastiBuild.Commands
 {
@@ -23,6 +23,17 @@ namespace ElastiBuild.Commands
 
         public async Task RunAsync(BuildContext ctx_)
         {
+            if (string.IsNullOrWhiteSpace(ContainerId))
+            {
+                await Console.Out.WriteLineAsync(
+                    $"ERROR(s):{Environment.NewLine}" +
+                    MagicStrings.Errors.NeedCidWhenTargetSpecified);
+                return;
+            }
+
+            if (Targets.Any(t => t.ToLower() == "all"))
+                Targets = ctx_.Config.TargetNames;
+
             foreach (var target in Targets)
             {
                 await Console.Out.WriteLineAsync(Environment.NewLine +
@@ -44,7 +55,7 @@ namespace ElastiBuild.Commands
             }
         }
 
-        [Usage(ApplicationAlias = GlobalOptions.AppAlias)]
+        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
         public static IEnumerable<Example> Examples
         {
             get

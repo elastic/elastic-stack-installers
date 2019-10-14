@@ -20,7 +20,7 @@ namespace ElastiBuild.Commands
 
     public interface ISupportContainerId
     {
-        // TODO: arid latest
+        // TODO: cid latest
         [Option("cid",
             HelpText = "Container Id. One of: "
             + "Branch, eg. 6.8, 7.x; "

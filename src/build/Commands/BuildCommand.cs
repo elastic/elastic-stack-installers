@@ -7,8 +7,6 @@ using CommandLine;
 using CommandLine.Text;
 using SimpleExec;
 using Elastic.Installer;
-using ElastiBuild.Options;
-using ElastiBuild.Infra;
 
 namespace ElastiBuild.Commands
 {
@@ -27,6 +25,17 @@ namespace ElastiBuild.Commands
 
         public async Task RunAsync(BuildContext ctx_)
         {
+            if (string.IsNullOrWhiteSpace(ContainerId))
+            {
+                await Console.Out.WriteLineAsync(
+                    $"ERROR(s):{Environment.NewLine}" +
+                    MagicStrings.Errors.NeedCidWhenTargetSpecified);
+                return;
+            }
+
+            if (Targets.Any(t => t.ToLower() == "all"))
+                Targets = ctx_.Config.TargetNames;
+
             var compilerSrcDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler");
             var compilerExe = Path.Combine(ctx_.CompilerDir, "BeatPackageCompiler.exe").Quote();
 
@@ -79,7 +88,7 @@ namespace ElastiBuild.Commands
         [Option("cert-pass", Hidden = true, HelpText = "Certificate password")]
         public string CertPass { get; set; }
 
-        [Usage(ApplicationAlias = GlobalOptions.AppAlias)]
+        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
         public static IEnumerable<Example> Examples
         {
             get
@@ -101,9 +110,17 @@ namespace ElastiBuild.Commands
                         {
                             ContainerId = "6.8",
                             ShowOss = true,
-                            Bitness = eBitness.x64,
                             Targets = "winlogbeat".Split(),
-                        })
+                        }),
+
+                    new Example(Environment.NewLine +
+                        "Build all supported installers from 8.0-SNAPSHOT",
+                        new BuildCommand
+                        {
+                            ContainerId = "8.0-SNAPSHOT",
+                            Targets = "all".Split(),
+                        }),
+
                 };
             }
         }

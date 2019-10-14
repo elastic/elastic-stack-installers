@@ -2,6 +2,8 @@ namespace Elastic.Installer
 {
     public static class MagicStrings
     {
+        public const string AppAlias = "./build";
+
         public static readonly string Elastic = "Elastic";
         public static readonly string Beats = "Beats";
         
@@ -56,6 +58,17 @@ namespace Elastic.Installer
         {
             public static readonly string x86 = "x86";
             public static readonly string x86_64 = "x86_64";
+        }
+
+        public static class Errors
+        {
+            public static readonly string NeedCidWhenTargetSpecified = @$"
+Need --cid when TARGET specified. To discover container IDs run:
+    {AppAlias} discover all
+
+Run with --help for more information.";
+
+
         }
     }
 }
