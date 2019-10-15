@@ -1,10 +1,13 @@
 <!-- 
 ** Issues that do not follow these guidelines are likely to be closed. **
 
-GitHub is reserved for bug reports and feature requests. The best place to ask a general question is at the Elastic forums: PUT LINK TO INSTALLERS SUB-FORUM HERE GitHub is not the place for general questions.
+GitHub is reserved for bug reports and feature requests. The best place to ask a general question is at the Elastic forums: https://discuss.elastic.co/tags/windows-installer. GitHub is not the place for general questions.
 
 Be sure to select the documentation version relevant to the installer version you are using.
 -->
+
+Please refer to [Elastic Forums](https://discuss.elastic.co/tags/windows-installer) as well.
+
 ### How to capture log file:
 ```msiexec /l!*vx "<full path to log file to be created>" /i "<full path to msi file>"```
 
