@@ -4,12 +4,12 @@ Beats is the platform for single-purpose data shippers. They send data from hund
 
 ### Current version of [ElastiBuild](elastibuild.md) supports these Beats:
   - [Auditbeat](https://www.elastic.co/products/beats/auditbeat)
-  - [Filebeat](https://www.elastic.co/products/beats/Filebeat)
-  - [Functionbeat](https://www.elastic.co/products/beats/Functionbeat)
-  - [Heartbeat](https://www.elastic.co/products/beats/Heartbeat)
-  - [Metricbeat](https://www.elastic.co/products/beats/Metricbeat)
-  - [Packetbeat](https://www.elastic.co/products/beats/Packetbeat)
-  - [Winlogbeat](https://www.elastic.co/products/beats/Winlogbeat)
+  - [Filebeat](https://www.elastic.co/products/beats/filebeat)
+  - [Functionbeat](https://www.elastic.co/products/beats/functionbeat)
+  - [Heartbeat](https://www.elastic.co/products/beats/heartbeat)
+  - [Metricbeat](https://www.elastic.co/products/beats/metricbeat)
+  - [Packetbeat](https://www.elastic.co/products/beats/packetbeat)
+  - [Winlogbeat](https://www.elastic.co/products/beats/winlogbeat)
 
 ### Usage
 
