@@ -26,11 +26,11 @@ Available Commands:
 
 - Discover branches, versions, aliases.
 - Download and unpack artifacts.
-- (WIP ~95%) Build all from downloaded artifacts.
+- Build all known (in config.yaml) installers from downloaded artifacts.
 
-### Example: building 7.4 SNAPSHOT for winlogbeat, filebeat and functionbeat:
+### Example: building x64 8.0 SNAPSHOT for winlogbeat, filebeat and functionbeat:
 ```
-.\build.bat build --cid 7.4 --bitness x64 winlogbeat filebeat functionbeat
+.\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat functionbeat
 ```
 
 ### Requirements
@@ -42,7 +42,7 @@ or a newer v3.14: https://wixtoolset.org/releases/development/
 ### Known issues
 - See [#4](https://github.com/elastic/msi-elastic-stack/issues/4)
 - Non-OSS only.
-- Command `show` is disabled for now, refactoring usage of BullsEye.
+
 
 ### ToDo's:
 - See [#3](https://github.com/elastic/msi-elastic-stack/issues/3)
