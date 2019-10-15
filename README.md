@@ -1,48 +1,10 @@
 # Windows MSI packages for Elastic stack
 
-### Feature set
-- Discover branches, versions and aliases
-- Fetch any beat from above
-- Build any beat from downloaded archives in non-OSS variant
-- Configuration and misc files installed into ProgramData/Elastic/{version}/Beats/{beat}/
+Use [ElastiBuild](docs/elastibuild.md) to discover and fetch artifacts to build supported Windows Installer packages.
 
-### Get help:
-```
-$ .\build 
-ElastiBuild v1.0.0
-Copyright (c) 2019, Elastic.co
-
-Global Flags:
-
-  --help    Shows this help screen as well as help for specific commands
-
-Available Commands:
-
-  build       Build Targets
-  discover    Discover Container Id's used for build and fetch commands
-  fetch       Download and optionally unpack input artifacts
-  show        Show available build targets
-  ```
-
-- Discover branches, versions, aliases.
-- Download and unpack artifacts.
-- Build all known (in config.yaml) installers from downloaded artifacts.
-
-### Example: building x64 8.0 SNAPSHOT for winlogbeat, filebeat and functionbeat:
-```
-.\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat functionbeat
-```
+### Supported products:
+- [Beats](docs/beats.md) - is the platform for single-purpose data shippers. They send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch.
 
 ### Requirements
-
-- .Net Core v3.0, SDK v3.0.100, Full Framework >= 4.5
-- Wix Toolset v3.11.1 (https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311.exe)
-or a newer v3.14: https://wixtoolset.org/releases/development/
-
-### Known issues
-- See [#4](https://github.com/elastic/msi-elastic-stack/issues/4)
-- Non-OSS only.
-
-
-### ToDo's:
-- See [#3](https://github.com/elastic/msi-elastic-stack/issues/3)
+- .Net Core v3.0, SDK v3.0.100
+- Full Framework >= 4.5 ([WixSharp](https://github.com/oleg-shilo/wixsharp) dependency)
