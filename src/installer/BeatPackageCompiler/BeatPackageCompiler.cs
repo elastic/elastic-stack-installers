@@ -190,7 +190,8 @@ namespace Elastic.PackageCompiler.Beats
                     mutablePaths.ToArray())
             };
 
-
+            // We hard-link Wix Toolset to a known location
+            Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
             Compiler.PreserveTempFiles = true;
 
             project.ResolveWildCards();

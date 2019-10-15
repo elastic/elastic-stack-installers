@@ -4,13 +4,16 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
+  
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
     <Compile Include="..\..\shared\BuildConfiguration.cs" Link="Shared\BuildConfiguration.cs" />
@@ -19,9 +22,27 @@
     <Compile Include="..\..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
     <Compile Include="..\..\shared\PackageInfo.cs" Link="Shared\PackageInfo.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="commandlineparser" Version="2.6.0" />
     <PackageReference Include="SharpYaml" Version="1.6.5" />
     <PackageReference Include="WixSharp.bin" Version="1.13.0" />
+    <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true"/>
   </ItemGroup>
+
+  <!-- We need to know the location of Wix Toolset binaries at run-time -->
+  <!-- $(PkgWixSharp_wix_bin) is created by GeneratePathProperty above -->
+  <Target Name="CopyWixToolsetBinaries" AfterTargets="Compile">
+    <Message Text="Copying (hard-linking) Wix Toolset binaries to a known location ..." Importance="High" />
+    
+    <ItemGroup>
+      <WixToolsetFiles Include="$(PkgWixSharp_wix_bin)/tools/**/*.*" />
+    </ItemGroup>
+    
+    <Copy
+      SourceFiles="@(WixToolsetFiles)"
+      DestinationFolder="$(MSBuildProjectDirectory)/../../../bin/WixToolset/%(RecursiveDir)"
+      UseHardlinksIfPossible="true"
+      SkipUnchangedFiles="true" />
+  </Target>
 </Project>
