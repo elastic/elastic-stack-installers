@@ -11,10 +11,6 @@ Beats is the platform for single-purpose data shippers. They send data from hund
   - [Packetbeat](https://www.elastic.co/products/beats/packetbeat)
   - [Winlogbeat](https://www.elastic.co/products/beats/winlogbeat)
 
-### Usage
-
-
-
 ### Notes:
 
 - Configuration files (.yml), Kibana dashboards, security and monitoring modules, etc are installed into `%ProgramData%\Elastic\{version}\Beats\{beat name}` directory.
