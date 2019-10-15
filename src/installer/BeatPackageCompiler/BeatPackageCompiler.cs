@@ -128,7 +128,7 @@ namespace Elastic.PackageCompiler.Beats
 
             var elements = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.All), path =>
+                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Files.All), path =>
                 {
                     var itm = path.ToLower();
 
@@ -153,7 +153,8 @@ namespace Elastic.PackageCompiler.Beats
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
                     .Except(pi.MutableDirs)
-                    .Select(dirName => new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Ext.All)))));
+                    .Select(dirName => 
+                        new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Files.All)))));
 
             elements.Add(pi.IsWindowsService ? service : null);
 
@@ -164,7 +165,7 @@ namespace Elastic.PackageCompiler.Beats
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
             var mutablePaths = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Ext.AllDotYml))
+                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Files.AllDotYml))
             };
 
             // These are the directories that we know of
@@ -174,7 +175,7 @@ namespace Elastic.PackageCompiler.Beats
                     {
                         var dirPath = Path.Combine(opts.InDir, dirName);
                         return Directory.Exists(dirPath)
-                            ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Ext.All)))
+                            ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Files.All)))
                             : null;
                     })
                     .Where(dir => dir != null));

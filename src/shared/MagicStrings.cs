@@ -17,17 +17,17 @@ namespace Elastic.Installer
         
         public static class Ext
         {
-            public static readonly string All = "*.*";
             public static readonly string DotExe = ".exe";
             public static readonly string DotYaml = ".yaml";
             public static readonly string DotYml = ".yml";
-            public static readonly string AllDotYml = "*.yml";
             public static readonly string DotIco = ".ico";
             public static readonly string DotPs1 = ".ps1";
         }
 
         public static class Files
         {
+            public static readonly string All = "*.*";
+            public static readonly string AllDotYml = "*.yml";
             public static readonly string ConfigYaml = "config.yaml";
             public static readonly string LicenseRtf = "LICENSE.rtf";
             public static readonly string LicenseTxt = "LICENSE.txt";
