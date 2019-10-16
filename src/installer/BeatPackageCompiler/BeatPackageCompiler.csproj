@@ -15,19 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
-    <Compile Include="..\..\shared\BuildConfiguration.cs" Link="Shared\BuildConfiguration.cs" />
-    <Compile Include="..\..\shared\BuildRootProvider.cs" Link="Shared\BuildRootProvider.cs" />
-    <Compile Include="..\..\shared\CmdLineOptions.cs" Link="Shared\CmdLineOptions.cs" />
-    <Compile Include="..\..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
-    <Compile Include="..\..\shared\PackageInfo.cs" Link="Shared\PackageInfo.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="commandlineparser" Version="2.6.0" />
     <PackageReference Include="SharpYaml" Version="1.6.5" />
     <PackageReference Include="WixSharp.bin" Version="1.13.0" />
-    <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true"/>
+    <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true" />
   </ItemGroup>
 
   <!-- We need to know the location of Wix Toolset binaries at run-time -->
@@ -45,4 +36,6 @@
       UseHardlinksIfPossible="true"
       SkipUnchangedFiles="true" />
   </Target>
+
+  <Import Project="..\..\shared\shared.projitems" Label="Shared" />
 </Project>

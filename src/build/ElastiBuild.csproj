@@ -18,14 +18,6 @@
     <OutputPath />
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="..\shared\ArtifactPackage.cs" Link="Shared\ArtifactPackage.cs" />
-    <Compile Include="..\shared\BuildConfiguration.cs" Link="Shared\BuildConfiguration.cs" />
-    <Compile Include="..\shared\BuildRootProvider.cs" Link="Shared\BuildRootProvider.cs" />
-    <Compile Include="..\shared\MagicStrings.cs" Link="Shared\MagicStrings.cs" />
-    <Compile Include="..\shared\PackageInfo.cs" Link="Shared\PackageInfo.cs" />
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Bullseye" Version="3.0.0" />
@@ -35,4 +27,5 @@
     <PackageReference Include="SharpYaml" Version="1.6.5" />
   </ItemGroup>
   
+  <Import Project="..\shared\shared.projitems" Label="Shared" />
 </Project>

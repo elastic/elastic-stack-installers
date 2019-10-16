@@ -13,7 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeatPackageCompiler", "installer\BeatPackageCompiler\BeatPackageCompiler.csproj", "{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "shared\Shared.shproj", "{6CD7786E-F7BC-41E7-998D-2845966FC460}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		shared\shared.projitems*{6cd7786e-f7bc-41e7-998d-2845966fc460}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
