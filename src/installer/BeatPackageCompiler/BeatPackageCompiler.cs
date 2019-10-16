@@ -112,7 +112,7 @@ namespace Elastic.PackageCompiler.Beats
                     DependsOn = new[] { new ServiceDependency(MagicStrings.Services.Tcpip) },
 
                     Arguments =
-                        $" -path.home \"[CommonAppDataFolder]{installSubPath}\"" +
+                        $" --path.home \"[CommonAppDataFolder]{installSubPath}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = true,
