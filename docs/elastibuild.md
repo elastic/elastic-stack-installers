@@ -17,12 +17,14 @@ Global Flags:
 
   --help    Shows this help screen as well as help for specific commands
 
+
 Available Commands:
 
-  build       Build Targets
+  build       Build one or more installers
+  clean       Clean downloaded .zip, temporary and output files
   discover    Discover Container Id's used for build and fetch commands
-  fetch       Download and optionally unpack input artifacts
-  show        Show available build targets
+  fetch       Download and optionally unpack packages
+  show        Show products that we can build
 ```
 
 Help is available for each command as well:
@@ -43,16 +45,18 @@ DISCOVER Flags:
                       7.x-SNAPSHOT;
   --oss               (Default: false) Show OSS artifacts
   --bitness           (Default: x64) Show artifacts of specific bitness: x86, x64
-  TARGETS (pos. 0)    Required. [TARGET [TARGET [...]]]
+  PRODUCT (pos. 0)    Required. [PRODUCT [PRODUCT [...]]]
+
+Usage Examples:
 
 Discover branches, versions and aliases:
   ./build discover all
 
-Show available Winlogbeat packages for alias 6.8:
+Discover available Winlogbeat packages for alias 6.8:
   ./build discover --cid 6.8 winlogbeat
 ```
 
-### Example: building x64 8.0 SNAPSHOT for winlogbeat, filebeat and functionbeat:
+### Example: building x64 winlogbeat, filebeat and functionbeat from 8.0-SNAPSHOT:
     .\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat functionbeat
 
 ### Requirements
