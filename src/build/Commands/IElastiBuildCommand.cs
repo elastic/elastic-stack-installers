@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommandLine;
 using Elastic.Installer;
@@ -14,7 +12,7 @@ namespace ElastiBuild.Commands
 
     public interface ISupportTargets
     {
-        [Value(0, Required = true, MetaName = "TARGETS", HelpText = "[TARGET [TARGET [...]]]")]
+        [Value(0, Required = true, MetaName = "PRODUCT", HelpText = "[PRODUCT [PRODUCT [...]]]")]
         IEnumerable<string> Targets { get; set; }
     }
 
@@ -32,20 +30,20 @@ namespace ElastiBuild.Commands
 
     public interface ISupportOssChoice
     {
-        [Option("oss", Default = false, HelpText = "Show OSS artifacts")]
+        [Option("oss", Default = false, HelpText = "Show OSS packages")]
         bool ShowOss { get; set; }
     }
 
     public enum eBitness
     {
-        both,
+        Both,
         x86,
         x64
     }
 
     public interface ISupportBitnessChoice
     {
-        [Option("bitness", Default = eBitness.x64, HelpText = "Show artifacts of specific bitness: x86, x64"),]
+        [Option("bitness", Default = eBitness.x64, HelpText = "Show packages of specific bitness: x86, x64"),]
         eBitness Bitness { get; set; }
     }
 }

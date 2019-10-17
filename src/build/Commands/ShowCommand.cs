@@ -4,21 +4,12 @@ using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using Elastic.Installer;
-using ElastiBuild.Options;
 
 namespace ElastiBuild.Commands
 { 
-    [Verb("show", HelpText = "Show available build targets")]
+    [Verb("show", HelpText = "Show products that we can build")]
     public class ShowCommand : IElastiBuildCommand
     {
-        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
-        public static IEnumerable<Example> Examples => new List<Example>()
-        {
-            new Example(Environment.NewLine +
-                "Show available build targets",
-                new ShowCommand())
-        };
-
         public Task RunAsync(BuildContext ctx_)
         {
             foreach (var target in ctx_.Config.TargetNames)
@@ -26,5 +17,13 @@ namespace ElastiBuild.Commands
 
             return Task.CompletedTask;
         }
+
+        [Usage(ApplicationAlias = MagicStrings.AppAlias)]
+        public static IEnumerable<Example> Examples => new List<Example>()
+        {
+            new Example(Environment.NewLine +
+                "Show products that we can build",
+                new ShowCommand())
+        };
     }
 }

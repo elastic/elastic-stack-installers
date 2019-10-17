@@ -8,7 +8,7 @@ using Elastic.Installer;
 
 namespace ElastiBuild.Commands
 {
-    [Verb("fetch", HelpText = "Download and optionally unpack input artifacts")]
+    [Verb("fetch", HelpText = "Download and optionally unpack packages")]
     public class FetchCommand
         : IElastiBuildCommand
         , ISupportTargets

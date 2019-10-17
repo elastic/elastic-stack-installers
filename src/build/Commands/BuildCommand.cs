@@ -10,7 +10,7 @@ using Elastic.Installer;
 
 namespace ElastiBuild.Commands
 {
-    [Verb("build", HelpText = "Build Targets")]
+    [Verb("build", HelpText = "Build one or more installers")]
     public class BuildCommand
         : IElastiBuildCommand
         , ISupportTargets
@@ -121,13 +121,12 @@ namespace ElastiBuild.Commands
                         }),
 
                     new Example(Environment.NewLine +
-                        "Build all supported installers from 8.0-SNAPSHOT",
+                        "Build all supported products from 8.0-SNAPSHOT",
                         new BuildCommand
                         {
                             ContainerId = "8.0-SNAPSHOT",
                             Targets = "all".Split(),
                         }),
-
                 };
             }
         }

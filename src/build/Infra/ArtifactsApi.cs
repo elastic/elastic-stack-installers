@@ -73,7 +73,7 @@ namespace ElastiBuild
                 $"search/{filter.ContainerId}/{target_}"
                 + ",windows"
                 + (filter.ShowOss ? string.Empty : ",-oss")
-                + (filter.Bitness == eBitness.both
+                + (filter.Bitness == eBitness.Both
                     ? string.Empty
                     : (filter.Bitness == eBitness.x86
                         ? (",-" + MagicStrings.Arch.x86_64)

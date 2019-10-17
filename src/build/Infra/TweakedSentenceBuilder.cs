@@ -43,7 +43,7 @@ namespace ElastiBuild.Infra
                     case ErrorType.MissingRequiredOptionError:
                         var errMisssing = ((MissingRequiredOptionError)error);
                         return errMisssing.NameInfo.Equals(NameInfo.EmptyName)
-                                   ? "TARGET missing."
+                                   ? "PRODUCT missing."
                                    : "Required option '".JoinTo(errMisssing.NameInfo.NameText, "' is missing.");
 
                     case ErrorType.BadFormatConversionError:

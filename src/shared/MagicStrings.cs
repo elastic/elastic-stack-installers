@@ -72,7 +72,7 @@ namespace Elastic.Installer
         public static class Errors
         {
             public static readonly string NeedCidWhenTargetSpecified = @$"
-Need --cid when TARGET specified. To discover container IDs run:
+Need --cid when PRODUCT specified. To discover container IDs run:
     {AppAlias} discover all
 
 Run with --help for more information.";
