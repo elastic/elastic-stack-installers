@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
-using CommandLine.Text;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
-{ 
+{
     [Verb("clean", HelpText = "Clean downloaded .zip, temporary and output files")]
     public class CleanCommand
         : IElastiBuildCommand

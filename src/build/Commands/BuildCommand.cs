@@ -36,11 +36,11 @@ namespace ElastiBuild.Commands
             if (Targets.Any(t => t.ToLower() == "all"))
                 Targets = ctx_.Config.TargetNames;
 
-            var compilerSrcDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler");
+            var compilerSrcDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler").Quote();
             var compilerExe = Path.Combine(ctx_.CompilerDir, "BeatPackageCompiler.exe").Quote();
 
             await Command.RunAsync(
-                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx_.CompilerDir}");
+                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx_.CompilerDir.Quote()}");
 
             foreach (var target in Targets)
             {
@@ -77,7 +77,7 @@ namespace ElastiBuild.Commands
 
                 var args = string.Join(' ', new string[]
                 {
-                    "--package=\"" + Path.GetFileNameWithoutExtension(ap.FileName) + "\"",
+                    "--package=" + Path.GetFileNameWithoutExtension(ap.FileName).Quote(),
                     (WxsOnly ? "--wxs-only" : string.Empty),
                 });
 
