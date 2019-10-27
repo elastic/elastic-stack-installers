@@ -6,7 +6,7 @@ using CommandLine.Text;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
-{ 
+{
     [Verb("show", HelpText = "Show products that we can build")]
     public class ShowCommand : IElastiBuildCommand
     {

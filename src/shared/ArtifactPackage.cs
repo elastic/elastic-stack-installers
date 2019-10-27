@@ -12,7 +12,7 @@ namespace Elastic.Installer
         public string FileName { get; }
         public string Location { get; }
 
-        public bool IsDownloadable => 
+        public bool IsDownloadable =>
             !string.IsNullOrWhiteSpace(Location);
 
         public bool Is32bit => Architecture == MagicStrings.Arch.x86;

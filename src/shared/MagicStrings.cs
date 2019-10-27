@@ -10,11 +10,11 @@ namespace Elastic.Installer
         {
             public static readonly string Name = "Beats";
 
-            public static readonly string Description = 
+            public static readonly string Description =
                 "Beats is the platform for single-purpose data shippers. They send data " +
                 "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.";
         }
-        
+
         public static class Ext
         {
             public static readonly string DotExe = ".exe";

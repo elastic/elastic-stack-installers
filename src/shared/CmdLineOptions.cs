@@ -7,7 +7,7 @@ namespace Elastic.PackageCompiler
 {
     public class CmdLineOptions : BuildRootPrivider
     {
-        [Option("package", Required = true, 
+        [Option("package", Required = true,
             HelpText = "Full package name without extension, ex: winlogbeat-7.4.0-SNAPSHOT-windows-x86_64")]
         public string PackageName { get; private set; }
 

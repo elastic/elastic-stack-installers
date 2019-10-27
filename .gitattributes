@@ -1,0 +1,15 @@
+*             text=auto
+
+*.sln         text eol=crlf
+*.csproj      text eol=crlf
+*.shproj      text eol=crlf
+*.projitems   text eol=crlf
+  
+*.sh          text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+             
+Dockerfile    text eol=lf
+Vagrantfile   text eol=lf
+gradlew       text eol=lf
+

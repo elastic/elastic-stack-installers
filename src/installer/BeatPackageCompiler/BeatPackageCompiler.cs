@@ -153,7 +153,7 @@ namespace Elastic.PackageCompiler.Beats
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
                     .Except(pi.MutableDirs)
-                    .Select(dirName => 
+                    .Select(dirName =>
                         new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Files.All)))));
 
             elements.Add(pi.IsWindowsService ? service : null);

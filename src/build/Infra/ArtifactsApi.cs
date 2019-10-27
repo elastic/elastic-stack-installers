@@ -35,7 +35,7 @@ namespace ElastiBuild
                 var data = js.Deserialize<JToken>(jtr);
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Branches] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string)itm, isBranch_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isBranch_: true));
             }
 
             using (var stm = await http.GetStreamAsync(MagicStrings.ArtifactsApi.Versions))
@@ -46,10 +46,10 @@ namespace ElastiBuild
                 var data = js.Deserialize<JToken>(jtr);
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Versions] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string)itm, isVersion_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isVersion_: true));
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Aliases] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string)itm, isAlias_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isAlias_: true));
             }
 
             return namedItems;
@@ -95,14 +95,14 @@ namespace ElastiBuild
                     continue;
 
                 if (filter.Bitness == eBitness.x64 &&
-                    (string)itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
+                    (string) itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
                 {
                     continue;
                 }
 
                 var package = new ArtifactPackage(
                     itm.Name,
-                    (string)itm.Value[MagicStrings.ArtifactsApi.Url] ?? string.Empty);
+                    (string) itm.Value[MagicStrings.ArtifactsApi.Url] ?? string.Empty);
 
                 packages.Add(package);
             }
@@ -152,13 +152,13 @@ namespace ElastiBuild
         public static Task UnpackArtifact(BuildContext ctx_, ArtifactPackage ap_)
         {
             var unpackedDir = Path.Combine(
-                ctx_.InDir, 
+                ctx_.InDir,
                 Path.GetFileNameWithoutExtension(ap_.FileName));
 
             if (Directory.Exists(unpackedDir))
                 return Task.CompletedTask;
 
-            return Task.Run(() => 
+            return Task.Run(() =>
                 ZipFile.ExtractToDirectory(
                     Path.Combine(ctx_.InDir, Path.GetFileName(ap_.FileName)),
                     Path.Combine(ctx_.InDir),

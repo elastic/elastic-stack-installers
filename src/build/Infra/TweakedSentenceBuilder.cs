@@ -32,45 +32,45 @@ namespace ElastiBuild.Infra
                 switch (error.Tag)
                 {
                     case ErrorType.BadFormatTokenError:
-                        return "Token '".JoinTo(((BadFormatTokenError)error).Token, "' is not recognized.");
+                        return "Token '".JoinTo(((BadFormatTokenError) error).Token, "' is not recognized.");
 
                     case ErrorType.MissingValueOptionError:
-                        return "Option '".JoinTo(((MissingValueOptionError)error).NameInfo.NameText, "' has no value.");
+                        return "Option '".JoinTo(((MissingValueOptionError) error).NameInfo.NameText, "' has no value.");
 
                     case ErrorType.UnknownOptionError:
-                        return "Option '".JoinTo(((UnknownOptionError)error).Token, "' is unknown.");
+                        return "Option '".JoinTo(((UnknownOptionError) error).Token, "' is unknown.");
 
                     case ErrorType.MissingRequiredOptionError:
-                        var errMisssing = ((MissingRequiredOptionError)error);
+                        var errMisssing = ((MissingRequiredOptionError) error);
                         return errMisssing.NameInfo.Equals(NameInfo.EmptyName)
                                    ? "PRODUCT missing."
                                    : "Required option '".JoinTo(errMisssing.NameInfo.NameText, "' is missing.");
 
                     case ErrorType.BadFormatConversionError:
-                        var badFormat = ((BadFormatConversionError)error);
+                        var badFormat = ((BadFormatConversionError) error);
                         return badFormat.NameInfo.Equals(NameInfo.EmptyName)
                                    ? "A target name is defined with a bad format."
                                    : "Option '".JoinTo(badFormat.NameInfo.NameText, "' is defined with a bad format.");
 
                     case ErrorType.SequenceOutOfRangeError:
-                        var seqOutRange = ((SequenceOutOfRangeError)error);
+                        var seqOutRange = ((SequenceOutOfRangeError) error);
                         return seqOutRange.NameInfo.Equals(NameInfo.EmptyName)
                                    ? "A free sequence value is defined with few items than required."
                                    : "A sequence option '".JoinTo(seqOutRange.NameInfo.NameText,
                                         "' is defined with fewer or more items than required.");
 
                     case ErrorType.BadVerbSelectedError:
-                        return "Command '".JoinTo(((BadVerbSelectedError)error).Token, "' is not recognized.");
+                        return "Command '".JoinTo(((BadVerbSelectedError) error).Token, "' is not recognized.");
 
                     case ErrorType.NoVerbSelectedError:
                         return "No command selected.";
 
                     case ErrorType.RepeatedOptionError:
-                        return "Option '".JoinTo(((RepeatedOptionError)error).NameInfo.NameText,
+                        return "Option '".JoinTo(((RepeatedOptionError) error).NameInfo.NameText,
                             "' is defined multiple times.");
 
                     case ErrorType.SetValueExceptionError:
-                        var setValueError = (SetValueExceptionError)error;
+                        var setValueError = (SetValueExceptionError) error;
                         return "Error setting value to option '".JoinTo(setValueError.NameInfo.NameText, "': ", setValueError.Exception.Message);
                 }
                 throw new InvalidOperationException();
