@@ -11,5 +11,5 @@ Use [ElastiBuild](docs/elastibuild.md) to discover and fetch artifacts to build 
 
 ### Asking Questions and Repoting Issues
 Please refer to [Elastic Forums](https://discuss.elastic.co/tags/windows-installer) for general questions.
-Please report issues in the [repository](https://github.com/elastic/msi-elastic-stack/issues).
+Please report issues in the [repository](https://github.com/elastic/stack-elastic-installers/issues).
 

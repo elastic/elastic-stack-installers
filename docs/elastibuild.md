@@ -8,7 +8,7 @@
 
 ### Get help:
 ```
-C:\src\msi-elastic-stack (master)
+C:\src\stack-elastic-installers (master)
 $ ./build
 ElastiBuild v1.0.0
 Copyright (c) 2019, https://elastic.co
@@ -30,7 +30,7 @@ Available Commands:
 Help is available for each command as well:
 
 ```
-C:\src\msi-elastic-stack (master)
+C:\src\stack-elastic-installers (master)
 $ ./build discover
 ElastiBuild v1.0.0
 Copyright (c) 2019, https://elastic.co
@@ -64,8 +64,8 @@ Discover available Winlogbeat packages for alias 6.8:
 - Full Framework >= 4.5 ([WixSharp](https://github.com/oleg-shilo/wixsharp) dependency)
 
 ### Known issues
-- See [#4](https://github.com/elastic/msi-elastic-stack/issues/4)
+- See [#4](https://github.com/elastic/stack-elastic-installers/issues/4)
 - Non-OSS only.
 
 ### ToDo's:
-- See [#3](https://github.com/elastic/msi-elastic-stack/issues/3)
+- See [#3](https://github.com/elastic/stack-elastic-installers/issues/3)
