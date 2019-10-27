@@ -91,7 +91,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var installSubPath = $@"{companyName}\{ap.Version}\{productSetName}\{serviceName}";
+            var installSubPath = $@"{companyName}\{productSetName}\{ap.Version}\{serviceName}";
 
             WixSharp.File service = null;
             if (pi.IsWindowsService)
