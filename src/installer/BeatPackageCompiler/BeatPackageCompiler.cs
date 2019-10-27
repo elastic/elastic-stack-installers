@@ -24,6 +24,7 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
+            var subProductName = ap.TargetName;
             var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
             var serviceName = ap.TargetName;
             var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
@@ -91,7 +92,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var installSubPath = $@"{companyName}\{productSetName}\{ap.Version}\{serviceName}";
+            var installSubPath = $@"{companyName}\{productSetName}\{ap.Version}\{subProductName}";
 
             WixSharp.File service = null;
             if (pi.IsWindowsService)
