@@ -23,7 +23,7 @@ namespace ElastiBuild.Commands
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
 
-        public async Task RunAsync(BuildContext ctx_)
+        public async Task RunAsync(BuildContext ctx)
         {
             if (string.IsNullOrWhiteSpace(ContainerId))
             {
@@ -34,13 +34,13 @@ namespace ElastiBuild.Commands
             }
 
             if (Targets.Any(t => t.ToLower() == "all"))
-                Targets = ctx_.Config.TargetNames;
+                Targets = ctx.Config.TargetNames;
 
-            var compilerSrcDir = Path.Combine(ctx_.SrcDir, "installer", "BeatPackageCompiler").Quote();
-            var compilerExe = Path.Combine(ctx_.CompilerDir, "BeatPackageCompiler.exe").Quote();
+            var compilerSrcDir = Path.Combine(ctx.SrcDir, "installer", "BeatPackageCompiler").Quote();
+            var compilerExe = Path.Combine(ctx.CompilerDir, "BeatPackageCompiler.exe").Quote();
 
             await Command.RunAsync(
-                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx_.CompilerDir.Quote()}");
+                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx.CompilerDir.Quote()}");
 
             foreach (var target in Targets)
             {
@@ -68,11 +68,11 @@ namespace ElastiBuild.Commands
                 var ap = items.Single();
 
                 await Console.Out.WriteAsync("Downloading " + ap.FileName + " ... ");
-                await ArtifactsApi.FetchArtifact(ctx_, ap);
+                await ArtifactsApi.FetchArtifact(ctx, ap);
                 await Console.Out.WriteLineAsync("done");
 
                 await Console.Out.WriteAsync("Unpacking " + ap.FileName + " ... ");
-                await ArtifactsApi.UnpackArtifact(ctx_, ap);
+                await ArtifactsApi.UnpackArtifact(ctx, ap);
                 await Console.Out.WriteLineAsync("done");
 
                 var args = string.Join(' ', new string[]
@@ -81,7 +81,7 @@ namespace ElastiBuild.Commands
                     (WxsOnly ? "--wxs-only" : string.Empty),
                 });
 
-                await Command.RunAsync(compilerExe, args, ctx_.InDir);
+                await Command.RunAsync(compilerExe, args, ctx.InDir);
             }
         }
 

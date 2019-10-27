@@ -7,16 +7,16 @@ namespace Elastic.Installer
 {
     public class BuildConfiguration
     {
-        public static BuildConfiguration Read(string fileName_)
+        public static BuildConfiguration Read(string fileName)
         {
             BuildConfiguration bc = null;
             var ser = new Serializer();
 
-            using (var yamlConfig = File.OpenRead(fileName_))
+            using (var yamlConfig = File.OpenRead(fileName))
             {
                 bc = new BuildConfiguration
                 {
-                    fileName = fileName_,
+                    fileName = fileName,
                     packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
                 };
             }
@@ -26,10 +26,10 @@ namespace Elastic.Installer
 
         public IEnumerable<string> TargetNames => packageMap?.Keys;
 
-        public PackageInfo GetPackageInfo(string targetName_)
+        public PackageInfo GetPackageInfo(string targetName)
         {
-            if (!packageMap.TryGetValue(targetName_, out PackageInfo pi))
-                throw new ArgumentException($"Unable to find {targetName_} section in {fileName}");
+            if (!packageMap.TryGetValue(targetName, out PackageInfo pi))
+                throw new ArgumentException($"Unable to find {targetName} section in {fileName}");
 
             return pi;
         }

@@ -9,9 +9,9 @@ namespace ElastiBuild.Commands
     public class CleanCommand
         : IElastiBuildCommand
     {
-        public Task RunAsync(BuildContext ctx_)
+        public Task RunAsync(BuildContext ctx)
         {
-            Directory.Delete(ctx_.BinDir, true);
+            Directory.Delete(ctx.BinDir, true);
 
             // TODO: Add support for Targets
 

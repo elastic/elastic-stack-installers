@@ -35,7 +35,7 @@ namespace ElastiBuild
                 var data = js.Deserialize<JToken>(jtr);
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Branches] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string) itm, isBranch_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isBranch: true));
             }
 
             using (var stm = await http.GetStreamAsync(MagicStrings.ArtifactsApi.Versions))
@@ -46,22 +46,22 @@ namespace ElastiBuild
                 var data = js.Deserialize<JToken>(jtr);
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Versions] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string) itm, isVersion_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isVersion: true));
 
                 foreach (var itm in data[MagicStrings.ArtifactsApi.Aliases] ?? new JArray())
-                    namedItems.Add(new ArtifactContainer((string) itm, isAlias_: true));
+                    namedItems.Add(new ArtifactContainer((string) itm, isAlias: true));
             }
 
             return namedItems;
         }
 
         public static async Task<IEnumerable<ArtifactPackage>> FindArtifact(
-            string target_, Action<ArtifactFilter> filterConfiguration_)
+            string target, Action<ArtifactFilter> filterConfiguration)
         {
             // TODO: validate filterConfiguraion
 
             var filter = new ArtifactFilter();
-            filterConfiguration_?.Invoke(filter);
+            filterConfiguration?.Invoke(filter);
 
             using var http = new HttpClient()
             {
@@ -70,7 +70,7 @@ namespace ElastiBuild
             };
 
             var query =
-                $"search/{filter.ContainerId}/{target_}"
+                $"search/{filter.ContainerId}/{target}"
                 + ",windows"
                 + (filter.ShowOss ? string.Empty : ",-oss")
                 + (filter.Bitness == eBitness.Both
@@ -110,21 +110,21 @@ namespace ElastiBuild
             return packages;
         }
 
-        public static async Task FetchArtifact(BuildContext ctx_, ArtifactPackage ap_)
+        public static async Task FetchArtifact(BuildContext ctx, ArtifactPackage ap)
         {
             // TODO: Proper check
-            Debug.Assert(ap_.IsDownloadable);
+            Debug.Assert(ap.IsDownloadable);
 
-            var fname = Path.Combine(ctx_.InDir, Path.GetFileName(ap_.Location));
+            var fname = Path.Combine(ctx.InDir, Path.GetFileName(ap.Location));
 
             // TODO: support "force overwrite"
             if (File.Exists(fname))
                 return;
 
-            Directory.CreateDirectory(ctx_.InDir);
+            Directory.CreateDirectory(ctx.InDir);
 
             using var http = new HttpClient();
-            using var stm = await http.GetStreamAsync(ap_.Location);
+            using var stm = await http.GetStreamAsync(ap.Location);
             using var fs = File.OpenWrite(fname);
 
             // Buffer size just shy of one that would get onto LOH (hopefully ArrayPool will oblige...)
@@ -149,19 +149,19 @@ namespace ElastiBuild
             }
         }
 
-        public static Task UnpackArtifact(BuildContext ctx_, ArtifactPackage ap_)
+        public static Task UnpackArtifact(BuildContext ctx, ArtifactPackage ap)
         {
             var unpackedDir = Path.Combine(
-                ctx_.InDir,
-                Path.GetFileNameWithoutExtension(ap_.FileName));
+                ctx.InDir,
+                Path.GetFileNameWithoutExtension(ap.FileName));
 
             if (Directory.Exists(unpackedDir))
                 return Task.CompletedTask;
 
             return Task.Run(() =>
                 ZipFile.ExtractToDirectory(
-                    Path.Combine(ctx_.InDir, Path.GetFileName(ap_.FileName)),
-                    Path.Combine(ctx_.InDir),
+                    Path.Combine(ctx.InDir, Path.GetFileName(ap.FileName)),
+                    Path.Combine(ctx.InDir),
                     overwriteFiles: true));
         }
     }

@@ -9,15 +9,15 @@ namespace ElastiBuild
         public bool IsBranch { get; }
         public bool IsVersion { get; }
 
-        internal ArtifactContainer(string name_, bool isBranch_ = false, bool isVersion_ = false, bool isAlias_ = false)
+        internal ArtifactContainer(string name, bool isBranch = false, bool isVersion = false, bool isAlias = false)
         {
-            Debug.Assert(isBranch_ || isVersion_ || isAlias_,
-                $"Must specify one of {nameof(isBranch_)}, {nameof(isVersion_)}, {nameof(isAlias_)}, ");
+            Debug.Assert(isBranch || isVersion || isAlias,
+                $"Must specify one of {nameof(isBranch)}, {nameof(isVersion)}, {nameof(isAlias)}, ");
 
-            Name = name_;
-            IsBranch = isBranch_;
-            IsVersion = isVersion_;
-            IsAlias = isAlias_;
+            Name = name;
+            IsBranch = isBranch;
+            IsVersion = isVersion;
+            IsAlias = isAlias;
         }
     }
 }

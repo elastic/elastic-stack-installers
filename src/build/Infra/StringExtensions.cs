@@ -4,15 +4,15 @@ namespace ElastiBuild
 {
     public static class StringExtensions
     {
-        public static string Quote(this string value_)
+        public static string Quote(this string value)
         {
-            return "\"" + value_ + "\"";
+            return "\"" + value + "\"";
         }
 
-        public static string JoinTo(this string value_, params string[] others_)
+        public static string JoinTo(this string value, params string[] others)
         {
-            var builder = new StringBuilder(value_);
-            foreach (var v in others_)
+            var builder = new StringBuilder(value);
+            foreach (var v in others)
                 builder.Append(v);
 
             return builder.ToString();

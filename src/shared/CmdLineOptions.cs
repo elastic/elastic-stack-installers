@@ -25,7 +25,7 @@ namespace Elastic.PackageCompiler
         public string ResDir => Path.Combine(SrcDir, MagicStrings.Dirs.Installer, MagicStrings.Dirs.Resources);
         public string ConfigDir => Path.Combine(SrcDir, MagicStrings.Dirs.Config);
 
-        public static CmdLineOptions Parse(string[] args_)
+        public static CmdLineOptions Parse(string[] args)
         {
             using var parser = new Parser(config =>
             {
@@ -35,7 +35,7 @@ namespace Elastic.PackageCompiler
                 config.IgnoreUnknownArguments = false;
             });
 
-            var res = parser.ParseArguments(() => new CmdLineOptions(), args_);
+            var res = parser.ParseArguments(() => new CmdLineOptions(), args);
 
             if (res is NotParsed<CmdLineOptions>)
                 throw new Exception("bad command line args");

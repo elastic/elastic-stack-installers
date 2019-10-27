@@ -9,9 +9,9 @@ namespace Elastic.PackageCompiler.Beats
 {
     public class BeatPackageCompiler
     {
-        static void Main(string[] args_)
+        static void Main(string[] args)
         {
-            var opts = CmdLineOptions.Parse(args_);
+            var opts = CmdLineOptions.Parse(args);
 
             Directory.CreateDirectory(opts.OutDir);
 

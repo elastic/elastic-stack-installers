@@ -7,7 +7,7 @@ namespace ElastiBuild.Commands
 {
     public interface IElastiBuildCommand
     {
-        Task RunAsync(BuildContext ctx_);
+        Task RunAsync(BuildContext ctx);
     }
 
     public interface ISupportTargets

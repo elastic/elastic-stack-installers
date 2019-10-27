@@ -21,7 +21,7 @@ namespace ElastiBuild.Commands
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
 
-        public async Task RunAsync(BuildContext ctx_)
+        public async Task RunAsync(BuildContext ctx)
         {
             if (string.IsNullOrWhiteSpace(ContainerId))
             {
@@ -32,7 +32,7 @@ namespace ElastiBuild.Commands
             }
 
             if (Targets.Any(t => t.ToLower() == "all"))
-                Targets = ctx_.Config.TargetNames;
+                Targets = ctx.Config.TargetNames;
 
             foreach (var target in Targets)
             {
@@ -49,7 +49,7 @@ namespace ElastiBuild.Commands
                 foreach (var ap in items)
                 {
                     await Console.Out.WriteAsync("  " + ap.FileName + " ... ");
-                    await ArtifactsApi.FetchArtifact(ctx_, ap);
+                    await ArtifactsApi.FetchArtifact(ctx, ap);
                     await Console.Out.WriteLineAsync("done");
                 }
             }

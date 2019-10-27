@@ -22,7 +22,7 @@ namespace ElastiBuild.Commands
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
 
-        public async Task RunAsync(BuildContext ctx_)
+        public async Task RunAsync(BuildContext ctx)
         {
             if (Targets.Any(t => t.ToLower() == "all"))
             {

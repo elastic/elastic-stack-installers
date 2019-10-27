@@ -18,14 +18,14 @@ namespace Elastic.Installer
         public bool Is32bit => Architecture == MagicStrings.Arch.x86;
         public bool Is64Bit => Architecture == MagicStrings.Arch.x86_64;
 
-        public ArtifactPackage(string name_)
-            : this(name_, null)
+        public ArtifactPackage(string name)
+            : this(name, null)
         { }
 
-        public ArtifactPackage(string fileName_, string location_)
+        public ArtifactPackage(string fileName, string location)
         {
-            FileName = fileName_;
-            Location = location_;
+            FileName = fileName;
+            Location = location;
 
             var rxVersion = rx.Match(FileName);
             if (rxVersion.Groups.Count != 6)
