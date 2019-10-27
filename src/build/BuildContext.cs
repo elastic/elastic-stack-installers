@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
-using ElastiBuild;
+﻿using System.IO;
 using ElastiBuild.Options;
+using Elastic.Installer;
 
-namespace Elastic.Installer
+namespace ElastiBuild
 {
     public class BuildContext : BuildRootPrivider
     {

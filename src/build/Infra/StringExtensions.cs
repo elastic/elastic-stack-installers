@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ElastiBuild
+namespace ElastiBuild.Infra
 {
     public static class StringExtensions
     {

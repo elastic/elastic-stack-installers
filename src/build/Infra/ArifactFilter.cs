@@ -1,6 +1,6 @@
 ﻿using ElastiBuild.Commands;
 
-namespace ElastiBuild
+namespace ElastiBuild.Infra
 {
     public class ArtifactFilter
     {

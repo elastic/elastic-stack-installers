@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace ElastiBuild
+namespace ElastiBuild.Infra
 {
     public class ArtifactContainer
     {

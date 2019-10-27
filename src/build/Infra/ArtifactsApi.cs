@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using Elastic.Installer;
 using ElastiBuild.Commands;
 
-namespace ElastiBuild
+namespace ElastiBuild.Infra
 {
     public class ArtifactsApi
     {

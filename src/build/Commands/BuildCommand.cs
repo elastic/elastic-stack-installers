@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using SimpleExec;
+using ElastiBuild.Infra;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
