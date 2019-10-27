@@ -45,8 +45,16 @@ namespace ElastiBuild.Commands
 
             foreach (var target in Targets)
             {
-                await Console.Out.WriteLineAsync(Environment.NewLine +
-                $"Building '{target}' in '{ContainerId}':");
+                if (!ctx.Config.TargetNames.Any(t => t.ToLower() == target))
+                {
+                    await Console.Out.WriteLineAsync(
+                        Environment.NewLine + $"Skipping '{target}', invalid");
+
+                    continue;
+                }
+
+                await Console.Out.WriteLineAsync(
+                    Environment.NewLine + $"Building '{target}' in '{ContainerId}':");
 
                 var items = await ArtifactsApi.FindArtifact(target, filter =>
                 {

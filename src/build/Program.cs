@@ -20,7 +20,7 @@ namespace ElastiBuild
         async Task Run(string[] args)
         {
 #if DEBUG
-            //args = "build --cid 7.x winlogbeat --bitness x64".Split();
+            //args = "build --cid 8.0-snapshot functionbeat".Split();
             //Console.WriteLine("ARGS: " + string.Join(",", args));
 #endif
 

@@ -9,11 +9,6 @@ filebeat:
   mutable_dirs: [ kibana, module, modules.d ]
   upgrade_code: 830E6D05-2CDB-4F5D-AACC-80B7EED19D43
 
-functionbeat:
-  description: Functionbeat is a beat implementation for a serverless architecture
-  service: false
-  upgrade_code: B28584E2-4F91-4CE2-9B49-A467632E80E4
-
 heartbeat:
   description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
   mutable_dirs: [ kibana, monitors.d ]
