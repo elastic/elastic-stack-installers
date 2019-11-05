@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="commandlineparser" Version="2.6.0" />
     <PackageReference Include="SharpYaml" Version="1.6.5" />
-    <PackageReference Include="WixSharp.bin" Version="1.13.0" />
+    <PackageReference Include="WixSharp.bin" Version="1.13.2" />
     <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true" />
   </ItemGroup>
 
