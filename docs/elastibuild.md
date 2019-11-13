@@ -58,8 +58,8 @@ Discover package names for all supported products in 8.0-SNAPSHOT:
   ./build discover --cid 8.0-SNAPSHOT all
 ```
 
-### Example: building x64 winlogbeat, filebeat and functionbeat from 8.0-SNAPSHOT:
-    .\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat functionbeat
+### Example: building x64 winlogbeat and filebeat from 8.0-SNAPSHOT:
+    .\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat
 
 ### Requirements
 - .Net Core v3.0, SDK v3.0.100
