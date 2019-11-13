@@ -30,7 +30,7 @@ Available Commands:
 Help is available for each command as well:
 
 ```
-C:\src\stack-elastic-installers (master|ADM)
+C:\src\stack-elastic-installers (master)
 $ ./build discover
 ElastiBuild v1.0.0
 Copyright (c) 2019, https://elastic.co
