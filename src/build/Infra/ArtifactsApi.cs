@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ElastiBuild.Commands;
+using Elastic.Installer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Elastic.Installer;
-using ElastiBuild.Commands;
 
 namespace ElastiBuild.Infra
 {
@@ -73,7 +72,7 @@ namespace ElastiBuild.Infra
                 $"search/{filter.ContainerId}/{target}"
                 + ",windows"
                 + (filter.ShowOss ? string.Empty : ",-oss")
-                + (filter.Bitness == eBitness.Both
+                + (filter.Bitness == eBitness.both
                     ? string.Empty
                     : (filter.Bitness == eBitness.x86
                         ? (",-" + MagicStrings.Arch.x86_64)
@@ -110,22 +109,23 @@ namespace ElastiBuild.Infra
             return packages;
         }
 
-        public static async Task FetchArtifact(BuildContext ctx, ArtifactPackage ap)
+        public static async Task<string> FetchArtifact(BuildContext ctx, ArtifactPackage ap)
         {
             // TODO: Proper check
-            Debug.Assert(ap.IsDownloadable);
+            if (!ap.IsDownloadable)
+                throw new Exception($"{ap.FileName} is missing {nameof(ap.Url)}");
 
-            var fname = Path.Combine(ctx.InDir, Path.GetFileName(ap.Location));
+            var localPath = Path.Combine(ctx.InDir, Path.GetFileName(ap.Url));
 
             // TODO: support "force overwrite"
-            if (File.Exists(fname))
-                return;
+            if (File.Exists(localPath))
+                return localPath;
 
             Directory.CreateDirectory(ctx.InDir);
 
             using var http = new HttpClient();
-            using var stm = await http.GetStreamAsync(ap.Location);
-            using var fs = File.OpenWrite(fname);
+            using var stm = await http.GetStreamAsync(ap.Url);
+            using var fs = File.OpenWrite(localPath);
 
             // Buffer size just shy of one that would get onto LOH (hopefully ArrayPool will oblige...)
             var bytes = ArrayPool<byte>.Shared.Rent(81920);
@@ -147,6 +147,8 @@ namespace ElastiBuild.Infra
                 if (bytes != null)
                     ArrayPool<byte>.Shared.Return(bytes);
             }
+
+            return localPath;
         }
 
         public static Task UnpackArtifact(BuildContext ctx, ArtifactPackage ap)

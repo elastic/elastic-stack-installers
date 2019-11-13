@@ -5,7 +5,7 @@ using Elastic.Installer;
 
 namespace Elastic.PackageCompiler
 {
-    public class CmdLineOptions : BuildRootPrivider
+    public class CmdLineOptions : CommonPathsProvider
     {
         [Option("package", Required = true,
             HelpText = "Full package name without extension, ex: winlogbeat-7.4.0-SNAPSHOT-windows-x86_64")]
@@ -14,16 +14,8 @@ namespace Elastic.PackageCompiler
         [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
         public bool WxsOnly { get; private set; }
 
-        // Initialized to the directory of .buildroot file
-        public string BuildRoot { get; private set; }
-
-        // TODO: cache these
-        public string SrcDir => Path.Combine(BuildRoot, MagicStrings.Dirs.Src);
-        public string BinDir => Path.Combine(BuildRoot, MagicStrings.Dirs.Bin);
-        public string InDir => Path.Combine(BinDir, MagicStrings.Dirs.In, PackageName);
-        public string OutDir => Path.Combine(BinDir, MagicStrings.Dirs.Out, PackageName);
-        public string ResDir => Path.Combine(SrcDir, MagicStrings.Dirs.Installer, MagicStrings.Dirs.Resources);
-        public string ConfigDir => Path.Combine(SrcDir, MagicStrings.Dirs.Config);
+        public string PackageInDir => Path.Combine(InDir, PackageName);
+        public string PackageOutDir => Path.Combine(OutDir, PackageName);
 
         public static CmdLineOptions Parse(string[] args)
         {
@@ -41,9 +33,6 @@ namespace Elastic.PackageCompiler
                 throw new Exception("bad command line args");
 
             var opts = (res as Parsed<CmdLineOptions>).Value;
-
-            if (string.IsNullOrWhiteSpace(opts.BuildRoot))
-                opts.BuildRoot = LookupBuildRoot();
 
             return opts;
         }

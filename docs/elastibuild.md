@@ -30,7 +30,7 @@ Available Commands:
 Help is available for each command as well:
 
 ```
-C:\src\stack-elastic-installers (master)
+C:\src\stack-elastic-installers (master|ADM)
 $ ./build discover
 ElastiBuild v1.0.0
 Copyright (c) 2019, https://elastic.co
@@ -41,19 +41,21 @@ Global Flags:
 
 DISCOVER Flags:
 
-  --cid               Container Id. One of: Branch, eg. 6.8, 7.x; Version, eg. 6.8.3-SNAPSHOT, 7.4.0; Alias, eg. 6.8,
-                      7.x-SNAPSHOT;
-  --oss               (Default: false) Show OSS artifacts
-  --bitness           (Default: x64) Show artifacts of specific bitness: x86, x64
+  --cid               Container Id. One of: Branch, eg. 6.8, 7.x; Version, eg. 6.8.3-SNAPSHOT, 7.4.0; Alias, eg. 6.8, 7.x-SNAPSHOT;
+  --oss               (Default: false) Show OSS packages
+  --bitness           (Default: x64) Show packages of specific bitness: x86, x64, both
   PRODUCT (pos. 0)    Required. [PRODUCT [PRODUCT [...]]]
 
 Usage Examples:
 
 Discover branches, versions and aliases:
-  ./build discover all
+  ./build discover containers
 
 Discover available Winlogbeat packages for alias 6.8:
   ./build discover --cid 6.8 winlogbeat
+
+Discover package names for all supported products in 8.0-SNAPSHOT:
+  ./build discover --cid 8.0-SNAPSHOT all
 ```
 
 ### Example: building x64 winlogbeat, filebeat and functionbeat from 8.0-SNAPSHOT:

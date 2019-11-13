@@ -13,7 +13,7 @@ namespace Elastic.PackageCompiler.Beats
         {
             var opts = CmdLineOptions.Parse(args);
 
-            Directory.CreateDirectory(opts.OutDir);
+            Directory.CreateDirectory(opts.PackageOutDir);
 
             var ap = new ArtifactPackage(opts.PackageName);
 
@@ -30,7 +30,6 @@ namespace Elastic.PackageCompiler.Beats
             var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
 
             // TODO: validate/process Product Id
-            //       bi.KnownVersions
 
             var project = new Project(displayName)
             {
@@ -41,11 +40,11 @@ namespace Elastic.PackageCompiler.Beats
 
                 Description = pi.Description,
 
-                OutFileName = Path.Combine(opts.OutDir, opts.PackageName),
+                OutFileName = Path.Combine(opts.PackageOutDir, opts.PackageName),
                 Version = new Version(ap.Version),
 
                 // We massage LICENSE.txt into .rtf below
-                LicenceFile = Path.Combine(opts.OutDir, MagicStrings.Files.LicenseRtf),
+                LicenceFile = Path.Combine(opts.PackageOutDir, MagicStrings.Files.LicenseRtf),
 
                 Platform = ap.Is32bit ? Platform.x86 : Platform.x64,
 
@@ -82,12 +81,12 @@ namespace Elastic.PackageCompiler.Beats
 
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.OutDir, MagicStrings.Files.LicenseRtf),
+                Path.Combine(opts.PackageOutDir, MagicStrings.Files.LicenseRtf),
                 @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
                 @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
                 @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
                 System.IO.File
-                    .ReadAllText(Path.Combine(opts.InDir, MagicStrings.Files.LicenseTxt))
+                    .ReadAllText(Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))
                     .Replace("\r\n\r\n", "\n\n")
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
@@ -97,7 +96,7 @@ namespace Elastic.PackageCompiler.Beats
             WixSharp.File service = null;
             if (pi.IsWindowsService)
             {
-                service = new WixSharp.File(Path.Combine(opts.InDir, exeName));
+                service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -129,7 +128,7 @@ namespace Elastic.PackageCompiler.Beats
 
             var elements = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Files.All), path =>
+                new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                 {
                     var itm = path.ToLower();
 
@@ -150,12 +149,12 @@ namespace Elastic.PackageCompiler.Beats
             };
 
             elements.AddRange(
-                new DirectoryInfo(opts.InDir)
+                new DirectoryInfo(opts.PackageInDir)
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
                     .Except(pi.MutableDirs)
                     .Select(dirName =>
-                        new Dir(dirName, new Files(Path.Combine(opts.InDir, dirName, MagicStrings.Files.All)))));
+                        new Dir(dirName, new Files(Path.Combine(opts.PackageInDir, dirName, MagicStrings.Files.All)))));
 
             elements.Add(pi.IsWindowsService ? service : null);
 
@@ -166,7 +165,7 @@ namespace Elastic.PackageCompiler.Beats
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
             var mutablePaths = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.InDir, MagicStrings.Files.AllDotYml))
+                new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.AllDotYml))
             };
 
             // These are the directories that we know of
@@ -174,7 +173,7 @@ namespace Elastic.PackageCompiler.Beats
                 pi.MutableDirs
                     .Select(dirName =>
                     {
-                        var dirPath = Path.Combine(opts.InDir, dirName);
+                        var dirPath = Path.Combine(opts.PackageInDir, dirName);
                         return Directory.Exists(dirPath)
                             ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Files.All)))
                             : null;

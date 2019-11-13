@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using SimpleExec;
-using ElastiBuild.Infra;
+using ElastiBuild.BullseyeTargets;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
@@ -14,88 +12,73 @@ namespace ElastiBuild.Commands
     [Verb("build", HelpText = "Build one or more installers")]
     public class BuildCommand
         : IElastiBuildCommand
-        , ISupportTargets
-        , ISupportContainerId
-        , ISupportOssChoice
+        , ISupportRequiredTargets
+        , ISupportRequiredContainerId
+        , ISupportOssSwitch
         , ISupportBitnessChoice
+        , ISupportWxsOnlySwitch
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
+        public bool WxsOnly { get; set; }
 
-        public async Task RunAsync(BuildContext ctx)
+        public async Task RunAsync()
         {
-            if (string.IsNullOrWhiteSpace(ContainerId))
-            {
-                await Console.Out.WriteLineAsync(
-                    $"ERROR(s):{Environment.NewLine}" +
-                    MagicStrings.Errors.NeedCidWhenTargetSpecified);
-                return;
-            }
-
             if (Targets.Any(t => t.ToLower() == "all"))
-                Targets = ctx.Config.TargetNames;
+                Targets = BuildContext.Default.Config.ProductNames;
 
-            var compilerSrcDir = Path.Combine(ctx.SrcDir, "installer", "BeatPackageCompiler").Quote();
-            var compilerExe = Path.Combine(ctx.CompilerDir, "BeatPackageCompiler.exe").Quote();
+            var bt = new Bullseye.Targets();
+            var cmd = this;
 
-            await Command.RunAsync(
-                "dotnet", $"build {compilerSrcDir} --configuration Release --output {ctx.CompilerDir.Quote()}");
+            bt.Add(
+                BuildBeatPackageCompilerTarget.Name,
+                async () => await BuildBeatPackageCompilerTarget.RunAsync(cmd, BuildContext.Default));
+
+            var productBuildTargets = new List<string>();
 
             foreach (var target in Targets)
             {
-                if (!ctx.Config.TargetNames.Any(t => t.ToLower() == target))
-                {
-                    await Console.Out.WriteLineAsync(
-                        Environment.NewLine + $"Skipping '{target}', invalid");
+                var product = target;
+                var ctx = new BuildContext();
 
-                    continue;
-                }
+                bt.Add(
+                    FindPackageTarget.NameWith(product),
+                    async () => await FindPackageTarget.RunAsync(cmd, ctx, product));
 
-                await Console.Out.WriteLineAsync(
-                    Environment.NewLine + $"Building '{target}' in '{ContainerId}':");
+                bt.Add(
+                    FetchPackageTarget.NameWith(product),
+                    Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
+                    async () => await FetchPackageTarget.RunAsync(cmd, ctx, product));
 
-                var items = await ArtifactsApi.FindArtifact(target, filter =>
-                {
-                    filter.ContainerId = ContainerId;
-                    filter.ShowOss = ShowOss;
-                    filter.Bitness = Bitness;
-                });
+                bt.Add(
+                    UnpackPackageTarget.NameWith(product),
+                    Bullseye.Targets.DependsOn(FetchPackageTarget.NameWith(product)),
+                    async () => await UnpackPackageTarget.RunAsync(cmd, ctx, product));
 
-                if (items.Count() > 1)
-                {
-                    await Console.Out.WriteLineAsync(string.Join(
-                        Environment.NewLine,
-                        items
-                            .Select(itm => "  " + itm.FileName)
-                        ));
+                bt.Add(
+                    BuildInstallerTarget.NameWith(product),
+                    Bullseye.Targets.DependsOn(
+                        BuildBeatPackageCompilerTarget.Name,
+                        UnpackPackageTarget.NameWith(product)),
+                    async () => await BuildInstallerTarget.RunAsync(cmd, ctx, product));
 
-                    throw new Exception("More than one possibility for package. Try specifying --bitness.");
-                }
+                productBuildTargets.Add(BuildInstallerTarget.NameWith(product));
+            }
 
-                var ap = items.Single();
-
-                await Console.Out.WriteAsync("Downloading " + ap.FileName + " ... ");
-                await ArtifactsApi.FetchArtifact(ctx, ap);
-                await Console.Out.WriteLineAsync("done");
-
-                await Console.Out.WriteAsync("Unpacking " + ap.FileName + " ... ");
-                await ArtifactsApi.UnpackArtifact(ctx, ap);
-                await Console.Out.WriteLineAsync("done");
-
-                var args = string.Join(' ', new string[]
-                {
-                    "--package=" + Path.GetFileNameWithoutExtension(ap.FileName).Quote(),
-                    (WxsOnly ? "--wxs-only" : string.Empty),
-                });
-
-                await Command.RunAsync(compilerExe, args, ctx.InDir);
+            try
+            {
+                await bt.RunWithoutExitingAsync(
+                    productBuildTargets,
+                    logPrefix: "ElastiBuild");
+            }
+            catch
+            {
+                // We swallow exceptions here, BullsEye prints them
+                // TODO: use overload "messageOnly"
             }
         }
-
-        [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
-        public bool WxsOnly { get; set; }
 
         // TODO: add env support
         [Option("cert-file", Hidden = true, HelpText = "Path to signing certificate")]

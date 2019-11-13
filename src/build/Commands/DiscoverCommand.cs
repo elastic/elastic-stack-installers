@@ -12,9 +12,9 @@ namespace ElastiBuild.Commands
     [Verb("discover", HelpText = "Discover Container Id's used for build and fetch commands")]
     public class DiscoverCommand
         : IElastiBuildCommand
-        , ISupportTargets
+        , ISupportRequiredTargets
         , ISupportContainerId
-        , ISupportOssChoice
+        , ISupportOssSwitch
         , ISupportBitnessChoice
     {
         public IEnumerable<string> Targets { get; set; } = new List<string>();
@@ -22,9 +22,9 @@ namespace ElastiBuild.Commands
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
 
-        public async Task RunAsync(BuildContext ctx)
+        public async Task RunAsync()
         {
-            if (Targets.Any(t => t.ToLower() == "all"))
+            if (Targets.Any(t => t.ToLower() == "containers"))
             {
                 var items = await ArtifactsApi.ListNamedContainers();
 
@@ -63,6 +63,9 @@ namespace ElastiBuild.Commands
                 return;
             }
 
+            if (Targets.Any(t => t.ToLower() == "all"))
+                Targets = BuildContext.Default.Config.ProductNames;
+
             foreach (var target in Targets)
             {
                 await Console.Out.WriteLineAsync(Environment.NewLine +
@@ -94,7 +97,7 @@ namespace ElastiBuild.Commands
                         "Discover branches, versions and aliases",
                         new DiscoverCommand()
                         {
-                            Targets = new List<string> { "all" },
+                            Targets = new List<string> { "containers" },
                         }),
 
                     new Example(Environment.NewLine +
@@ -103,10 +106,17 @@ namespace ElastiBuild.Commands
                         {
                             ContainerId = "6.8",
                             Targets = new List<string> { "winlogbeat" },
-                        })
+                        }),
+
+                    new Example(Environment.NewLine +
+                        "Discover package names for all supported products in 8.0-SNAPSHOT",
+                        new DiscoverCommand()
+                        {
+                            Targets = new List<string> { "all" },
+                            ContainerId = "8.0-SNAPSHOT"
+                        }),
                 };
             }
         }
-
     }
 }

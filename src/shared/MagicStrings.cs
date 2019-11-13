@@ -13,6 +13,8 @@ namespace Elastic.Installer
             public static readonly string Description =
                 "Beats is the platform for single-purpose data shippers. They send data " +
                 "from hundreds or thousands of machines and systems to Logstash or Elasticsearch.";
+
+            public static readonly string CompilerName = "BeatPackageCompiler";
         }
 
         public static class Ext
@@ -73,7 +75,7 @@ namespace Elastic.Installer
         {
             public static readonly string NeedCidWhenTargetSpecified = @$"
 Need --cid when PRODUCT specified. To discover container IDs run:
-    {AppAlias} discover all
+    {AppAlias} discover containers
 
 Run with --help for more information.";
 

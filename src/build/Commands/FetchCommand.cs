@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using ElastiBuild.Infra;
+using ElastiBuild.BullseyeTargets;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
@@ -12,9 +12,9 @@ namespace ElastiBuild.Commands
     [Verb("fetch", HelpText = "Download and optionally unpack packages")]
     public class FetchCommand
         : IElastiBuildCommand
-        , ISupportTargets
-        , ISupportContainerId
-        , ISupportOssChoice
+        , ISupportRequiredTargets
+        , ISupportRequiredContainerId
+        , ISupportOssSwitch
         , ISupportBitnessChoice
     {
         public IEnumerable<string> Targets { get; set; }
@@ -22,37 +22,43 @@ namespace ElastiBuild.Commands
         public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
 
-        public async Task RunAsync(BuildContext ctx)
+        public async Task RunAsync()
         {
-            if (string.IsNullOrWhiteSpace(ContainerId))
-            {
-                await Console.Out.WriteLineAsync(
-                    $"ERROR(s):{Environment.NewLine}" +
-                    MagicStrings.Errors.NeedCidWhenTargetSpecified);
-                return;
-            }
-
             if (Targets.Any(t => t.ToLower() == "all"))
-                Targets = ctx.Config.TargetNames;
+                Targets = BuildContext.Default.Config.ProductNames;
+
+            var bt = new Bullseye.Targets();
+            var cmd = this;
+
+            var productBuildTargets = new List<string>();
 
             foreach (var target in Targets)
             {
-                await Console.Out.WriteLineAsync(Environment.NewLine +
-                $"Fetching '{target}' in '{ContainerId}':");
+                var product = target;
+                var ctx = new BuildContext();
 
-                var items = await ArtifactsApi.FindArtifact(target, filter =>
-                {
-                    filter.ContainerId = ContainerId;
-                    filter.ShowOss = ShowOss;
-                    filter.Bitness = Bitness;
-                });
+                bt.Add(
+                    FindPackageTarget.NameWith(product),
+                    async () => await FindPackageTarget.RunAsync(cmd, ctx, product));
 
-                foreach (var ap in items)
-                {
-                    await Console.Out.WriteAsync("  " + ap.FileName + " ... ");
-                    await ArtifactsApi.FetchArtifact(ctx, ap);
-                    await Console.Out.WriteLineAsync("done");
-                }
+                bt.Add(
+                    FetchPackageTarget.NameWith(product),
+                    Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
+                    async () => await FetchPackageTarget.RunAsync(cmd, ctx, product));
+
+                productBuildTargets.Add(FetchPackageTarget.NameWith(product));
+            }
+
+            try
+            {
+                await bt.RunWithoutExitingAsync(
+                    productBuildTargets,
+                    logPrefix: "ElastiBuild");
+            }
+            catch
+            {
+                // We swallow exceptions here, BullsEye prints them
+                // TODO: use overload "messageOnly"
             }
         }
 

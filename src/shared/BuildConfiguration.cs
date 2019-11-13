@@ -24,7 +24,7 @@ namespace Elastic.Installer
             return bc;
         }
 
-        public IEnumerable<string> TargetNames => packageMap?.Keys;
+        public IEnumerable<string> ProductNames => packageMap?.Keys;
 
         public PackageInfo GetPackageInfo(string targetName)
         {

@@ -38,11 +38,9 @@ namespace ElastiBuild
                 cfg.HelpWriter = null;
             });
 
-            var ctx = new BuildContext();
-
             var result = parser.ParseArguments(args, commands);
             await result.MapResult(
-                async (IElastiBuildCommand cmd) => await cmd.RunAsync(ctx),
+                async (IElastiBuildCommand cmd) => await cmd.RunAsync(),
                 async (errs) => await HandleErrorsAndShowHelp(result, commands));
         }
 

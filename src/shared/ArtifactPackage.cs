@@ -10,10 +10,10 @@ namespace Elastic.Installer
         public string SemVer { get; }
         public string Architecture { get; }
         public string FileName { get; }
-        public string Location { get; }
+        public string Url { get; }
 
         public bool IsDownloadable =>
-            !string.IsNullOrWhiteSpace(Location);
+            !string.IsNullOrWhiteSpace(Url);
 
         public bool Is32bit => Architecture == MagicStrings.Arch.x86;
         public bool Is64Bit => Architecture == MagicStrings.Arch.x86_64;
@@ -22,10 +22,10 @@ namespace Elastic.Installer
             : this(name, null)
         { }
 
-        public ArtifactPackage(string fileName, string location)
+        public ArtifactPackage(string fileName, string url)
         {
             FileName = fileName;
-            Location = location;
+            Url = url;
 
             var rxVersion = rx.Match(FileName);
             if (rxVersion.Groups.Count != 6)

@@ -10,12 +10,12 @@ namespace ElastiBuild.Commands
     [Verb("show", HelpText = "Show products that we can build")]
     public class ShowCommand : IElastiBuildCommand
     {
-        public Task RunAsync(BuildContext ctx)
+        public async Task RunAsync()
         {
-            foreach (var target in ctx.Config.TargetNames)
+            foreach (var target in BuildContext.Default.Config.ProductNames)
                 Console.WriteLine(target);
 
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         [Usage(ApplicationAlias = MagicStrings.AppAlias)]

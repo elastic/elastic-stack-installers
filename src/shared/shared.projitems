@@ -11,7 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ArtifactPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BuildConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)BuildRootProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommonPathsProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CmdLineOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MagicStrings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PackageInfo.cs" />
