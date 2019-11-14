@@ -31,11 +31,14 @@ namespace Elastic.Installer
             public static readonly string All = "*.*";
             public static readonly string AllDotYml = "*.yml";
             public static readonly string ConfigYaml = "config.yaml";
-            public static readonly string LicenseRtf = "LICENSE.rtf";
             public static readonly string LicenseTxt = "LICENSE.txt";
             public static readonly string TopBannerBmp = "topbanner.bmp";
             public static readonly string LeftBannerBmp = "leftbanner.bmp";
             public static readonly string BuildRoot = ".buildroot";
+            public static readonly string LicenseRtf = "LICENSE.rtf";
+
+            public static string PackageLicenseRtf(string packageName) =>
+                packageName + "." + LicenseRtf;
         }
 
         public static class Dirs

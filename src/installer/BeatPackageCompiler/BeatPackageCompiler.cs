@@ -44,7 +44,9 @@ namespace Elastic.PackageCompiler.Beats
                 Version = new Version(ap.Version),
 
                 // We massage LICENSE.txt into .rtf below
-                LicenceFile = Path.Combine(opts.PackageOutDir, MagicStrings.Files.LicenseRtf),
+                LicenceFile = Path.Combine(
+                    opts.PackageOutDir,
+                    MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
 
                 Platform = ap.Is32bit ? Platform.x86 : Platform.x64,
 
@@ -81,7 +83,7 @@ namespace Elastic.PackageCompiler.Beats
 
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.PackageOutDir, MagicStrings.Files.LicenseRtf),
+                Path.Combine(opts.PackageOutDir, MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
                 @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
                 @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
                 @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +

@@ -14,8 +14,11 @@ namespace Elastic.PackageCompiler
         [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
         public bool WxsOnly { get; private set; }
 
+        public string ShortPackageName =>
+            PackageName?.Substring(0, PackageName.IndexOf('-')) ?? string.Empty;
+
         public string PackageInDir => Path.Combine(InDir, PackageName);
-        public string PackageOutDir => Path.Combine(OutDir, PackageName);
+        public string PackageOutDir => Path.Combine(OutDir, ShortPackageName);
 
         public static CmdLineOptions Parse(string[] args)
         {
