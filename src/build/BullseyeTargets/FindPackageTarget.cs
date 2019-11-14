@@ -14,11 +14,14 @@ namespace ElastiBuild.BullseyeTargets
             if (!ctx.Config.ProductNames.Any(t => t.ToLower() == target))
                 throw new InvalidDataException($"Invalid product '{target}'");
 
-            var items = await ArtifactsApi.FindArtifact(target, filter =>
+            var items = await ArtifactsApi.FindArtifact(target, async filter =>
             {
                 filter.ContainerId = (cmd as ISupportRequiredContainerId).ContainerId;
                 filter.ShowOss = (cmd as ISupportOssSwitch).ShowOss;
                 filter.Bitness = (cmd as ISupportBitnessChoice).Bitness;
+
+                await Console.Out.WriteLineAsync(
+                    $"Searching {filter.ContainerId} for {target} ...");
             });
 
             if (items.Count() > 1)

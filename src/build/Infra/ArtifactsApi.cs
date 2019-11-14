@@ -68,18 +68,9 @@ namespace ElastiBuild.Infra
                 Timeout = TimeSpan.FromMilliseconds(3000)
             };
 
-            var query =
-                $"search/{filter.ContainerId}/{target}"
-                + ",windows"
-                + (filter.ShowOss ? string.Empty : ",-oss")
-                + (filter.Bitness == eBitness.both
-                    ? string.Empty
-                    : (filter.Bitness == eBitness.x86
-                        ? (",-" + MagicStrings.Arch.x86_64)
-                        : string.Empty))
-                ;
-
+            var query = $"search/{filter.ContainerId}/{target}{filter.QueryString}";
             using var stm = await http.GetStreamAsync(query);
+
             using var sr = new StreamReader(stm);
             using var jtr = new JsonTextReader(sr);
 
