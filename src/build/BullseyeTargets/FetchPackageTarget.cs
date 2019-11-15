@@ -14,8 +14,12 @@ namespace ElastiBuild.BullseyeTargets
         public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
         {
             var ap = ctx.GetArtifactPackage();
-            var localPath = await ArtifactsApi.FetchArtifact(ctx, ap);
-            await Console.Out.WriteLineAsync("Saved " + localPath);
+            var (wasAlreadyPresent, localPath) = await ArtifactsApi.FetchArtifact(ctx, ap);
+
+            if (wasAlreadyPresent)
+                await Console.Out.WriteLineAsync("Download skipped, file exists: " + localPath);
+            else
+                await Console.Out.WriteLineAsync("Saved: " + localPath);
         }
     }
 }

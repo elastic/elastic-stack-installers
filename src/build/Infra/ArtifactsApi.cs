@@ -100,7 +100,7 @@ namespace ElastiBuild.Infra
             return packages;
         }
 
-        public static async Task<string> FetchArtifact(BuildContext ctx, ArtifactPackage ap)
+        public static async Task<(bool wasAlreadyPresent, string localPath)> FetchArtifact(BuildContext ctx, ArtifactPackage ap)
         {
             // TODO: Proper check
             if (!ap.IsDownloadable)
@@ -110,7 +110,7 @@ namespace ElastiBuild.Infra
 
             // TODO: support "force overwrite"
             if (File.Exists(localPath))
-                return localPath;
+                return (true, localPath);
 
             Directory.CreateDirectory(ctx.InDir);
 
@@ -139,7 +139,7 @@ namespace ElastiBuild.Infra
                     ArrayPool<byte>.Shared.Return(bytes);
             }
 
-            return localPath;
+            return (false, localPath);
         }
 
         public static Task UnpackArtifact(BuildContext ctx, ArtifactPackage ap)
