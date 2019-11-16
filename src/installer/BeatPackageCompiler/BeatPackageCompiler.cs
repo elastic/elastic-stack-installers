@@ -13,14 +13,13 @@ namespace Elastic.PackageCompiler.Beats
         {
             var opts = CmdLineOptions.Parse(args);
 
-            Directory.CreateDirectory(opts.PackageOutDir);
-
-            var ap = new ArtifactPackage(opts.PackageName);
-
             var config = BuildConfiguration.Read(
                 Path.Combine(opts.ConfigDir, MagicStrings.Files.ConfigYaml));
 
-            var pi = config.GetPackageInfo(ap.TargetName);
+            Directory.CreateDirectory(opts.PackageOutDir);
+
+            var ap = new ArtifactPackage(opts.PackageName);
+            var pi = config.GetProductConfig(ap.TargetName);
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;

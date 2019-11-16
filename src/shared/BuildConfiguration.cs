@@ -1,40 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using SharpYaml.Serialization;
 
 namespace Elastic.Installer
 {
     public class BuildConfiguration
     {
-        public static BuildConfiguration Read(string fileName)
+        public static ElastiBuildConfig Read(string fileName)
         {
-            BuildConfiguration bc = null;
             var ser = new Serializer();
-
             using (var yamlConfig = File.OpenRead(fileName))
             {
-                bc = new BuildConfiguration
-                {
-                    fileName = fileName,
-                    packageMap = ser.Deserialize<Dictionary<string, PackageInfo>>(yamlConfig)
-                };
+                var config = ser.Deserialize<ElastiBuildConfig>(yamlConfig);
+                return config;
             }
-
-            return bc;
         }
-
-        public IEnumerable<string> ProductNames => packageMap?.Keys;
-
-        public PackageInfo GetPackageInfo(string targetName)
-        {
-            if (!packageMap.TryGetValue(targetName, out PackageInfo pi))
-                throw new ArgumentException($"Unable to find {targetName} section in {fileName}");
-
-            return pi;
-        }
-
-        string fileName;
-        Dictionary<string, PackageInfo> packageMap;
     }
 }

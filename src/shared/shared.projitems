@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CommonPathsProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CmdLineOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MagicStrings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PackageInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProductConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ElastiBuildConfig.cs" />
   </ItemGroup>
 </Project>

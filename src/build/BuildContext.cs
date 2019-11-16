@@ -11,8 +11,8 @@ namespace ElastiBuild
         public static BuildContext Default => lazyContext.Value;
         static readonly Lazy<BuildContext> lazyContext = new Lazy<BuildContext>();
 
-        public BuildConfiguration Config => lazyBuildConfig.Value;
-        static readonly Lazy<BuildConfiguration> lazyBuildConfig = new Lazy<BuildConfiguration>(
+        public ElastiBuildConfig Config => lazyBuildConfig.Value;
+        static readonly Lazy<ElastiBuildConfig> lazyBuildConfig = new Lazy<ElastiBuildConfig>(
             () => BuildConfiguration.Read(Path.Combine(lazyConfigDir.Value, MagicStrings.Files.ConfigYaml)));
 
         public GlobalOptions Options { get; private set; }
