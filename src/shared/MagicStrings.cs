@@ -24,6 +24,7 @@ namespace Elastic.Installer
             public static readonly string DotYml = ".yml";
             public static readonly string DotIco = ".ico";
             public static readonly string DotPs1 = ".ps1";
+            public static readonly string DotMsi = ".msi";
         }
 
         public static class Files
@@ -35,8 +36,9 @@ namespace Elastic.Installer
             public static readonly string TopBannerBmp = "topbanner.bmp";
             public static readonly string LeftBannerBmp = "leftbanner.bmp";
             public static readonly string BuildRoot = ".buildroot";
-            public static readonly string LicenseRtf = "LICENSE.rtf";
+            public static readonly string SignToolExe = "signtool.exe";
 
+            public static readonly string LicenseRtf = "LICENSE.rtf";
             public static string PackageLicenseRtf(string packageName) =>
                 packageName + "." + LicenseRtf;
         }
@@ -47,6 +49,7 @@ namespace Elastic.Installer
             public static readonly string Bin = "bin";
             public static readonly string In = "in";
             public static readonly string Out = "out";
+            public static readonly string Tools = "tools";
             public static readonly string Installer = "installer";
             public static readonly string Resources = "resources";
             public static readonly string Config = "config";

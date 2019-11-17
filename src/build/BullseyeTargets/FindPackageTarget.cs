@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
+using ElastiBuild.Extensions;
 using ElastiBuild.Infra;
 
 namespace ElastiBuild.BullseyeTargets
@@ -20,8 +21,7 @@ namespace ElastiBuild.BullseyeTargets
                 filter.ShowOss = (cmd as ISupportOssSwitch).ShowOss;
                 filter.Bitness = (cmd as ISupportBitnessChoice).Bitness;
 
-                await Console.Out.WriteLineAsync(
-                    $"Searching {filter.ContainerId} for {target} ...");
+                await Console.Out.WriteLineAsync($"Searching {filter.ContainerId} for {target} ...");
             });
 
             if (items.Count() > 1)
@@ -37,6 +37,8 @@ namespace ElastiBuild.BullseyeTargets
 
             var ap = items.Single();
             ctx.UseArtifactPackage(ap);
+
+            await Console.Out.WriteLineAsync("Found " + ap.FileName);
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿using System.Text;
 
-namespace ElastiBuild.Infra
+namespace ElastiBuild.Extensions
 {
     public static class StringExtensions
     {
-        public static string Quote(this string value)
-        {
-            return "\"" + value + "\"";
-        }
+        public static string Quote(this string value) =>
+            "\"" + value + "\"";
 
         public static string JoinTo(this string value, params string[] others)
         {
@@ -17,5 +15,8 @@ namespace ElastiBuild.Infra
 
             return builder.ToString();
         }
+
+        public static bool IsEmpty(this string value) =>
+            string.IsNullOrWhiteSpace(value);
     }
 }

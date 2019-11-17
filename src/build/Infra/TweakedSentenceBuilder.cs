@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using CommandLine;
 using CommandLine.Text;
+using ElastiBuild.Extensions;
 
 namespace ElastiBuild.Infra
 {

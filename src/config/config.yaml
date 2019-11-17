@@ -1,43 +1,57 @@
 ---
+timestamp_url: http://timestamp.comodoca.com
+
 products:
   auditbeat:
     upgrade_code: 89EAA6B0-0CAC-4DA4-AA58-C6C2632AA341
+    description: Audit the activities of users and processes on your system
     published_name: Elastic Beats Autditbeat
     published_url: https://www.elastic.co/products/beats/auditbeat
-    description: Audit the activities of users and processes on your system
+    published_binaries: [ auditbeat.exe ]
     mutable_dirs: [ kibana ]
+    service: true
 
   filebeat:
     upgrade_code: 830E6D05-2CDB-4F5D-AACC-80B7EED19D43
+    description: Filebeat sends log files to Logstash or directly to Elasticsearch
     published_name: Elastic Beats Filebeat
     published_url: https://www.elastic.co/products/beats/filebeat
-    description: Filebeat sends log files to Logstash or directly to Elasticsearch
+    published_binaries: [ filebeat.exe ]
     mutable_dirs: [ kibana, module, modules.d ]
+    service: true
 
   heartbeat:
     upgrade_code: E3C93134-2403-4FCD-B816-85DD37B2C7BC
+    description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
     published_name: Elastic Beats Heartbeat
     published_url: https://www.elastic.co/products/beats/heartbeat
-    description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
+    published_binaries: [ heartbeat.exe ]
     mutable_dirs: [ kibana, monitors.d ]
+    service: true
 
   metricbeat:
     upgrade_code: 79A65434-259C-4E71-9A10-B69FA34848A3
+    description: Metricbeat is a lightweight shipper for metrics
     published_name: Elastic Beats Metricbeat
     published_url: https://www.elastic.co/products/beats/metricbeat
-    description: Metricbeat is a lightweight shipper for metrics
+    published_binaries: [ metricbeat.exe ]
     mutable_dirs: [ kibana, module, modules.d ]
+    service: true
 
   packetbeat:
     upgrade_code: 48C5CD3B-C42A-4D6C-9D4A-D8BAF83F05BA
+    description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
     published_name: Elastic Beats Packetbeat
     published_url: https://www.elastic.co/products/beats/packetbeat
-    description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
+    published_binaries: [ packetbeat.exe ]
     mutable_dirs: [ kibana ]
+    service: true
 
   winlogbeat:
     upgrade_code: 18DE3315-EA8A-4B00-9394-2CF1523F3968
+    description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
     published_name: Elastic Beats Winlogbeat
     published_url: https://www.elastic.co/products/beats/winlogbeat
-    description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
+    published_binaries: [ winlogbeat.exe ]
     mutable_dirs: [ kibana, module ]
+    service: true

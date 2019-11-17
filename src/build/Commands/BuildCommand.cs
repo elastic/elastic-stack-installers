@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using ElastiBuild.BullseyeTargets;
+using ElastiBuild.Extensions;
+using ElastiBuild.Infra;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
@@ -14,14 +17,17 @@ namespace ElastiBuild.Commands
         : IElastiBuildCommand
         , ISupportRequiredTargets
         , ISupportRequiredContainerId
-        , ISupportOssSwitch
         , ISupportBitnessChoice
+        , ISupportCodeSigning
+        , ISupportOssSwitch
         , ISupportWxsOnlySwitch
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
-        public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
+        public string CertFile { get; set; }
+        public string CertPass { get; set; }
+        public bool ShowOss { get; set; }
         public bool WxsOnly { get; set; }
 
         public async Task RunAsync()
@@ -37,6 +43,24 @@ namespace ElastiBuild.Commands
                 async () => await BuildBeatPackageCompilerTarget.RunAsync(cmd, BuildContext.Default));
 
             var productBuildTargets = new List<string>();
+
+            bool addSignTarget = false;
+            if (!CertPass.IsEmpty() && File.Exists(CertFile))
+            {
+                // Let's try value as file name first, then as env var
+                var password = CertPass;
+
+                try
+                { password = await File.ReadAllTextAsync(CertPass); }
+                catch
+                { password = Environment.GetEnvironmentVariable(password); }
+
+                if (!password.IsEmpty())
+                {
+                    CertPass = password;
+                    addSignTarget = true;
+                }
+            }
 
             foreach (var target in Targets)
             {
@@ -57,11 +81,51 @@ namespace ElastiBuild.Commands
                     Bullseye.Targets.DependsOn(FetchPackageTarget.NameWith(product)),
                     async () => await UnpackPackageTarget.RunAsync(cmd, ctx, product));
 
+                // sign individual binaries
+                if (addSignTarget)
+                    ctx.UseCertificate(CertFile, CertPass);
+
+                if (addSignTarget)
+                {
+                    bt.Add(
+                        SignProductBinariesTarget.NameWith(product),
+                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(product)),
+                        async () => await SignProductBinariesTarget.RunAsync(cmd, ctx, product));
+                }
+                else
+                {
+                    bt.Add(
+                        SignProductBinariesTarget.NameWith(product),
+                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(product)),
+                        async () => await Console.Out.WriteLineAsync("Skipping digital signature for product binaries"));
+                }
+
                 bt.Add(
-                    BuildInstallerTarget.NameWith(product),
+                    CompileMsiTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(
                         BuildBeatPackageCompilerTarget.Name,
-                        UnpackPackageTarget.NameWith(product)),
+                        SignProductBinariesTarget.NameWith(product)),
+                    async () => await CompileMsiTarget.RunAsync(cmd, ctx, product));
+
+                // sign final .msi
+                if (addSignTarget)
+                {
+                    bt.Add(
+                        SignMsiPackageTarget.NameWith(product),
+                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(product)),
+                        async () => await SignMsiPackageTarget.RunAsync(cmd, ctx, product));
+                }
+                else
+                {
+                    bt.Add(
+                        SignMsiPackageTarget.NameWith(product),
+                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(product)),
+                        async () => await Console.Out.WriteLineAsync("Skipping digital signature for MSI package"));
+                }
+
+                bt.Add(
+                    BuildInstallerTarget.NameWith(product),
+                    Bullseye.Targets.DependsOn(SignMsiPackageTarget.NameWith(product)),
                     async () => await BuildInstallerTarget.RunAsync(cmd, ctx, product));
 
                 productBuildTargets.Add(BuildInstallerTarget.NameWith(product));
@@ -79,13 +143,6 @@ namespace ElastiBuild.Commands
                 // TODO: use overload "messageOnly"
             }
         }
-
-        // TODO: add env support
-        [Option("cert-file", Hidden = true, HelpText = "Path to signing certificate")]
-        public string CertFile { get; set; }
-
-        [Option("cert-pass", Hidden = true, HelpText = "Certificate password")]
-        public string CertPass { get; set; }
 
         [Usage(ApplicationAlias = MagicStrings.AppAlias)]
         public static IEnumerable<Example> Examples

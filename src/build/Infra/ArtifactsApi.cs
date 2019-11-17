@@ -2,7 +2,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
@@ -140,22 +139,6 @@ namespace ElastiBuild.Infra
             }
 
             return (false, localPath);
-        }
-
-        public static Task UnpackArtifact(BuildContext ctx, ArtifactPackage ap)
-        {
-            var unpackedDir = Path.Combine(
-                ctx.InDir,
-                Path.GetFileNameWithoutExtension(ap.FileName));
-
-            if (Directory.Exists(unpackedDir))
-                return Task.CompletedTask;
-
-            return Task.Run(() =>
-                ZipFile.ExtractToDirectory(
-                    Path.Combine(ctx.InDir, Path.GetFileName(ap.FileName)),
-                    Path.Combine(ctx.InDir),
-                    overwriteFiles: true));
         }
     }
 }

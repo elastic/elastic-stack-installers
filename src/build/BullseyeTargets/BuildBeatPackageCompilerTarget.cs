@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
-using ElastiBuild.Infra;
+using ElastiBuild.Extensions;
 using Elastic.Installer;
 
 namespace ElastiBuild.BullseyeTargets

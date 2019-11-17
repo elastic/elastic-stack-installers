@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
-using Elastic.Installer;
 
 namespace ElastiBuild.Commands
 {
@@ -14,7 +12,7 @@ namespace ElastiBuild.Commands
     {
         public IEnumerable<string> Targets { get; set; }
 
-        [Option("all", HelpText = "Clean entire bin directory: downloaded products and built msi packages")]
+        [Option("all", Default = false, HelpText = "Clean entire bin directory: downloaded products and built msi packages")]
         public bool WxsOnly { get; set; }
 
         public async Task RunAsync()

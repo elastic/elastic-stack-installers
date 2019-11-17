@@ -6,6 +6,9 @@ namespace Elastic.Installer
 {
     public sealed class ElastiBuildConfig
     {
+        [YamlMember("timestamp_url")]
+        public string TimestampUrl { get; set; }
+
         [YamlMember("products")]
         public Dictionary<string, ProductConfig> Products { get; set;  }
 
