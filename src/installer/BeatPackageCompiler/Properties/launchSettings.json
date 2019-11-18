@@ -2,7 +2,7 @@
   "profiles": {
     "BeatPackageCompiler.netcore": {
       "commandName": "Project",
-      "commandLineArgs": "--package=winlogbeat-8.0.0-SNAPSHOT-windows-x86_64",
+      "commandLineArgs": "--package=winlogbeat-7.5.0-windows-x86_64",
       "workingDirectory": "$(SolutionDir)"
     }
   }

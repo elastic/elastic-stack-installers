@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using WixSharp;
+using BeatPackageCompiler.Properties;
 using Elastic.Installer;
+using WixSharp;
+using WixSharp.CommonTasks;
 
 namespace Elastic.PackageCompiler.Beats
 {
@@ -23,7 +25,7 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
-            var subProductName = ap.TargetName;
+            var beatName = ap.TargetName;
             var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
             var serviceName = ap.TargetName;
             var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
@@ -92,7 +94,9 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var installSubPath = $@"{companyName}\{productSetName}\{ap.Version}\{subProductName}";
+            var beatGenericInstallPath = Path.Combine(companyName, productSetName);
+            var beatsVersionPath = Path.Combine(beatGenericInstallPath, ap.Version);
+            var beatVersionedInstallPath = Path.Combine(beatsVersionPath, beatName);
 
             WixSharp.File service = null;
             if (pi.IsWindowsService)
@@ -113,7 +117,7 @@ namespace Elastic.PackageCompiler.Beats
                     DependsOn = new[] { new ServiceDependency(MagicStrings.Services.Tcpip) },
 
                     Arguments =
-                        $" --path.home \"[CommonAppDataFolder]{installSubPath}\"" +
+                        $" --path.home \"[CommonAppDataFolder]{beatVersionedInstallPath}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = true,
@@ -127,7 +131,7 @@ namespace Elastic.PackageCompiler.Beats
                 };
             }
 
-            var elements = new List<WixEntity>
+            var packageContents = new List<WixEntity>
             {
                 new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                 {
@@ -149,7 +153,7 @@ namespace Elastic.PackageCompiler.Beats
                 })
             };
 
-            elements.AddRange(
+            packageContents.AddRange(
                 new DirectoryInfo(opts.PackageInDir)
                     .GetDirectories()
                     .Select(dirName => dirName.Name)
@@ -157,11 +161,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Select(dirName =>
                         new Dir(dirName, new Files(Path.Combine(opts.PackageInDir, dirName, MagicStrings.Files.All)))));
 
-            elements.Add(pi.IsWindowsService ? service : null);
-
-            var mainInstallDir = new InstallDir(
-                $@"ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder\{installSubPath}",
-                elements.ToArray());
+            packageContents.Add(pi.IsWindowsService ? service : null);
 
             // TODO: evaluate adding metadata file into beats repo that lists these per-beat
             var mutablePaths = new List<WixEntity>
@@ -181,15 +181,33 @@ namespace Elastic.PackageCompiler.Beats
                     })
                     .Where(dir => dir != null));
 
+            // Drop CLI shim on disk
+            var cliShimScriptPath = Path.Combine(opts.PackageOutDir, MagicStrings.Files.ProductCliShim(beatName));
+            System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
+
+            var baseInstallPath = $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]";
+
             project.Dirs = new[]
             {
-                mainInstallDir,
+                // Binaries
+                new InstallDir(
+                    Path.Combine(baseInstallPath, beatGenericInstallPath),
+                    new Dir(
+                        ap.Version,
+                        new Dir(beatName, packageContents.ToArray()),
+                        new WixSharp.File(cliShimScriptPath))),
 
-                // Mutable path
+                // Configration and logs
                 new Dir(
-                    $@"CommonAppDataFolder\{installSubPath}",
+                    Path.Combine("[CommonAppDataFolder]", beatVersionedInstallPath),
                     mutablePaths.ToArray())
             };
+
+            // CLI Shim path
+            project.Add(new EnvironmentVariable("PATH", Path.Combine(baseInstallPath, beatsVersionPath))
+            {
+                Part = EnvVarPart.last
+            });
 
             // We hard-link Wix Toolset to a known location
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");

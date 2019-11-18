@@ -21,6 +21,21 @@
     <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <!-- We need to know the location of Wix Toolset binaries at run-time -->
   <!-- $(PkgWixSharp_wix_bin) is created by GeneratePathProperty above -->
   <Target Name="CopyWixToolsetBinaries" AfterTargets="Compile">

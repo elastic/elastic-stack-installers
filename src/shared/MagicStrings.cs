@@ -25,6 +25,7 @@ namespace Elastic.Installer
             public static readonly string DotIco = ".ico";
             public static readonly string DotPs1 = ".ps1";
             public static readonly string DotMsi = ".msi";
+            public static readonly string DotCmd = ".cmd";
         }
 
         public static class Files
@@ -41,6 +42,9 @@ namespace Elastic.Installer
             public static readonly string LicenseRtf = "LICENSE.rtf";
             public static string PackageLicenseRtf(string packageName) =>
                 packageName + "." + LicenseRtf;
+
+            public static string ProductCliShim(string productName) =>
+                productName + Ext.DotCmd;
         }
 
         public static class Dirs
