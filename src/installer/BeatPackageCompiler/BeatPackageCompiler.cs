@@ -73,7 +73,7 @@ namespace Elastic.PackageCompiler.Beats
             {
                 Contact = companyName,
                 Manufacturer = companyName,
-                UrlInfoAbout = "https://www.elastic.co/downloads/beats",
+                UrlInfoAbout = "https://www.elastic.co",
 
                 Comments = pc.Description + ". " + MagicStrings.Beats.Description,
 
