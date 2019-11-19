@@ -80,6 +80,8 @@ namespace Elastic.PackageCompiler.Beats
                 ProductIcon = Path.Combine(
                     opts.ResDir,
                     Path.GetFileNameWithoutExtension(exeName) + MagicStrings.Ext.DotIco),
+
+                NoRepair = true,
             };
 
             // Convert LICENSE.txt to something richedit control can render
