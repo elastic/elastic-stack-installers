@@ -114,7 +114,12 @@ namespace Elastic.PackageCompiler.Beats
                     Name = serviceName,
                     DisplayName = $"{displayName} {ap.SemVer}",
                     Description = pc.Description,
-                    DependsOn = new[] { new ServiceDependency(MagicStrings.Services.Tcpip) },
+
+                    DependsOn = new[]
+                    {
+                        new ServiceDependency(MagicStrings.Services.Tcpip),
+                        new ServiceDependency(MagicStrings.Services.Dnscache),
+                    },
 
                     Arguments =
                         $" --path.home \"{beatDataPath}\"" +
@@ -127,7 +132,7 @@ namespace Elastic.PackageCompiler.Beats
                     //StartOn = SvcEvent.Install,
 
                     StopOn = SvcEvent.InstallUninstall_Wait,
-                    RemoveOn = SvcEvent.Uninstall_Wait,
+                    RemoveOn = SvcEvent.InstallUninstall_Wait,
                 };
             }
 

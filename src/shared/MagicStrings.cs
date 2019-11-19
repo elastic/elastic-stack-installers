@@ -63,6 +63,7 @@ namespace Elastic.Installer
         public static class Services
         {
             public static readonly string Tcpip = "Tcpip";
+            public static readonly string Dnscache = "Dnscache";
         }
 
         public static class ArtifactsApi
