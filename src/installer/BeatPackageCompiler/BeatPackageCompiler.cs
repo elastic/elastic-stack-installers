@@ -21,7 +21,7 @@ namespace Elastic.PackageCompiler.Beats
             Directory.CreateDirectory(opts.PackageOutDir);
 
             var ap = new ArtifactPackage(opts.PackageName);
-            var pi = config.GetProductConfig(ap.TargetName);
+            var pc = config.GetProductConfig(ap.TargetName);
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
@@ -35,11 +35,11 @@ namespace Elastic.PackageCompiler.Beats
             var project = new Project(displayName)
             {
                 // This GUID *must* be stable and unique per-beat
-                GUID = pi.UpgradeCode,
+                GUID = pc.UpgradeCode,
 
                 Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
 
-                Description = pi.Description,
+                Description = pc.Description,
 
                 OutFileName = Path.Combine(opts.PackageOutDir, opts.PackageName),
                 Version = new Version(ap.Version),
@@ -75,7 +75,7 @@ namespace Elastic.PackageCompiler.Beats
                 Manufacturer = companyName,
                 UrlInfoAbout = "https://www.elastic.co/downloads/beats",
 
-                Comments = pi.Description + ". " + MagicStrings.Beats.Description,
+                Comments = pc.Description + ". " + MagicStrings.Beats.Description,
 
                 ProductIcon = Path.Combine(
                     opts.ResDir,
@@ -96,12 +96,10 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var beatGenericInstallPath = Path.Combine(companyName, productSetName);
-            var beatsVersionPath = Path.Combine(beatGenericInstallPath, ap.Version);
-            var beatVersionedInstallPath = Path.Combine(beatsVersionPath, beatName);
+            var beatDataPath = Path.Combine("[CommonAppDataFolder]", companyName, productSetName, beatName);
 
             WixSharp.File service = null;
-            if (pi.IsWindowsService)
+            if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
 
@@ -115,11 +113,11 @@ namespace Elastic.PackageCompiler.Beats
 
                     Name = serviceName,
                     DisplayName = $"{displayName} {ap.SemVer}",
-                    Description = pi.Description,
+                    Description = pc.Description,
                     DependsOn = new[] { new ServiceDependency(MagicStrings.Services.Tcpip) },
 
                     Arguments =
-                        $" --path.home \"[CommonAppDataFolder]{beatVersionedInstallPath}\"" +
+                        $" --path.home \"{beatDataPath}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = true,
@@ -139,7 +137,7 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     var itm = path.ToLower();
 
-                    bool include = !(
+                    bool exclude = 
 
                         // configuration will go into mutable location
                         itm.EndsWith(MagicStrings.Ext.DotYml) ||
@@ -148,32 +146,40 @@ namespace Elastic.PackageCompiler.Beats
                         itm.EndsWith(MagicStrings.Ext.DotPs1) ||
 
                         // .exe must be excluded for service configuration to work
-                        (pi.IsWindowsService && itm.EndsWith(exeName))
-                    );
+                        (pc.IsWindowsService && itm.EndsWith(exeName))
+                    ;
 
-                    return include;
+                    // this is an "include" filter
+                    return ! exclude;
                 })
             };
 
             packageContents.AddRange(
                 new DirectoryInfo(opts.PackageInDir)
                     .GetDirectories()
-                    .Select(dirName => dirName.Name)
-                    .Except(pi.MutableDirs)
+                    .Select(dir => dir.Name)
+                    .Except(pc.MutableDirs)
                     .Select(dirName =>
                         new Dir(dirName, new Files(Path.Combine(opts.PackageInDir, dirName, MagicStrings.Files.All)))));
 
-            packageContents.Add(pi.IsWindowsService ? service : null);
+            packageContents.Add(pc.IsWindowsService ? service : null);
 
-            // TODO: evaluate adding metadata file into beats repo that lists these per-beat
-            var mutablePaths = new List<WixEntity>
-            {
-                new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.AllDotYml))
-            };
+            var dataContents = new DirectoryInfo(opts.PackageInDir)
+                .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
+                .Select(fi =>
+                {
+                    var wf = new WixSharp.File(fi.FullName);
 
-            // These are the directories that we know of
-            mutablePaths.AddRange(
-                pi.MutableDirs
+                    // rename main config file to hide it from MSI engine and keep customizations
+                    if (string.Compare(fi.Name, beatName + MagicStrings.Ext.DotYml, true) == 0)
+                        wf.Attributes.Add("Name", beatName + ".example" + MagicStrings.Ext.DotYml);
+
+                    return wf;
+                })
+                .ToList<WixEntity>();
+
+            dataContents.AddRange(
+                pc.MutableDirs
                     .Select(dirName =>
                     {
                         var dirPath = Path.Combine(opts.PackageInDir, dirName);
@@ -187,26 +193,27 @@ namespace Elastic.PackageCompiler.Beats
             var cliShimScriptPath = Path.Combine(opts.PackageOutDir, MagicStrings.Files.ProductCliShim(beatName));
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            var baseInstallPath = $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]";
+            var beatsInstallPath = Path.Combine(
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]",
+                companyName,
+                productSetName);
 
             project.Dirs = new[]
             {
                 // Binaries
                 new InstallDir(
-                    Path.Combine(baseInstallPath, beatGenericInstallPath),
+                    beatsInstallPath,
                     new Dir(
                         ap.Version,
                         new Dir(beatName, packageContents.ToArray()),
                         new WixSharp.File(cliShimScriptPath))),
 
                 // Configration and logs
-                new Dir(
-                    Path.Combine("[CommonAppDataFolder]", beatVersionedInstallPath),
-                    mutablePaths.ToArray())
+                new Dir(beatDataPath, dataContents.ToArray())
             };
 
             // CLI Shim path
-            project.Add(new EnvironmentVariable("PATH", Path.Combine(baseInstallPath, beatsVersionPath))
+            project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
             {
                 Part = EnvVarPart.last
             });

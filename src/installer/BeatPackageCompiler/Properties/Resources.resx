@@ -125,22 +125,12 @@ if "%args%" == "" (
     set args=--help
 )
 
-set thisDir=%~dp0
-set thisDir=%thisDir:~0,-1%
-
-pushd %~dp0..
-set parentDir=%cd%
-popd
-
-call set thisVer=%%thisDir:*%parentDir%\=%%
-
 set beat_bin=%~dp0%~n0
-set beat_data=%ProgramData%\Elastic\Beats\%thisVer%\%~n0
+set beat_data=%ProgramData%\Elastic\Beats\%~n0
 
 "%beat_bin%\%~n0.exe" ^
     --path.home "%beat_data%" ^
     --path.config "%beat_data%" ^
-    --c "%beat_data%\%~n0.yml" ^
     --E logging.files.redirect_stderr=true ^
     %args%</value>
   </data>

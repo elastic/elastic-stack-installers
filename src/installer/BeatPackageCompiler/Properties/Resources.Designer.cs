@@ -68,22 +68,12 @@ namespace BeatPackageCompiler.Properties {
         ///    set args=--help
         ///)
         ///
-        ///set thisDir=%~dp0
-        ///set thisDir=%thisDir:~0,-1%
-        ///
-        ///pushd %~dp0..
-        ///set parentDir=%cd%
-        ///popd
-        ///
-        ///call set thisVer=%%thisDir:*%parentDir%\=%%
-        ///
         ///set beat_bin=%~dp0%~n0
-        ///set beat_data=%ProgramData%\Elastic\Beats\%thisVer%\%~n0
+        ///set beat_data=%ProgramData%\Elastic\Beats\%~n0
         ///
         ///&quot;%beat_bin%\%~n0.exe&quot; ^
         ///    --path.home &quot;%beat_data%&quot; ^
         ///    --path.config &quot;%beat_data%&quot; ^
-        ///    --c &quot;%beat_data%\%~n0.yml&quot; ^
         ///    --E logging.files.redirect_stderr=true ^
         ///    %args%.
         /// </summary>
