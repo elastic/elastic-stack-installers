@@ -36,7 +36,6 @@ namespace Elastic.PackageCompiler.Beats
 
             var project = new Project(displayName)
             {
-                // This GUID *must* be stable and unique per-beat
                 GUID = upgradeCode,
 
                 Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
@@ -65,8 +64,6 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     AllowDowngrades = false,
                     AllowSameVersionUpgrades = false,
-                    //Disallow = true,
-                    //DisallowUpgradeErrorMessage = "An existing version is already installed, please uninstall before continuing.",
                     DowngradeErrorMessage = MagicStrings.Errors.NewerVersionInstalled,
                 },
             };
