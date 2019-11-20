@@ -16,5 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)MagicStrings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProductConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElastiBuildConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpgradeCode.cs" />
   </ItemGroup>
 </Project>

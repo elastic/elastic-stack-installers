@@ -35,7 +35,7 @@ namespace Elastic.PackageCompiler.Beats
             var project = new Project(displayName)
             {
                 // This GUID *must* be stable and unique per-beat
-                GUID = pc.UpgradeCode,
+                GUID = ap.Is32bit ? pc.UpgradeCode.x86 : pc.UpgradeCode.x64,
 
                 Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
 
