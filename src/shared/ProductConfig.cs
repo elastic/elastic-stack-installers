@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SharpYaml.Serialization;
 
 namespace Elastic.Installer
 {
     public sealed class ProductConfig
     {
-        [YamlMember("upgrade_code")]
-        public UpgradeCode UpgradeCode { get; set; }
-
         [YamlMember("description")]
         public string Description { get; set; } = "(add 'description' field to config.yaml)";
 

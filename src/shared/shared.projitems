@@ -13,9 +13,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)BuildConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommonPathsProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CmdLineOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GuidExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MagicStrings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProductConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ElastiBuildConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UpgradeCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Uuid5.cs" />
   </ItemGroup>
 </Project>

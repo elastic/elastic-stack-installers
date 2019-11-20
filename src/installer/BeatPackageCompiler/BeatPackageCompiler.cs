@@ -30,12 +30,14 @@ namespace Elastic.PackageCompiler.Beats
             var serviceName = ap.TargetName;
             var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
 
-            // TODO: validate/process Product Id
+            // Generate UUID v5 from product properties
+            // This UUID *must* be stable and unique beat/arch combination
+            var upgradeCode = Uuid5.FromString(ap.TargetName + ap.Architecture);
 
             var project = new Project(displayName)
             {
                 // This GUID *must* be stable and unique per-beat
-                GUID = ap.Is32bit ? pc.UpgradeCode.x86 : pc.UpgradeCode.x64,
+                GUID = upgradeCode,
 
                 Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
 

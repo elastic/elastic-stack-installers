@@ -3,9 +3,6 @@ timestamp_url: http://timestamp.comodoca.com
 
 products:
   auditbeat:
-    upgrade_code: 
-      x86: 0D2FF24C-39FC-48C1-868B-B6E5962FDFAE
-      x64: 89EAA6B0-0CAC-4DA4-AA58-C6C2632AA341
     description: Audit the activities of users and processes on your system
     published_name: Elastic Beats Autditbeat
     published_url: https://www.elastic.co/products/beats/auditbeat
@@ -14,9 +11,6 @@ products:
     service: true
 
   filebeat:
-    upgrade_code: 
-      x86: E4178FAE-5216-49E8-8A3E-4B2667F66C30
-      x64: 830E6D05-2CDB-4F5D-AACC-80B7EED19D43
     description: Filebeat sends log files to Logstash or directly to Elasticsearch
     published_name: Elastic Beats Filebeat
     published_url: https://www.elastic.co/products/beats/filebeat
@@ -25,9 +19,6 @@ products:
     service: true
 
   heartbeat:
-    upgrade_code: 
-      x86: 853F95F3-1570-4E3D-9896-4CA4D0FDD08A
-      x64: E3C93134-2403-4FCD-B816-85DD37B2C7BC
     description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
     published_name: Elastic Beats Heartbeat
     published_url: https://www.elastic.co/products/beats/heartbeat
@@ -36,9 +27,6 @@ products:
     service: true
 
   metricbeat:
-    upgrade_code: 
-      x86: CFCB11E9-3E5D-4599-A83F-A08D0395BC39
-      x64: 79A65434-259C-4E71-9A10-B69FA34848A3
     description: Metricbeat is a lightweight shipper for metrics
     published_name: Elastic Beats Metricbeat
     published_url: https://www.elastic.co/products/beats/metricbeat
@@ -47,9 +35,6 @@ products:
     service: true
 
   packetbeat:
-    upgrade_code: 
-      x86: D1BD66B5-7FE3-4AE8-99F8-1E6C086ED9BA
-      x64: 48C5CD3B-C42A-4D6C-9D4A-D8BAF83F05BA
     description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
     published_name: Elastic Beats Packetbeat
     published_url: https://www.elastic.co/products/beats/packetbeat
@@ -58,9 +43,6 @@ products:
     service: true
 
   winlogbeat:
-    upgrade_code: 
-      x86: 35F1F6F0-E0D5-4FA7-8B26-9467B98F1815
-      x64: 18DE3315-EA8A-4B00-9394-2CF1523F3968
     description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
     published_name: Elastic Beats Winlogbeat
     published_url: https://www.elastic.co/products/beats/winlogbeat
