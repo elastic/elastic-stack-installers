@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using BeatPackageCompiler.Properties;
 using Elastic.Installer;
 using WixSharp;
@@ -67,6 +68,9 @@ namespace Elastic.PackageCompiler.Beats
                     DowngradeErrorMessage = MagicStrings.Errors.NewerVersionInstalled,
                 },
             };
+
+            project.Include(WixExtension.UI);
+            project.Include(WixExtension.Util);
 
             project.ControlPanelInfo = new ProductInfo
             {
@@ -168,6 +172,34 @@ namespace Elastic.PackageCompiler.Beats
 
             packageContents.Add(pc.IsWindowsService ? service : null);
 
+
+            // Add a note to the final screen and a checkbox to open the directory of .example.yml file
+            var beatConfigExampleFileName = beatName + ".example" + MagicStrings.Ext.DotYml;
+            var beatConfigExampleFileId = beatConfigExampleFileName +
+                Uuid5.FromString(beatConfigExampleFileName).ToString("n");
+
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
+                $"NOTE: We put an example configuration file {beatName}.example.yml in the data directory. " +
+                $"Please copy this example file to {beatName}.yml and make changes according to your environment. " +
+                $"Once {beatName}.yml is created, you can start {displayName} {ap.SemVer} Windows service and " +
+                $"configure {beatName} from your favorite shell."));
+
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
+                $"Open {beatName} data directory in Windows Explorer"));
+
+            // We'll open the folder for now
+            // TODO: select file in explorer window
+            project.AddProperty(new Property("WixShellExecTarget", $"[$Component.{beatConfigExampleFileId}]"));
+
+            project.AddWixFragment("Wix/Product", XElement.Parse(@"
+<CustomAction
+    Id=""LaunchApplication""
+    BinaryKey = ""WixCA""
+    DllEntry = ""WixShellExec""
+    Impersonate = ""yes""
+/>"));
+
             var dataContents = new DirectoryInfo(opts.PackageInDir)
                 .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
                 .Select(fi =>
@@ -176,7 +208,10 @@ namespace Elastic.PackageCompiler.Beats
 
                     // rename main config file to hide it from MSI engine and keep customizations
                     if (string.Compare(fi.Name, beatName + MagicStrings.Ext.DotYml, true) == 0)
-                        wf.Attributes.Add("Name", beatName + ".example" + MagicStrings.Ext.DotYml);
+                    {
+                        wf.Attributes.Add("Name", beatConfigExampleFileName);
+                        wf.Id = new Id(beatConfigExampleFileId);
+                    }
 
                     return wf;
                 })
@@ -226,12 +261,29 @@ namespace Elastic.PackageCompiler.Beats
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
             Compiler.PreserveTempFiles = true;
 
+            project.WixSourceGenerated += Project_WixSourceGenerated;
+
             project.ResolveWildCards();
 
             if (opts.WxsOnly)
                 project.BuildWxs();
             else
                 Compiler.BuildMsi(project);
+        }
+
+        static void Project_WixSourceGenerated(XDocument document)
+        {
+            document.Root
+                .Select("Product")
+                .Add(XElement.Parse(@"
+<UI>
+    <Publish
+        Dialog=""ExitDialog""
+        Control=""Finish""
+        Event=""DoAction"" 
+        Value=""LaunchApplication"">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
+    </Publish>
+</UI>"));
         }
     }
 }
