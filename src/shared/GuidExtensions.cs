@@ -10,7 +10,7 @@ namespace Elastic.Installer
         {
             var bytes = uid.ToByteArray();
 
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (BitConverter.IsLittleEndian)
                 ReverseGuidEndianness(ref bytes);
 
             return bytes;
@@ -18,7 +18,7 @@ namespace Elastic.Installer
 
         public static Guid FromHostBytes(this Guid _, byte[] bytes)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (BitConverter.IsLittleEndian)
                 ReverseGuidEndianness(ref bytes);
 
             return new Guid(bytes);
