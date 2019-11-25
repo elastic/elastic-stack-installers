@@ -99,7 +99,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var beatDataPath = Path.Combine("[CommonAppDataFolder]", companyName, productSetName, beatName);
+            var beatDataPath = Path.Combine(companyName, productSetName, beatName);
 
             WixSharp.File service = null;
             if (pc.IsWindowsService)
@@ -125,7 +125,7 @@ namespace Elastic.PackageCompiler.Beats
                     },
 
                     Arguments =
-                        $" --path.home \"{beatDataPath}\"" +
+                        $" --path.home \"[CommonAppDataFolder]\\{beatDataPath}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = true,
@@ -248,7 +248,19 @@ namespace Elastic.PackageCompiler.Beats
                         new WixSharp.File(cliShimScriptPath))),
 
                 // Configration and logs
-                new Dir(beatDataPath, dataContents.ToArray())
+                new Dir(
+                    "[CommonAppDataFolder]",
+                    new Dir(beatDataPath, dataContents.ToArray())
+                    {
+                        Permissions = new[]
+                        {
+                            new DirPermission
+                            {
+                                // Wix knows "Users" and will translate it to a well-known SID
+                                User = "Users", GenericAll = true
+                            }
+                        }
+                    })
             };
 
             // CLI Shim path
