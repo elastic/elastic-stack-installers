@@ -1,15 +1,22 @@
-# Windows MSI packages for Elastic stack
+# Welcome to the Elastic Stack Installers wiki!
 
-Use [ElastiBuild](docs/elastibuild.md) to discover and fetch artifacts to build supported Windows Installer packages.
+This repository contains [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/ElastiBuild) and [Beat Package Compiler](https://github.com/elastic/elastic-stack-installers/wiki/Beat-Package-Compiler).
 
-### Supported products:
-- [Beats](docs/beats.md) - is the platform for single-purpose data shippers. They send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch.
+## Reporting Problems
+To report any problems encountered during installation, or to request features, please open an [issue on GitHub](https://github.com/elastic/elastic-stack-installers/issues)  and attach the MSI installation log if applicable. 
 
-### Requirements
-- .Net Core v3.0, SDK v3.0.100
-- Full Framework >= 4.5 ([WixSharp](https://github.com/oleg-shilo/wixsharp) dependency)
+For other questions of comments pleas refer to [Elastic Forums](https://discuss.elastic.co/tags/windows-installer). Please *tag* your question with `windows-installer` (singlular).
 
-### Asking Questions and Repoting Issues
-Please refer to [Elastic Forums](https://discuss.elastic.co/tags/windows-installer) for general questions.
-Please report issues in the [repository](https://github.com/elastic/elastic-stack-installers/issues).
+## Capturing Logs:
+```msiexec /l!*vx "<full path to log file to be created>" /i "<full path to msi file>"```
 
+Please *attach* log file to the issue you create and provide as much information about your environment as you can.
+
+For other general questions and comments, please use the [Elastic discussion forum](https://discuss.elastic.co/).
+
+### Building From Source
+---
+
+**NOTE**: *Building from source should only be done for development purposes. Only the officially distributed and signed Elastic Stack Installers should be used in production. Using unofficial Elastic Stack Installers is not supported.*
+
+---
