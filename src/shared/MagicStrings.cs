@@ -58,6 +58,7 @@ namespace Elastic.Installer
             public static readonly string Resources = "resources";
             public static readonly string Config = "config";
             public static readonly string Compiler = "compiler";
+            public static readonly string Cert = "cert";
         }
 
         public static class Services
