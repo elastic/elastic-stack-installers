@@ -1,6 +1,6 @@
-# Welcome to the Elastic Stack Installers wiki!
+# Welcome to the Elastic Stack Installers!
 
-This repository contains [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/ElastiBuild) and [Beat Package Compiler](https://github.com/elastic/elastic-stack-installers/wiki/Beat-Package-Compiler).
+This repository contains [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/ElastiBuild) and [Beat Package Compiler](https://github.com/elastic/elastic-stack-installers/wiki/Beat-Package-Compiler). See [Wiki](https://github.com/elastic/elastic-stack-installers/wiki) for more information.
 
 ## Reporting Problems
 To report any problems encountered during installation, or to request features, please open an [issue on GitHub](https://github.com/elastic/elastic-stack-installers/issues)  and attach the MSI installation log if applicable. 
