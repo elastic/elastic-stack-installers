@@ -19,6 +19,7 @@ namespace Elastic.Installer
 
         public static class Ext
         {
+            public static readonly string DotAll = ".*";
             public static readonly string DotExe = ".exe";
             public static readonly string DotYaml = ".yaml";
             public static readonly string DotYml = ".yml";
@@ -26,12 +27,14 @@ namespace Elastic.Installer
             public static readonly string DotPs1 = ".ps1";
             public static readonly string DotMsi = ".msi";
             public static readonly string DotCmd = ".cmd";
+            public static readonly string DotZip = ".zip";
         }
 
         public static class Files
         {
-            public static readonly string All = "*.*";
-            public static readonly string AllDotYml = "*.yml";
+            public static readonly string All = "*" + Ext.DotAll;
+            public static readonly string AllDotYml = "*" + Ext.DotYml;
+            public static readonly string AllDotZip = "*" + Ext.DotZip;
             public static readonly string ConfigYaml = "config.yaml";
             public static readonly string LicenseTxt = "LICENSE.txt";
             public static readonly string TopBannerBmp = "topbanner.bmp";
@@ -81,6 +84,11 @@ namespace Elastic.Installer
         {
             public static readonly string x86 = "x86";
             public static readonly string x86_64 = "x86_64";
+        }
+
+        public static class Ver
+        {
+            public static readonly string Snapshot = "SNAPSHOT";
         }
 
         public static class Errors

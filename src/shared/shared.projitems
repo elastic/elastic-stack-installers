@@ -19,5 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ElastiBuildConfig.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Uuid5.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QualifiedVersion.cs" />
   </ItemGroup>
 </Project>

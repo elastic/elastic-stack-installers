@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
 using ElastiBuild.Extensions;
 using ElastiBuild.Infra;
+using Humanizer;
 
 namespace ElastiBuild.BullseyeTargets
 {
@@ -10,13 +12,18 @@ namespace ElastiBuild.BullseyeTargets
     {
         public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
         {
+            bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
+
             var ap = ctx.GetArtifactPackage();
-            var (wasAlreadyPresent, localPath) = await ArtifactsApi.FetchArtifact(ctx, ap);
+            var (wasAlreadyPresent, localPath) = await ArtifactsApi.FetchArtifact(ctx, ap, forceSwitch);
 
             if (wasAlreadyPresent)
                 await Console.Out.WriteLineAsync("Download skipped, file exists: " + localPath);
             else
-                await Console.Out.WriteLineAsync("Saved: " + localPath);
+            {
+                var fileSize = new FileInfo(localPath).Length;
+                await Console.Out.WriteLineAsync($"Saved: ({fileSize.Bytes().Humanize("MB")}) {localPath}");
+            }
         }
     }
 }

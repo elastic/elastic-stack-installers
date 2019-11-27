@@ -1,8 +1,10 @@
-﻿using System.IO;
-using System.IO.Compression;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
 using ElastiBuild.Extensions;
+using Ionic.Zip;
 
 namespace ElastiBuild.BullseyeTargets
 {
@@ -12,24 +14,52 @@ namespace ElastiBuild.BullseyeTargets
         {
             var ap = ctx.GetArtifactPackage();
 
-            var unpackedDir = new DirectoryInfo(
-                Path.Combine(
-                    ctx.InDir, Path.GetFileNameWithoutExtension(ap.FileName)));
+            var destDir = Path.Combine(ctx.InDir, Path.GetFileNameWithoutExtension(ap.FileName));
 
-            if (unpackedDir.Exists)
+            using var zf = ZipFile.Read(Path.Combine(ctx.InDir, ap.FileName));
+
+            var firstEntryPath = zf.Entries.First().FileName;
+
+            var archiveRootDir = firstEntryPath
+                .Substring(0, firstEntryPath.IndexOfAny(new[] { '/', '\\' }));
+
+            bool allDirsRooted = zf.Entries
+                .All(itm => itm.FileName.StartsWith(archiveRootDir));
+
+            if (!allDirsRooted)
+                throw new InvalidDataException(
+                    $"Unexpected non-uniform root directory in product archive '{ap.FileName}'");
+
+            Directory.CreateDirectory(destDir);
+
+            int totalItems = zf.Count;
+            int currentItem = 0;
+
+            foreach (var itm in zf.Entries)
             {
-			    // Simply deleting the directory introduces timing issues when directory is open 
-			    // in explorer for example, with subsequent failure to create it again.
-                var randomDir = Path.Combine(unpackedDir.Parent.FullName, Path.GetRandomFileName());
-                unpackedDir.MoveTo(randomDir);
-                Directory.Delete(randomDir, true);
+                var fname = itm.FileName.Substring(archiveRootDir.Length + 1);
+
+                if (itm.IsDirectory)
+                {
+                    Directory.CreateDirectory(
+                        Path.Combine(destDir, fname));
+                }
+                else
+                {
+                    using var fs = File.Open(
+                        Path.Combine(destDir, fname),
+                        FileMode.Create,
+                        FileAccess.Write);
+
+                    itm.Extract(fs);
+                }
+
+                double progress = ((++currentItem * 100.0) / totalItems);
+                if (progress % 10 == 0)
+                    Console.WriteLine((int) progress + "%");
             }
 
-            await Task.Run(() =>
-                ZipFile.ExtractToDirectory(
-                    Path.Combine(ctx.InDir, Path.GetFileName(ap.FileName)),
-                    Path.Combine(ctx.InDir),
-                    overwriteFiles: true));
+            await Console.Out.WriteLineAsync($"Extracted to: {destDir}");
         }
     }
 }

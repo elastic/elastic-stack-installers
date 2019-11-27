@@ -21,15 +21,15 @@ namespace Elastic.PackageCompiler.Beats
 
             Directory.CreateDirectory(opts.PackageOutDir);
 
-            var ap = new ArtifactPackage(opts.PackageName);
+            if (!ArtifactPackage.FromFilename(opts.PackageName, out var ap))
+                throw new Exception("Unable to parse file name: " + opts.PackageName);
+
             var pc = config.GetProductConfig(ap.TargetName);
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
-            var beatName = ap.TargetName;
             var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
-            var serviceName = ap.TargetName;
-            var exeName = ap.TargetName + MagicStrings.Ext.DotExe;
+            var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
             // Generate UUID v5 from product properties
             // This UUID *must* be stable and unique beat/arch combination
@@ -51,7 +51,7 @@ namespace Elastic.PackageCompiler.Beats
                     opts.PackageOutDir,
                     MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
 
-                Platform = ap.Is32bit ? Platform.x86 : Platform.x64,
+                Platform = ap.Is32Bit ? Platform.x86 : Platform.x64,
 
                 InstallScope = InstallScope.perMachine,
 
@@ -99,7 +99,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Replace("\n\n", @"\par" + "\r\n") +
                 @"\par}");
 
-            var beatDataPath = Path.Combine(companyName, productSetName, beatName);
+            var beatDataPath = Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
 
             WixSharp.File service = null;
             if (pc.IsWindowsService)
@@ -114,7 +114,7 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     Interactive = false,
 
-                    Name = serviceName,
+                    Name = ap.CanonicalTargetName,
                     DisplayName = $"{displayName} {ap.SemVer}",
                     Description = pc.Description,
 
@@ -148,13 +148,13 @@ namespace Elastic.PackageCompiler.Beats
                     bool exclude = 
 
                         // configuration will go into mutable location
-                        itm.EndsWith(MagicStrings.Ext.DotYml) ||
+                        itm.EndsWith(MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase) ||
 
                         // we install/remove service ourselves
-                        itm.EndsWith(MagicStrings.Ext.DotPs1) ||
+                        itm.EndsWith(MagicStrings.Ext.DotPs1, StringComparison.OrdinalIgnoreCase) ||
 
                         // .exe must be excluded for service configuration to work
-                        (pc.IsWindowsService && itm.EndsWith(exeName))
+                        (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
                     ;
 
                     // this is an "include" filter
@@ -168,25 +168,29 @@ namespace Elastic.PackageCompiler.Beats
                     .Select(dir => dir.Name)
                     .Except(pc.MutableDirs)
                     .Select(dirName =>
-                        new Dir(dirName, new Files(Path.Combine(opts.PackageInDir, dirName, MagicStrings.Files.All)))));
+                        new Dir(
+                            dirName,
+                            new Files(Path.Combine(
+                                opts.PackageInDir,
+                                dirName,
+                                MagicStrings.Files.All)))));
 
             packageContents.Add(pc.IsWindowsService ? service : null);
 
-
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            var beatConfigExampleFileName = beatName + ".example" + MagicStrings.Ext.DotYml;
+            var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
             var beatConfigExampleFileId = beatConfigExampleFileName +
                 Uuid5.FromString(beatConfigExampleFileName).ToString("n");
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                $"NOTE: We put an example configuration file {beatName}.example.yml in the data directory. " +
-                $"Please copy this example file to {beatName}.yml and make changes according to your environment. " +
-                $"Once {beatName}.yml is created, you can start {displayName} {ap.SemVer} Windows service and " +
-                $"configure {beatName} from your favorite shell."));
+                $"NOTE: We put an example configuration file {ap.CanonicalTargetName}.example.yml in the data directory. " +
+                $"Please copy this example file to {ap.CanonicalTargetName}.yml and make changes according to your environment. " +
+                $"Once {ap.CanonicalTargetName}.yml is created, you can start {displayName} {ap.SemVer} Windows service and " +
+                $"configure {ap.CanonicalTargetName} from your favorite shell."));
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
-                $"Open {beatName} data directory in Windows Explorer"));
+                $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
 
             // We'll open the folder for now
             // TODO: select file in explorer window
@@ -207,7 +211,10 @@ namespace Elastic.PackageCompiler.Beats
                     var wf = new WixSharp.File(fi.FullName);
 
                     // rename main config file to hide it from MSI engine and keep customizations
-                    if (string.Compare(fi.Name, beatName + MagicStrings.Ext.DotYml, true) == 0)
+                    if (string.Compare(
+                        fi.Name,
+                        ap.CanonicalTargetName + MagicStrings.Ext.DotYml,
+                        StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         wf.Attributes.Add("Name", beatConfigExampleFileName);
                         wf.Id = new Id(beatConfigExampleFileId);
@@ -222,6 +229,7 @@ namespace Elastic.PackageCompiler.Beats
                     .Select(dirName =>
                     {
                         var dirPath = Path.Combine(opts.PackageInDir, dirName);
+
                         return Directory.Exists(dirPath)
                             ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Files.All)))
                             : null;
@@ -229,7 +237,10 @@ namespace Elastic.PackageCompiler.Beats
                     .Where(dir => dir != null));
 
             // Drop CLI shim on disk
-            var cliShimScriptPath = Path.Combine(opts.PackageOutDir, MagicStrings.Files.ProductCliShim(beatName));
+            var cliShimScriptPath = Path.Combine(
+                opts.PackageOutDir,
+                MagicStrings.Files.ProductCliShim(ap.CanonicalTargetName));
+
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
             var beatsInstallPath = Path.Combine(
@@ -244,7 +255,7 @@ namespace Elastic.PackageCompiler.Beats
                     beatsInstallPath,
                     new Dir(
                         ap.Version,
-                        new Dir(beatName, packageContents.ToArray()),
+                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
                         new WixSharp.File(cliShimScriptPath))),
 
                 // Configration and logs

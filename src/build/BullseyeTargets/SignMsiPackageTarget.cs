@@ -12,7 +12,11 @@ namespace ElastiBuild.BullseyeTargets
     {
         public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
         {
-            var SignToolExePath = Path.Combine(ctx.ToolsDir, MagicStrings.Files.SignToolExe);
+            var SignToolExePath = Path.Combine(
+                ctx.ToolsDir,
+                MagicStrings.Dirs.Cert,
+                MagicStrings.Files.SignToolExe);
+
             var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, target);
 
             var ap = ctx.GetArtifactPackage();

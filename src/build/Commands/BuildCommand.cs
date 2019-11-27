@@ -19,7 +19,6 @@ namespace ElastiBuild.Commands
         , ISupportRequiredContainerId
         , ISupportBitnessChoice
         , ISupportCodeSigning
-        , ISupportOssSwitch
         , ISupportWxsOnlySwitch
     {
         public IEnumerable<string> Targets { get; set; }
@@ -27,7 +26,6 @@ namespace ElastiBuild.Commands
         public eBitness Bitness { get; set; }
         public string CertFile { get; set; }
         public string CertPass { get; set; }
-        public bool ShowOss { get; set; }
         public bool WxsOnly { get; set; }
 
         public async Task RunAsync()
@@ -161,11 +159,10 @@ namespace ElastiBuild.Commands
                         }),
 
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat x64 OSS for alias 6.8",
+                        "Build Winlogbeat x64 for alias 6.8",
                         new BuildCommand
                         {
                             ContainerId = "6.8",
-                            ShowOss = true,
                             Targets = "winlogbeat".Split(),
                         }),
 

@@ -14,13 +14,13 @@ namespace ElastiBuild.Commands
         : IElastiBuildCommand
         , ISupportRequiredTargets
         , ISupportRequiredContainerId
-        , ISupportOssSwitch
         , ISupportBitnessChoice
+        , ISupportForceSwitch
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
-        public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
+        public bool ForceSwitch { get; set; }
 
         public async Task RunAsync()
         {
@@ -82,8 +82,8 @@ namespace ElastiBuild.Commands
                         new FetchCommand
                         {
                             ContainerId = "6.8",
-                            ShowOss = true,
-                            Targets = "winlogbeat".Split(),
+                            ForceSwitch = true,
+                            Targets = "winlogbeat-oss".Split(),
                         })
                 };
             }

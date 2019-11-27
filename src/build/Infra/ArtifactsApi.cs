@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ElastiBuild.Commands;
+using ElastiBuild.Extensions;
 using Elastic.Installer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -58,7 +59,7 @@ namespace ElastiBuild.Infra
         {
             // TODO: validate filterConfiguraion
 
-            var filter = new ArtifactFilter();
+            var filter = new ArtifactFilter(target);
             filterConfiguration?.Invoke(filter);
 
             using var http = new HttpClient()
@@ -80,18 +81,18 @@ namespace ElastiBuild.Infra
 
             foreach (JProperty itm in data["packages"] ?? new JArray())
             {
-                if (filter.ShowOss && !itm.Name.Contains("oss"))
-                    continue;
-
                 if (filter.Bitness == eBitness.x64 &&
                     (string) itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
                 {
                     continue;
                 }
 
-                var package = new ArtifactPackage(
-                    itm.Name,
-                    (string) itm.Value[MagicStrings.ArtifactsApi.Url] ?? string.Empty);
+                var packageUrl = (string) itm.Value[MagicStrings.ArtifactsApi.Url];
+                if (packageUrl.IsEmpty())
+                    continue;
+
+                if (!ArtifactPackage.FromUrl(packageUrl, out var package))
+                    continue;
 
                 packages.Add(package);
             }
@@ -99,25 +100,28 @@ namespace ElastiBuild.Infra
             return packages;
         }
 
-        public static async Task<(bool wasAlreadyPresent, string localPath)> FetchArtifact(BuildContext ctx, ArtifactPackage ap)
+        public static async Task<(bool wasAlreadyPresent, string localPath)> FetchArtifact(
+            BuildContext ctx, ArtifactPackage ap, bool forceSwitch)
         {
-            // TODO: Proper check
+            var localPath = Path.Combine(ctx.InDir, ap.FileName);
+
+            if (!forceSwitch && File.Exists(localPath))
+                return (true, localPath);
+
             if (!ap.IsDownloadable)
                 throw new Exception($"{ap.FileName} is missing {nameof(ap.Url)}");
 
-            var localPath = Path.Combine(ctx.InDir, Path.GetFileName(ap.Url));
-
-            // TODO: support "force overwrite"
-            if (File.Exists(localPath))
-                return (true, localPath);
+            localPath = Path.Combine(ctx.InDir, Path.GetFileName(ap.Url));
 
             Directory.CreateDirectory(ctx.InDir);
 
             using var http = new HttpClient();
             using var stm = await http.GetStreamAsync(ap.Url);
-            using var fs = File.OpenWrite(localPath);
+            using var fs = File.Open(localPath, FileMode.Create, FileAccess.Write);
 
-            // Buffer size just shy of one that would get onto LOH (hopefully ArrayPool will oblige...)
+            // Buffer size just shy of one that would get onto LOH
+            // (hopefully ArrayPool will oblige...)
+
             var bytes = ArrayPool<byte>.Shared.Rent(81920);
 
             try

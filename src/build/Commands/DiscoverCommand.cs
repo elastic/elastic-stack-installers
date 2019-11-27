@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
@@ -14,13 +15,13 @@ namespace ElastiBuild.Commands
         : IElastiBuildCommand
         , ISupportRequiredTargets
         , ISupportContainerId
-        , ISupportOssSwitch
         , ISupportBitnessChoice
+        , ISupportForceSwitch
     {
         public IEnumerable<string> Targets { get; set; } = new List<string>();
         public string ContainerId { get; set; }
-        public bool ShowOss { get; set; }
         public eBitness Bitness { get; set; }
+        public bool ForceSwitch { get; set; }
 
         public async Task RunAsync()
         {
@@ -68,13 +69,15 @@ namespace ElastiBuild.Commands
 
             foreach (var target in Targets)
             {
+                if (!ForceSwitch && !BuildContext.Default.Config.ProductNames.Any(t => t.ToLower() == target))
+                    throw new InvalidDataException($"Invalid product '{target}'");
+
                 await Console.Out.WriteLineAsync(Environment.NewLine +
                     $"Discovering '{target}' in '{ContainerId}' ...");
 
                 var items = await ArtifactsApi.FindArtifact(target, filter =>
                 {
                     filter.ContainerId = ContainerId;
-                    filter.ShowOss = ShowOss;
                     filter.Bitness = Bitness;
                 });
 

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
+using ElastiBuild.Extensions;
 
 namespace Elastic.Installer
 {
@@ -7,41 +10,65 @@ namespace Elastic.Installer
     {
         public string TargetName { get; }
         public string Version { get; }
-        public string SemVer { get; }
+        public string Qualifier { get; }
+        public string Snapshot => IsSnapshot ? MagicStrings.Ver.Snapshot : string.Empty;
         public string Architecture { get; }
         public string FileName { get; }
         public string Url { get; }
 
-        public bool IsDownloadable =>
-            !string.IsNullOrWhiteSpace(Url);
+        public string SemVer => string.Join("-", new[]
+        {
+            Version, Qualifier, Snapshot
+        }.Where(str => !str.IsEmpty()));
 
-        public bool Is32bit => Architecture == MagicStrings.Arch.x86;
+        public bool IsSnapshot { get; private set; }
+        public bool IsOss { get; private set; }
+        public string CanonicalTargetName { get; private set; }
+
+        public bool Is32Bit => Architecture == MagicStrings.Arch.x86;
         public bool Is64Bit => Architecture == MagicStrings.Arch.x86_64;
+        public bool IsDownloadable => !Url.IsEmpty();
+        public bool IsQualified => !Qualifier.IsEmpty();
 
-        public ArtifactPackage(string name)
-            : this(name, null)
-        { }
+        public static bool FromUrl(string url, out ArtifactPackage artifactPackage) =>
+            FromFilenameOrUrl(Path.GetFileName(url), url, out artifactPackage);
 
-        public ArtifactPackage(string fileName, string url)
+        public static bool FromFilename(string fileName, out ArtifactPackage artifactPackage) =>
+            FromFilenameOrUrl(fileName, null, out artifactPackage);
+
+        static readonly Regex rx = new Regex(
+            /* 0 full capture, 7 groups total */
+            /* 1 */ @$"(?<target>[^-]+(-oss)?)" +
+            /* 2 */ @$"-(?<version>\d+\.\d+\.\d+)" +
+            /* 3 */ @$"(-(?<qualifier>(?!\b(?:{MagicStrings.Ver.Snapshot})\b)[^-]+))?" +
+            /* 4 */ @$"(-(?<snapshot>{MagicStrings.Ver.Snapshot}))?" +
+            /* 5 */ @$"-(?<os>[^-]+)" +
+            /* 6 */ @$"-(?<arch>[^\.]+)",
+            RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+
+        static bool FromFilenameOrUrl(string fileName, string url, out ArtifactPackage artifactPackage)
+        {
+            artifactPackage = null;
+
+            var rxVersion = rx.Match(fileName);
+            if (rxVersion.Groups.Count < 7)
+                return false;
+
+            artifactPackage = new ArtifactPackage(rxVersion.Groups, fileName, url);
+            return true;
+        }
+
+        ArtifactPackage(GroupCollection rxGroups, string fileName, string url)
         {
             FileName = fileName;
             Url = url;
-
-            var rxVersion = rx.Match(FileName);
-            if (rxVersion.Groups.Count != 6)
-                throw new Exception("Unable to parse package file name: " + FileName);
-
-            TargetName = rxVersion.Groups["target"].Value?.ToLower();
-            Version = rxVersion.Groups["version"].Value?.ToLower();
-            SemVer = rxVersion.Groups["semver"].Value?.ToLower();
-            Architecture = rxVersion.Groups["arch"].Value?.ToLower();
+            TargetName = rxGroups["target"].Value.ToLower();
+            Version = rxGroups["version"].Value.ToLower();
+            Qualifier = rxGroups["qualifier"].Value.ToLower();
+            Architecture = rxGroups["arch"].Value.ToLower();
+            IsSnapshot = !rxGroups["snapshot"].Value.IsEmpty();
+            IsOss = TargetName.EndsWith("-oss", StringComparison.OrdinalIgnoreCase);
+            CanonicalTargetName = TargetName.Replace("-oss", string.Empty);
         }
-
-        static readonly Regex rx = new Regex(
-                @"(?<target>[^-]+)-" +
-                @"(?<semver>(?<version>\d+\.\d+\.\d+)(-[^-]+)?)-" +
-                @"(?<os>[^-]+)-" +
-                @"(?<arch>[^\.]+)",
-                RegexOptions.Compiled | RegexOptions.ExplicitCapture);
     }
 }
