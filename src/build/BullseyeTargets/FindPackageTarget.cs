@@ -25,6 +25,8 @@ namespace ElastiBuild.BullseyeTargets
             if (!QualifiedVersion.FromString(containerId, out var qv))
                 throw new InvalidDataException($"Bad container id: '{containerId}'");
 
+            Directory.CreateDirectory(ctx.InDir);
+
             if (!forceSwitch)
                 await Console.Out.WriteLineAsync($"Searching local directory {ctx.InDir} ...");
 
