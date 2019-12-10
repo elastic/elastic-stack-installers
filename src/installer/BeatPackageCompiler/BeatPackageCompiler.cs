@@ -31,9 +31,15 @@ namespace Elastic.PackageCompiler.Beats
             var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
-            // Generate UUID v5 from product properties
-            // This UUID *must* be stable and unique beat/arch combination
-            var upgradeCode = Uuid5.FromString(ap.TargetName + ap.Architecture);
+            // We converge x86/x64 and OSS/Elastic licensed product into one product code,
+            // because data directory is shared and we don't support side-by-side installs
+            var convergedTarget = ap.TargetName.EndsWith(MagicStrings.Files.DashOssSuffix, true)
+                ? ap.TargetName.Substring(0, ap.TargetName.Length - MagicStrings.Files.DashOssSuffix.Length)
+                : ap.TargetName;
+
+            // Generate UUID v5 from product properties.
+            // This UUID *must* be stable and unique between Beats.
+            var upgradeCode = Uuid5.FromString(convergedTarget);
 
             var project = new Project(displayName)
             {
@@ -89,15 +95,12 @@ namespace Elastic.PackageCompiler.Beats
 
             // Convert LICENSE.txt to something richedit control can render
             System.IO.File.WriteAllText(
-                Path.Combine(opts.PackageOutDir, MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
-                @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
-                @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
-                @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
-                System.IO.File
-                    .ReadAllText(Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))
-                    .Replace("\r\n\r\n", "\n\n")
-                    .Replace("\n\n", @"\par" + "\r\n") +
-                @"\par}");
+                Path.Combine(
+                    opts.PackageOutDir,
+                    MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
+                MagicStrings.Content.WrapWithRtf(
+                    System.IO.File.ReadAllText(
+                        Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))));
 
             var beatDataPath = Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
 
@@ -194,12 +197,14 @@ namespace Elastic.PackageCompiler.Beats
 
             // We'll open the folder for now
             // TODO: select file in explorer window
-            project.AddProperty(new Property("WixShellExecTarget", $"[$Component.{beatConfigExampleFileId}]"));
+            project.AddProperty(new Property(
+                "WixShellExecTarget",
+                $"[$Component.{beatConfigExampleFileId}]"));
 
             project.AddWixFragment("Wix/Product",
                 XElement.Parse(@"
 <CustomAction
-    Id=""LaunchApplication""
+    Id=""CA_SelectExampleYamlInExplorer""
     BinaryKey = ""WixCA""
     DllEntry = ""WixShellExec""
     Impersonate = ""yes""
@@ -210,7 +215,7 @@ namespace Elastic.PackageCompiler.Beats
         Dialog=""ExitDialog""
         Control=""Finish""
         Event=""DoAction"" 
-        Value=""LaunchApplication"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
+        Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
     </Publish>
 </UI>"));
 
@@ -306,7 +311,7 @@ namespace Elastic.PackageCompiler.Beats
                 Compiler.LightOptions += " -v";
             }
 
-            project.WixSourceGenerated += Project_WixSourceGenerated;
+            //project.WixSourceGenerated += Project_WixSourceGenerated;
 
             project.ResolveWildCards();
 
@@ -316,8 +321,8 @@ namespace Elastic.PackageCompiler.Beats
                 Compiler.BuildMsi(project);
         }
 
-        static void Project_WixSourceGenerated(XDocument document)
-        {
-        }
+        //static void Project_WixSourceGenerated(XDocument document)
+        //{
+        //}
     }
 }

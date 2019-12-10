@@ -49,3 +49,51 @@ products:
     published_binaries: [ winlogbeat.exe ]
     mutable_dirs: [ kibana, module ]
     service: true
+
+  auditbeat-oss:
+    description: Audit the activities of users and processes on your system
+    published_name: Elastic Beats Autditbeat OSS
+    published_url: https://www.elastic.co/products/beats/auditbeat
+    published_binaries: [ auditbeat.exe ]
+    mutable_dirs: [ kibana ]
+    service: true
+
+  filebeat-oss:
+    description: Filebeat sends log files to Logstash or directly to Elasticsearch
+    published_name: Elastic Beats Filebeat OSS
+    published_url: https://www.elastic.co/products/beats/filebeat
+    published_binaries: [ filebeat.exe ]
+    mutable_dirs: [ kibana, module, modules.d ]
+    service: true
+
+  heartbeat-oss:
+    description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
+    published_name: Elastic Beats Heartbeat OSS
+    published_url: https://www.elastic.co/products/beats/heartbeat
+    published_binaries: [ heartbeat.exe ]
+    mutable_dirs: [ kibana, monitors.d ]
+    service: true
+
+  metricbeat-oss:
+    description: Metricbeat is a lightweight shipper for metrics
+    published_name: Elastic Beats Metricbeat OSS
+    published_url: https://www.elastic.co/products/beats/metricbeat
+    published_binaries: [ metricbeat.exe ]
+    mutable_dirs: [ kibana, modules.d ]
+    service: true
+
+  packetbeat-oss:
+    description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
+    published_name: Elastic Beats Packetbeat OSS
+    published_url: https://www.elastic.co/products/beats/packetbeat
+    published_binaries: [ packetbeat.exe ]
+    mutable_dirs: [ kibana ]
+    service: true
+
+  winlogbeat-oss:
+    description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
+    published_name: Elastic Beats Winlogbeat OSS
+    published_url: https://www.elastic.co/products/beats/winlogbeat
+    published_binaries: [ winlogbeat.exe ]
+    mutable_dirs: [ kibana ]
+    service: true

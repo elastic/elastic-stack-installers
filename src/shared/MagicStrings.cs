@@ -41,6 +41,7 @@ namespace Elastic.Installer
             public static readonly string LeftBannerBmp = "leftbanner.bmp";
             public static readonly string BuildRoot = ".buildroot";
             public static readonly string SignToolExe = "signtool.exe";
+            public static readonly string DashOssSuffix = "-oss";
 
             public static readonly string LicenseRtf = "LICENSE.rtf";
             public static string PackageLicenseRtf(string packageName) =>
@@ -89,6 +90,18 @@ namespace Elastic.Installer
         public static class Ver
         {
             public static readonly string Snapshot = "SNAPSHOT";
+        }
+
+        public static class Content
+        {
+            public static string WrapWithRtf(string content) =>
+                @"{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033" +
+                @"{\fonttbl{\f0\fnil\fcharset0 Tahoma;}}" +
+                @"{\viewkind4\uc1\pard\sa200\sl276\slmult1\f0\fs18\lang9 " +
+                content
+                    .Replace("\r\n\r\n", "\n\n")
+                    .Replace("\n\n", @"\par" + "\r\n") +
+                @"\par}";
         }
 
         public static class Errors
