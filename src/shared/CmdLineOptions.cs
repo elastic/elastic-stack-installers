@@ -14,6 +14,12 @@ namespace Elastic.PackageCompiler
         [Option("wxs-only", HelpText = "Only generate .wxs file, skip building .msi")]
         public bool WxsOnly { get; private set; }
 
+        [Option('v', "verbose", Default = false, HelpText = "Wix Toolset will print verbose output")]
+        public bool Verbose { get; set; }
+
+        [Option("keep-temp-files", Default = false, HelpText = "Preserve (do not delete) temporary files")]
+        public bool KeepTempFiles { get; set; }
+
         public string ShortPackageName =>
             PackageName?.Substring(0, PackageName.IndexOf('-')) ?? string.Empty;
 

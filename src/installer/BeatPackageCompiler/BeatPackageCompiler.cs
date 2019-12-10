@@ -128,7 +128,7 @@ namespace Elastic.PackageCompiler.Beats
                         $" --path.home \"[CommonAppDataFolder]\\{beatDataPath}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
-                    DelayedAutoStart = true,
+                    DelayedAutoStart = false,
                     Start = SvcStartType.auto,
 
                     // Don't start on install, config file is likely not ready yet
@@ -196,13 +196,23 @@ namespace Elastic.PackageCompiler.Beats
             // TODO: select file in explorer window
             project.AddProperty(new Property("WixShellExecTarget", $"[$Component.{beatConfigExampleFileId}]"));
 
-            project.AddWixFragment("Wix/Product", XElement.Parse(@"
+            project.AddWixFragment("Wix/Product",
+                XElement.Parse(@"
 <CustomAction
     Id=""LaunchApplication""
     BinaryKey = ""WixCA""
     DllEntry = ""WixShellExec""
     Impersonate = ""yes""
-/>"));
+/>"),
+                XElement.Parse(@"
+<UI>
+    <Publish
+        Dialog=""ExitDialog""
+        Control=""Finish""
+        Event=""DoAction"" 
+        Value=""LaunchApplication"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
+    </Publish>
+</UI>"));
 
             var dataContents = new DirectoryInfo(opts.PackageInDir)
                 .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
@@ -282,7 +292,19 @@ namespace Elastic.PackageCompiler.Beats
 
             // We hard-link Wix Toolset to a known location
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
-            Compiler.PreserveTempFiles = true;
+
+#if !DEBUG
+            if (opts.KeepTempFiles)
+#endif
+            {
+                Compiler.PreserveTempFiles = true;
+            }
+
+            if (opts.Verbose)
+            {
+                Compiler.CandleOptions += " -v";
+                Compiler.LightOptions += " -v";
+            }
 
             project.WixSourceGenerated += Project_WixSourceGenerated;
 
@@ -296,17 +318,6 @@ namespace Elastic.PackageCompiler.Beats
 
         static void Project_WixSourceGenerated(XDocument document)
         {
-            document.Root
-                .Select("Product")
-                .Add(XElement.Parse(@"
-<UI>
-    <Publish
-        Dialog=""ExitDialog""
-        Control=""Finish""
-        Event=""DoAction"" 
-        Value=""LaunchApplication"">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
-    </Publish>
-</UI>"));
         }
     }
 }
