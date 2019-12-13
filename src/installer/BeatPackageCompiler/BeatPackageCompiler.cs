@@ -283,7 +283,10 @@ namespace Elastic.PackageCompiler.Beats
                             new DirPermission
                             {
                                 // Wix knows "Users" and will translate it to a well-known SID
-                                User = "Users", GenericAll = true
+                                User = "Users",
+
+                                // Only users who a able to elevate can touch config files 
+                                GenericAll = false
                             }
                         }
                     })
