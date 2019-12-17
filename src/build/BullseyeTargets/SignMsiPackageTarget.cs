@@ -10,19 +10,19 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class SignMsiPackageTarget : SignToolTargetBase<SignMsiPackageTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
         {
+            var ap = ctx.GetArtifactPackage();
+
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
                 MagicStrings.Dirs.Cert,
                 MagicStrings.Files.SignToolExe);
 
-            var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, target);
-
-            var ap = ctx.GetArtifactPackage();
+            var (certPass, SignToolArgs) = MakeSignToolArgs(ctx);
 
             SignToolArgs += Path
-                .Combine(ctx.OutDir, target,
+                .Combine(ctx.OutDir, ap.CanonicalTargetName,
                     Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi)
                 .Quote();
 

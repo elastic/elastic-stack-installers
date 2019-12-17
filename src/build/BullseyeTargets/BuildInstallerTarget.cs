@@ -10,7 +10,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class BuildInstallerTarget : BullseyeTargetBase<BuildInstallerTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
         {
             await Console.Out.WriteLineAsync("Build Done");
         }

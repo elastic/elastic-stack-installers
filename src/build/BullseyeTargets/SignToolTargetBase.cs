@@ -1,13 +1,15 @@
 ﻿using ElastiBuild.Extensions;
+using Elastic.Installer;
 
 namespace ElastiBuild.BullseyeTargets
 {
     public abstract class SignToolTargetBase<T> : BullseyeTargetBase<T>
     {
-        protected static (string certPass, string SignToolArgs) MakeSignToolArgs(
-            BuildContext ctx, string target)
+        protected static (string certPass, string SignToolArgs) MakeSignToolArgs(BuildContext ctx)
         {
-            var pc = ctx.Config.GetProductConfig(target);
+            var ap = ctx.GetArtifactPackage();
+
+            var pc = ctx.Config.GetProductConfig(ap.TargetName);
             var (certFile, certPass) = ctx.GetCertificate();
 
             return (

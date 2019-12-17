@@ -10,7 +10,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class UnpackPackageTarget : BullseyeTargetBase<UnpackPackageTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
         {
             var ap = ctx.GetArtifactPackage();
 

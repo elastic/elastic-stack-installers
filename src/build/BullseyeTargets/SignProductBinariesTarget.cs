@@ -10,18 +10,18 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class SignProductBinariesTarget : SignToolTargetBase<SignProductBinariesTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
         {
+            var ap = ctx.GetArtifactPackage();
+
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
                 MagicStrings.Dirs.Cert,
                 MagicStrings.Files.SignToolExe);
 
-            var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, target);
+            var (certPass, SignToolArgs) = MakeSignToolArgs(ctx);
 
-            var ap = ctx.GetArtifactPackage();
-
-            foreach (var binary in ctx.Config.GetProductConfig(target).PublishedBinaries)
+            foreach (var binary in ctx.Config.GetProductConfig(ap.TargetName).PublishedBinaries)
             {
                 var FullSignToolArgs = SignToolArgs + Path
                     .Combine(ctx.InDir, Path.GetFileNameWithoutExtension(ap.FileName), binary)

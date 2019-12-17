@@ -10,7 +10,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class FetchPackageTarget : BullseyeTargetBase<FetchPackageTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
         {
             bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
 

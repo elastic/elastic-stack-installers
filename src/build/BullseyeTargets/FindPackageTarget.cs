@@ -12,12 +12,12 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class FindPackageTarget : BullseyeTargetBase<FindPackageTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string target)
+        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string targetName)
         {
             bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
 
-            if (!forceSwitch && !ctx.Config.ProductNames.Any(t => t.ToLower() == target))
-                throw new InvalidDataException($"Invalid product '{target}'");
+            if (!forceSwitch && !ctx.Config.ProductNames.Any(t => t.ToLower() == targetName))
+                throw new InvalidDataException($"Invalid product '{targetName}'");
 
             var bitness = (cmd as ISupportBitnessChoice).Bitness;
             var containerId = (cmd as ISupportRequiredContainerId).ContainerId;
@@ -43,7 +43,7 @@ namespace ElastiBuild.BullseyeTargets
                         if (!ArtifactPackage.FromFilename(fi.Name, out var ap))
                             return null;
 
-                        if (ap.TargetName != target)
+                        if (ap.TargetName != targetName)
                             return null;
 
                         if (ap.SemVer != qv.SemVer)
@@ -73,9 +73,9 @@ namespace ElastiBuild.BullseyeTargets
             if (packageList.Count == 0)
             {
                 // No local packages found, try Artifacts API
-                await Console.Out.WriteLineAsync($"Searching Artifacts API for {target}-{containerId} ...");
+                await Console.Out.WriteLineAsync($"Searching Artifacts API for {targetName}-{containerId} ...");
 
-                packageList = (await ArtifactsApi.FindArtifact(target, filter =>
+                packageList = (await ArtifactsApi.FindArtifact(targetName, filter =>
                 {
                     filter.ContainerId = containerId;
                     filter.Bitness = bitness;

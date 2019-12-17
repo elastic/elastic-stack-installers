@@ -31,15 +31,9 @@ namespace Elastic.PackageCompiler.Beats
             var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
-            // We converge x86/x64 and OSS/Elastic licensed product into one product code,
-            // because data directory is shared and we don't support side-by-side installs
-            var convergedTarget = ap.TargetName.EndsWith(MagicStrings.Files.DashOssSuffix, true)
-                ? ap.TargetName.Substring(0, ap.TargetName.Length - MagicStrings.Files.DashOssSuffix.Length)
-                : ap.TargetName;
-
             // Generate UUID v5 from product properties.
             // This UUID *must* be stable and unique between Beats.
-            var upgradeCode = Uuid5.FromString(convergedTarget);
+            var upgradeCode = Uuid5.FromString(ap.CanonicalTargetName);
 
             var project = new Project(displayName)
             {

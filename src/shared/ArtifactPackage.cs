@@ -38,7 +38,7 @@ namespace Elastic.Installer
 
         static readonly Regex rx = new Regex(
             /* 0 full capture, 7 groups total */
-            /* 1 */ @$"(?<target>[^-]+(-oss)?)" +
+            /* 1 */ @$"(?<target>[^-]+({MagicStrings.Files.DashOssSuffix})?)" +
             /* 2 */ @$"-(?<version>\d+\.\d+\.\d+)" +
             /* 3 */ @$"(-(?<qualifier>(?!\b(?:{MagicStrings.Ver.Snapshot})\b)[^-]+))?" +
             /* 4 */ @$"(-(?<snapshot>{MagicStrings.Ver.Snapshot}))?" +
@@ -62,13 +62,20 @@ namespace Elastic.Installer
         {
             FileName = fileName;
             Url = url;
+
             TargetName = rxGroups["target"].Value.ToLower();
             Version = rxGroups["version"].Value.ToLower();
             Qualifier = rxGroups["qualifier"].Value.ToLower();
             Architecture = rxGroups["arch"].Value.ToLower();
             IsSnapshot = !rxGroups["snapshot"].Value.IsEmpty();
-            IsOss = TargetName.EndsWith("-oss", StringComparison.OrdinalIgnoreCase);
-            CanonicalTargetName = TargetName.Replace("-oss", string.Empty);
+
+            IsOss = TargetName.EndsWith(
+                MagicStrings.Files.DashOssSuffix,
+                StringComparison.OrdinalIgnoreCase);
+
+            CanonicalTargetName = IsOss
+                ? TargetName.Substring(0, TargetName.Length - MagicStrings.Files.DashOssSuffix.Length)
+                : TargetName;
         }
     }
 }

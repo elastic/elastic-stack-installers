@@ -6,13 +6,15 @@ namespace ElastiBuild.Infra
 {
     public class ArtifactFilter
     {
-        public string Target { get; }
+        public string TargetName { get; }
         public string ContainerId { get; set; }
         public eBitness Bitness { get; set; }
 
         public string QueryString =>
             ",windows"
-            + (Target.EndsWith("-oss", StringComparison.OrdinalIgnoreCase) ? string.Empty : ",-oss")
+            + (TargetName.EndsWith(MagicStrings.Files.DashOssSuffix, StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : ("," + MagicStrings.Files.DashOssSuffix))
             + (Bitness == eBitness.both
                 ? string.Empty
                 : (Bitness == eBitness.x86
@@ -20,7 +22,7 @@ namespace ElastiBuild.Infra
                     : string.Empty))
             ;
 
-        public ArtifactFilter(string target) =>
-            Target = target;
+        public ArtifactFilter(string targetName) =>
+            TargetName = targetName;
     }
 }

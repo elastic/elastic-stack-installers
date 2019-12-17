@@ -72,12 +72,12 @@ namespace ElastiBuild.Commands
                 bt.Add(
                     FetchPackageTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
-                    async () => await FetchPackageTarget.RunAsync(cmd, ctx, product));
+                    async () => await FetchPackageTarget.RunAsync(cmd, ctx));
 
                 bt.Add(
                     UnpackPackageTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(FetchPackageTarget.NameWith(product)),
-                    async () => await UnpackPackageTarget.RunAsync(cmd, ctx, product));
+                    async () => await UnpackPackageTarget.RunAsync(cmd, ctx));
 
                 // sign individual binaries
                 if (addSignTarget)
@@ -88,7 +88,7 @@ namespace ElastiBuild.Commands
                     bt.Add(
                         SignProductBinariesTarget.NameWith(product),
                         Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(product)),
-                        async () => await SignProductBinariesTarget.RunAsync(cmd, ctx, product));
+                        async () => await SignProductBinariesTarget.RunAsync(cmd, ctx));
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace ElastiBuild.Commands
                     Bullseye.Targets.DependsOn(
                         BuildBeatPackageCompilerTarget.Name,
                         SignProductBinariesTarget.NameWith(product)),
-                    async () => await CompileMsiTarget.RunAsync(cmd, ctx, product));
+                    async () => await CompileMsiTarget.RunAsync(cmd, ctx));
 
                 // sign final .msi
                 if (addSignTarget)
@@ -111,7 +111,7 @@ namespace ElastiBuild.Commands
                     bt.Add(
                         SignMsiPackageTarget.NameWith(product),
                         Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(product)),
-                        async () => await SignMsiPackageTarget.RunAsync(cmd, ctx, product));
+                        async () => await SignMsiPackageTarget.RunAsync(cmd, ctx));
                 }
                 else
                 {
@@ -124,7 +124,7 @@ namespace ElastiBuild.Commands
                 bt.Add(
                     BuildInstallerTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(SignMsiPackageTarget.NameWith(product)),
-                    async () => await BuildInstallerTarget.RunAsync(cmd, ctx, product));
+                    async () => await BuildInstallerTarget.RunAsync(cmd, ctx));
 
                 productBuildTargets.Add(BuildInstallerTarget.NameWith(product));
             }

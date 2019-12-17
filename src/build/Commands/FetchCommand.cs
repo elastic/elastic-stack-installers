@@ -44,7 +44,7 @@ namespace ElastiBuild.Commands
                 bt.Add(
                     FetchPackageTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
-                    async () => await FetchPackageTarget.RunAsync(cmd, ctx, product));
+                    async () => await FetchPackageTarget.RunAsync(cmd, ctx));
 
                 productBuildTargets.Add(FetchPackageTarget.NameWith(product));
             }
