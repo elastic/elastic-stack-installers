@@ -55,3 +55,6 @@ _ReSharper*/
 
 # Jetbrains cache
 src/.idea/
+
+# Test cmd files
+src/*.cmd

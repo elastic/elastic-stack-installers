@@ -2,7 +2,7 @@
   "profiles": {
     "BeatPackageCompiler.netcore": {
       "commandName": "Project",
-      "commandLineArgs": "--package=winlogbeat-7.5.0-windows-x86_64 --keep-temp-files",
+      "commandLineArgs": "--package=winlogbeat-7.5.0-windows-x86_64 -v --keep-temp-files",
       "workingDirectory": "$(SolutionDir)"
     }
   }

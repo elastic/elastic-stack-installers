@@ -37,6 +37,8 @@ namespace Elastic.PackageCompiler.Beats
 
             var project = new Project(displayName)
             {
+                InstallerVersion = 500,
+
                 GUID = upgradeCode,
 
                 Name = $"{displayName} {ap.SemVer} ({ap.Architecture})",
@@ -96,8 +98,6 @@ namespace Elastic.PackageCompiler.Beats
                     System.IO.File.ReadAllText(
                         Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))));
 
-            var beatDataPath = Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
-
             WixSharp.File service = null;
             if (pc.IsWindowsService)
             {
@@ -122,7 +122,7 @@ namespace Elastic.PackageCompiler.Beats
                     },
 
                     Arguments =
-                        $" --path.home \"[CommonAppDataFolder]\\{beatDataPath}\"" +
+                        $" --path.home \"[CommonAppDataFolder]\\{Path.Combine(companyName, productSetName, ap.CanonicalTargetName)}\"" +
                         $" -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = false,
@@ -176,8 +176,7 @@ namespace Elastic.PackageCompiler.Beats
 
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
             var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
-            var beatConfigExampleFileId = beatConfigExampleFileName +
-                Uuid5.FromString(beatConfigExampleFileName).ToString("n");
+            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + beatConfigExampleFileName.GetHashCode32();
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
                 $"NOTE: We put an example configuration file {ap.CanonicalTargetName}.example.yml in the data directory. " +
@@ -260,30 +259,38 @@ namespace Elastic.PackageCompiler.Beats
             project.Dirs = new[]
             {
                 // Binaries
-                new InstallDir(
-                    beatsInstallPath,
+                new InstallDir(beatsInstallPath,
                     new Dir(
                         ap.Version,
                         new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
                         new WixSharp.File(cliShimScriptPath))),
 
                 // Configration and logs
-                new Dir(
-                    "[CommonAppDataFolder]",
-                    new Dir(beatDataPath, dataContents.ToArray())
-                    {
-                        Permissions = new[]
-                        {
-                            new DirPermission
+                new Dir("[CommonAppDataFolder]",
+                    new Dir(companyName,
+                        new Dir(productSetName,
+                            new Dir(ap.CanonicalTargetName, dataContents.ToArray())
                             {
-                                // Wix knows "Users" and will translate it to a well-known SID
-                                User = "Users",
+                                GenericItems = new []
+                                {
+                                    /*
+                                    This will *replace* ACL on the {beatname} directory:
 
-                                // Only users who a able to elevate can touch config files 
-                                GenericAll = false
-                            }
-                        }
-                    })
+                                    Directory tree:
+                                        NT AUTHORITY\SYSTEM:(OI)(CI)F
+                                        BUILTIN\Administrators:(OI)(CI)F
+                                        BUILTIN\Users:(CI)R
+
+                                    Files:
+                                        NT AUTHORITY\SYSTEM:(ID)F
+                                        BUILTIN\Administrators:(ID)F
+                                    */
+
+                                    new MsiLockPermissionEx(
+                                        "D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;CI;0x1200a9;;;BU)",
+                                        ap.Is64Bit)
+                                }
+                            })))
             };
 
             // CLI Shim path
@@ -308,18 +315,14 @@ namespace Elastic.PackageCompiler.Beats
                 Compiler.LightOptions += " -v";
             }
 
-            //project.WixSourceGenerated += Project_WixSourceGenerated;
-
             project.ResolveWildCards();
 
             if (opts.WxsOnly)
                 project.BuildWxs();
+            else if (opts.CmdOnly)
+                Compiler.BuildMsiCmd(project, Path.Combine(opts.SrcDir, opts.PackageName) + ".cmd");
             else
                 Compiler.BuildMsi(project);
         }
-
-        //static void Project_WixSourceGenerated(XDocument document)
-        //{
-        //}
     }
 }
