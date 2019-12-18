@@ -20,7 +20,7 @@ namespace Elastic.PackageCompiler.Beats
             var parentId = context.XParent.Attribute("Id").Value;
 
             var elt = new XElement("Component",
-                new XAttribute("Id", "Component.MsiLockPermissionEx_" + parentId.GetHashCode32()),
+                new XAttribute("Id", "Component.MsiLockPermissionEx_" + (uint) parentId.GetHashCode32()),
                 new XAttribute("Guid", Guid.NewGuid()),
                 new XAttribute("KeyPath", "yes"),
                 new XAttribute("Win64", Win64),

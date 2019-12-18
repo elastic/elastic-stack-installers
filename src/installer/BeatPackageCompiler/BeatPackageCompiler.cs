@@ -176,7 +176,7 @@ namespace Elastic.PackageCompiler.Beats
 
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
             var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
-            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + beatConfigExampleFileName.GetHashCode32();
+            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
                 $"NOTE: We put an example configuration file {ap.CanonicalTargetName}.example.yml in the data directory. " +
