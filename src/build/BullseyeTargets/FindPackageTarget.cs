@@ -12,8 +12,9 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class FindPackageTarget : BullseyeTargetBase<FindPackageTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx, string targetName)
+        public static async Task RunAsync(BuildContext ctx, string targetName)
         {
+            var cmd = ctx.GetCommand();
             bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
 
             if (!forceSwitch && !ctx.Config.ProductNames.Any(t => t.ToLower() == targetName))
@@ -109,7 +110,7 @@ namespace ElastiBuild.BullseyeTargets
             if (ap == null)
                 throw new Exception("BUGBUG: ap = null");
 
-            ctx.UseArtifactPackage(ap);
+            ctx.SetArtifactPackage(ap);
 
             await Console.Out.WriteLineAsync(actionPrefix + ap.FileName);
             return;

@@ -38,7 +38,7 @@ namespace ElastiBuild.Commands
 
             bt.Add(
                 BuildBeatPackageCompilerTarget.Name,
-                async () => await BuildBeatPackageCompilerTarget.RunAsync(cmd, BuildContext.Default));
+                async () => await BuildBeatPackageCompilerTarget.RunAsync(BuildContext.Default));
 
             var productBuildTargets = new List<string>();
 
@@ -62,71 +62,71 @@ namespace ElastiBuild.Commands
 
             foreach (var target in Targets)
             {
-                var product = target;
                 var ctx = new BuildContext();
+                ctx.SetCommand(this);
 
                 bt.Add(
-                    FindPackageTarget.NameWith(product),
-                    async () => await FindPackageTarget.RunAsync(cmd, ctx, product));
+                    FindPackageTarget.NameWith(target),
+                    async () => await FindPackageTarget.RunAsync(ctx, target));
 
                 bt.Add(
-                    FetchPackageTarget.NameWith(product),
-                    Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
-                    async () => await FetchPackageTarget.RunAsync(cmd, ctx));
+                    FetchPackageTarget.NameWith(target),
+                    Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(target)),
+                    async () => await FetchPackageTarget.RunAsync(ctx));
 
                 bt.Add(
-                    UnpackPackageTarget.NameWith(product),
-                    Bullseye.Targets.DependsOn(FetchPackageTarget.NameWith(product)),
-                    async () => await UnpackPackageTarget.RunAsync(cmd, ctx));
+                    UnpackPackageTarget.NameWith(target),
+                    Bullseye.Targets.DependsOn(FetchPackageTarget.NameWith(target)),
+                    async () => await UnpackPackageTarget.RunAsync(ctx));
 
                 // sign individual binaries
                 if (addSignTarget)
-                    ctx.UseCertificate(CertFile, CertPass);
+                    ctx.SetCertificate(CertFile, CertPass);
 
                 if (addSignTarget)
                 {
                     bt.Add(
-                        SignProductBinariesTarget.NameWith(product),
-                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(product)),
-                        async () => await SignProductBinariesTarget.RunAsync(cmd, ctx));
+                        SignProductBinariesTarget.NameWith(target),
+                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(target)),
+                        async () => await SignProductBinariesTarget.RunAsync(ctx));
                 }
                 else
                 {
                     bt.Add(
-                        SignProductBinariesTarget.NameWith(product),
-                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(product)),
+                        SignProductBinariesTarget.NameWith(target),
+                        Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(target)),
                         async () => await Console.Out.WriteLineAsync("Skipping digital signature for product binaries"));
                 }
 
                 bt.Add(
-                    CompileMsiTarget.NameWith(product),
+                    CompileMsiTarget.NameWith(target),
                     Bullseye.Targets.DependsOn(
                         BuildBeatPackageCompilerTarget.Name,
-                        SignProductBinariesTarget.NameWith(product)),
-                    async () => await CompileMsiTarget.RunAsync(cmd, ctx));
+                        SignProductBinariesTarget.NameWith(target)),
+                    async () => await CompileMsiTarget.RunAsync(ctx));
 
                 // sign final .msi
                 if (addSignTarget)
                 {
                     bt.Add(
-                        SignMsiPackageTarget.NameWith(product),
-                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(product)),
-                        async () => await SignMsiPackageTarget.RunAsync(cmd, ctx));
+                        SignMsiPackageTarget.NameWith(target),
+                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(target)),
+                        async () => await SignMsiPackageTarget.RunAsync(ctx));
                 }
                 else
                 {
                     bt.Add(
-                        SignMsiPackageTarget.NameWith(product),
-                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(product)),
+                        SignMsiPackageTarget.NameWith(target),
+                        Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(target)),
                         async () => await Console.Out.WriteLineAsync("Skipping digital signature for MSI package"));
                 }
 
                 bt.Add(
-                    BuildInstallerTarget.NameWith(product),
-                    Bullseye.Targets.DependsOn(SignMsiPackageTarget.NameWith(product)),
-                    async () => await BuildInstallerTarget.RunAsync(cmd, ctx));
+                    BuildInstallerTarget.NameWith(target),
+                    Bullseye.Targets.DependsOn(SignMsiPackageTarget.NameWith(target)),
+                    async () => await BuildInstallerTarget.RunAsync(ctx));
 
-                productBuildTargets.Add(BuildInstallerTarget.NameWith(product));
+                productBuildTargets.Add(BuildInstallerTarget.NameWith(target));
             }
 
             try

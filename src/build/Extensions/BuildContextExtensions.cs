@@ -6,7 +6,20 @@ namespace ElastiBuild.Extensions
 {
     public static class BuildContextExtensions
     {
-        public static void UseArtifactPackage(this BuildContext ctx, ArtifactPackage ap) =>
+        public static void SetCommand(this BuildContext ctx, IElastiBuildCommand cmd) =>
+            ctx.Items.Add(nameof(IElastiBuildCommand), cmd);
+
+        public static IElastiBuildCommand GetCommand(this BuildContext ctx)
+        {
+            if (ctx.Items.TryGetValue(nameof(IElastiBuildCommand), out var obj) && obj is IElastiBuildCommand cmd)
+                return cmd;
+
+            throw new Exception(
+                $"Unable to get {nameof(IElastiBuildCommand)} instance from " +
+                $"{nameof(BuildContext)}.{nameof(BuildContext.Items)}");
+        }
+
+        public static void SetArtifactPackage(this BuildContext ctx, ArtifactPackage ap) =>
             ctx.Items.Add(nameof(ArtifactPackage), ap);
 
         public static ArtifactPackage GetArtifactPackage(this BuildContext ctx)
@@ -19,7 +32,7 @@ namespace ElastiBuild.Extensions
                 $"{nameof(BuildContext)}.{nameof(BuildContext.Items)}");
         }
 
-        public static void UseCertificate(this BuildContext ctx, string certFile, string certPass)
+        public static void SetCertificate(this BuildContext ctx, string certFile, string certPass)
         {
             ctx.Items.Add(nameof(ISupportCodeSigning.CertFile), certFile);
             ctx.Items.Add(nameof(ISupportCodeSigning.CertPass), certPass);

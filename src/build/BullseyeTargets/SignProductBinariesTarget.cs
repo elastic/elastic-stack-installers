@@ -10,7 +10,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class SignProductBinariesTarget : SignToolTargetBase<SignProductBinariesTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
+        public static async Task RunAsync(BuildContext ctx)
         {
             var ap = ctx.GetArtifactPackage();
 

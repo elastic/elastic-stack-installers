@@ -8,8 +8,9 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class CompileMsiTarget : BullseyeTargetBase<CompileMsiTarget>
     {
-        public static async Task RunAsync(IElastiBuildCommand cmd, BuildContext ctx)
+        public static async Task RunAsync(BuildContext ctx)
         {
+            var cmd = ctx.GetCommand();
             var ap = ctx.GetArtifactPackage();
 
             var args = string.Join(' ', new string[]

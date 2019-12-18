@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
 using ElastiBuild.BullseyeTargets;
+using ElastiBuild.Extensions;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
@@ -36,15 +37,16 @@ namespace ElastiBuild.Commands
             {
                 var product = target;
                 var ctx = new BuildContext();
+                ctx.SetCommand(this);
 
                 bt.Add(
                     FindPackageTarget.NameWith(product),
-                    async () => await FindPackageTarget.RunAsync(cmd, ctx, product));
+                    async () => await FindPackageTarget.RunAsync(ctx, product));
 
                 bt.Add(
                     FetchPackageTarget.NameWith(product),
                     Bullseye.Targets.DependsOn(FindPackageTarget.NameWith(product)),
-                    async () => await FetchPackageTarget.RunAsync(cmd, ctx));
+                    async () => await FetchPackageTarget.RunAsync(ctx));
 
                 productBuildTargets.Add(FetchPackageTarget.NameWith(product));
             }
