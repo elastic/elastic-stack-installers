@@ -8,7 +8,9 @@ To report any problems encountered during installation, or to request features, 
 For other questions of comments pleas refer to [Elastic Forums](https://discuss.elastic.co/tags/windows-installer). Please *tag* your question with `windows-installer` (singlular).
 
 ## Capturing Logs:
-```msiexec /l!*vx "<full path to log file to be created>" /i "<full path to msi file>"```
+```
+msiexec /i "<full path to msi file>" /l!*vx "<full path to log file to be created>"
+```
 
 Please *attach* log file to the issue you create and provide as much information about your environment as you can.
 
