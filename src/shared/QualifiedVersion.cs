@@ -32,7 +32,7 @@ namespace Elastic.Installer
 
         static readonly Regex rx = new Regex(
             /* 0 full capture, 4 groups total */
-            /* 1 */ @$"(?<version>\d+\.\d+\.\d+)" +
+            /* 1 */ @$"(?<version>\d+\.\d+(\.\d+)?)" +
             /* 2 */ @$"(-(?<qualifier>(?!\b(?:{MagicStrings.Ver.Snapshot})\b)[^-]+))?" +
             /* 3 */ @$"(-(?<snapshot>{MagicStrings.Ver.Snapshot}))?",
             RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
