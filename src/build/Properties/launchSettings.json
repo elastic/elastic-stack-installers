@@ -2,7 +2,7 @@
   "profiles": {
     "BeatsBuild": {
       "commandName": "Project",
-      "commandLineArgs": "build --cid 7.5.0 metricbeat",
+      "commandLineArgs": "build --cid 7.5 winlogbeat",
       "workingDirectory": "$(SolutionDir)"
     }
   }
