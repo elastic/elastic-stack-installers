@@ -6,11 +6,19 @@ namespace Elastic.Installer
 {
     public sealed class ElastiBuildConfig
     {
-        [YamlMember("timestamp_url")]
-        public string TimestampUrl { get; set; }
+        [YamlMember("timestamp_urls", SerializeMemberMode.Content)]
+        public List<string> TimestampUrls { get; }
 
         [YamlMember("products")]
-        public Dictionary<string, ProductConfig> Products { get; set;  }
+        public Dictionary<string, ProductConfig> Products { get; set; }
+
+        [YamlIgnore]
+        public IEnumerable<string> ProductNames => Products?.Keys;
+
+        public ElastiBuildConfig()
+        {
+            TimestampUrls = new List<string>();
+        }
 
         public ProductConfig GetProductConfig(string targetName)
         {
@@ -19,8 +27,5 @@ namespace Elastic.Installer
 
             return pc;
         }
-
-        [YamlIgnore]
-        public IEnumerable<string> ProductNames => Products?.Keys;
     }
 }
