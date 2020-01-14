@@ -1,5 +1,11 @@
 ---
-timestamp_url: http://timestamp.comodoca.com
+timestamp_urls:
+  - http://timestamp.comodoca.com
+  - http://timestamp.apple.com/ts01
+  - http://tsa.starfieldtech.com
+  - http://tsp.iaik.tugraz.at/tsp/TspRequest
+  - http://timestamp.digicert.com
+  - http://timestamp.globalsign.com/scripts/timstamp.dll
 
 products:
   auditbeat:

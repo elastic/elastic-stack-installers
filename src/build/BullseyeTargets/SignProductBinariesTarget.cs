@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using ElastiBuild.Commands;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
 using SimpleExec;
@@ -19,17 +18,39 @@ namespace ElastiBuild.BullseyeTargets
                 MagicStrings.Dirs.Cert,
                 MagicStrings.Files.SignToolExe);
 
-            var (certPass, SignToolArgs) = MakeSignToolArgs(ctx);
-
             foreach (var binary in ctx.Config.GetProductConfig(ap.TargetName).PublishedBinaries)
             {
-                var FullSignToolArgs = SignToolArgs + Path
-                    .Combine(ctx.InDir, Path.GetFileNameWithoutExtension(ap.FileName), binary)
-                    .Quote();
+                bool signed = false;
+                int tryCount = ctx.Config.TimestampUrls.Count;
 
-                await Console.Out.WriteAsync(SignToolExePath + " ");
-                await Console.Out.WriteLineAsync(FullSignToolArgs.Replace(certPass, "[redacted]"));
-                await Command.RunAsync(SignToolExePath, FullSignToolArgs, noEcho: true);
+                for (int tryNr = 0; tryNr < tryCount; ++tryNr)
+                {
+                    var timestampUrl = ctx.Config.TimestampUrls[tryNr];
+                    var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, timestampUrl);
+
+                    var FullSignToolArgs = SignToolArgs + Path
+                        .Combine(ctx.InDir, Path.GetFileNameWithoutExtension(ap.FileName), binary)
+                        .Quote();
+
+                    await Console.Out.WriteAsync(SignToolExePath + " ");
+                    await Console.Out.WriteLineAsync(FullSignToolArgs.Replace(certPass, "[redacted]"));
+
+                    try
+                    {
+                        await Command.RunAsync(SignToolExePath, FullSignToolArgs, noEcho: true);
+                        signed = true;
+                        break;
+                    }
+                    catch (Exception /*ex*/)
+                    {
+                        await Console.Out.WriteLineAsync(
+                            $"Error: timestap server {timestampUrl} is unavailable, " +
+                            $"{tryCount - tryNr - 1} server(s) left to try.");
+                    }
+                }
+
+                if (!signed)
+                    throw new Exception("Error: None of the timestamp servers available.");
             }
         }
     }
