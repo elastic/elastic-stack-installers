@@ -7,12 +7,9 @@ namespace Elastic.Installer
     {
         public static ElastiBuildConfig Read(string fileName)
         {
-            var ser = new Serializer();
-            using (var yamlConfig = File.OpenRead(fileName))
-            {
-                var config = ser.Deserialize<ElastiBuildConfig>(yamlConfig);
-                return config;
-            }
+            using var yamlConfig = File.OpenRead(fileName);
+            var config = new Serializer().Deserialize<ElastiBuildConfig>(yamlConfig);
+            return config;
         }
     }
 }
