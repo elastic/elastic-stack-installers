@@ -19,6 +19,9 @@ namespace ElastiBuild.Infra
         public override Func<string> UsageHeadingText =>
             () => "USAGE:";
 
+        public override Func<string> OptionGroupWord =>
+            () => "Group";
+
         public override Func<bool, string> HelpCommandText =>
             isOption => isOption
                 ? "Display this help screen."
