@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeatPackageCompiler", "inst
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "shared\Shared.shproj", "{6CD7786E-F7BC-41E7-998D-2845966FC460}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QA", "qa\QA.csproj", "{867FB7F5-92AD-4797-8403-8397B2B0B681}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		shared\shared.projitems*{6cd7786e-f7bc-41e7-998d-2845966fc460}*SharedItemsImports = 13
@@ -33,6 +35,10 @@ Global
 		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}.Release|Any CPU.Build.0 = Release|Any CPU
+		{867FB7F5-92AD-4797-8403-8397B2B0B681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{867FB7F5-92AD-4797-8403-8397B2B0B681}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{867FB7F5-92AD-4797-8403-8397B2B0B681}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{867FB7F5-92AD-4797-8403-8397B2B0B681}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
