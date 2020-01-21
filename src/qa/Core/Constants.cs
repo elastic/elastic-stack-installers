@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Elastic.Installer;
-
-namespace QA.Core
+﻿namespace QA.Core
 {
     public static class Constants
     {

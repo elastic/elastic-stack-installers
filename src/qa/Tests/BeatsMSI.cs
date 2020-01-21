@@ -1,18 +1,19 @@
-using Elastic.Installer;
-using NUnit.Framework;
-using QA.Core;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text.RegularExpressions;
+using Elastic.Installer;
+using NUnit.Framework;
+using QA.Core;
 
-namespace qa
+namespace QA
 {
     public class BeatsMSI : TestBase
     {
-        static IEnumerable Installers() {
+        static IEnumerable Installers()
+        {
             foreach (string productName in BuildConfig.ProductNames)
             {
                 ProductConfig productConfig = BuildConfig.Products[productName];
@@ -28,7 +29,7 @@ namespace qa
                     td.SetName($"{productName} ({installerPath})");
 
                     yield return td;
-                }                
+                }
             }
         }
 

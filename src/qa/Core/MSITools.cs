@@ -27,7 +27,7 @@ namespace QA.Core
             process.StartInfo.FileName = "msiexec";
             process.StartInfo.Arguments = String.Join(" ", args);
 
-            if(RunElevated)
+            if (RunElevated)
                 process.StartInfo.Verb = "runas";
 
             process.Start();
@@ -46,7 +46,7 @@ namespace QA.Core
 
             Process process = Run(args);
 
-            if(waitForCompletion)
+            if (waitForCompletion)
                 process.WaitForExit(timeoutSeconds * 1000);
 
             return process;
@@ -64,7 +64,7 @@ namespace QA.Core
 
             Process process = Run(args);
 
-            if(waitForCompletion)
+            if (waitForCompletion)
                 process.WaitForExit(timeoutSeconds * 1000);
 
             return process;

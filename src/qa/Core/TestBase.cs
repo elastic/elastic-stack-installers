@@ -1,6 +1,6 @@
-﻿using Elastic.Installer;
+﻿using System.IO;
+using Elastic.Installer;
 using NUnit.Framework;
-using System.IO;
 
 namespace QA.Core
 {
