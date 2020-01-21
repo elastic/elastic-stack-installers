@@ -11,7 +11,7 @@
 
     <StartupObject />
 
-    <AssemblyName>ElasticStackInstallerTests</AssemblyName>
+    <AssemblyName>QA</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
