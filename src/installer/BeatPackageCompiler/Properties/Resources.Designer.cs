@@ -72,8 +72,10 @@ namespace BeatPackageCompiler.Properties {
         ///set beat_data=%ProgramData%\Elastic\Beats\%~n0
         ///
         ///&quot;%beat_bin%\%~n0.exe&quot; ^
-        ///    --path.home &quot;%beat_data%&quot; ^
+        ///    --path.home &quot;%beat_bin%&quot; ^
         ///    --path.config &quot;%beat_data%&quot; ^
+        ///    --path.data &quot;%beat_data%\data&quot; ^
+        ///    --path.logs &quot;%beat_data%\logs&quot; ^
         ///    --E logging.files.redirect_stderr=true ^
         ///    %args%.
         /// </summary>
