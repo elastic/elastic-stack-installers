@@ -11,7 +11,7 @@ namespace ElastiBuild.Infra
         public eBitness Bitness { get; set; }
 
         public string QueryString =>
-            ",windows"
+            ",windows,zip"
             + (TargetName.EndsWith(MagicStrings.Files.DashOssSuffix, StringComparison.OrdinalIgnoreCase)
                 ? string.Empty
                 : ("," + MagicStrings.Files.DashOssSuffix))
