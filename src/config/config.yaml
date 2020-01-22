@@ -13,7 +13,7 @@ products:
     published_name: Elastic Beats Autditbeat
     published_url: https://www.elastic.co/products/beats/auditbeat
     published_binaries: [ auditbeat.exe ]
-    mutable_dirs: [ kibana ]
+    mutable_dirs: [ ]
     service: true
 
   filebeat:
@@ -21,7 +21,7 @@ products:
     published_name: Elastic Beats Filebeat
     published_url: https://www.elastic.co/products/beats/filebeat
     published_binaries: [ filebeat.exe ]
-    mutable_dirs: [ kibana, module, modules.d ]
+    mutable_dirs: [ modules.d ]
     service: true
 
   heartbeat:
@@ -29,7 +29,7 @@ products:
     published_name: Elastic Beats Heartbeat
     published_url: https://www.elastic.co/products/beats/heartbeat
     published_binaries: [ heartbeat.exe ]
-    mutable_dirs: [ kibana, monitors.d ]
+    mutable_dirs: [ monitors.d ]
     service: true
 
   metricbeat:
@@ -37,7 +37,7 @@ products:
     published_name: Elastic Beats Metricbeat
     published_url: https://www.elastic.co/products/beats/metricbeat
     published_binaries: [ metricbeat.exe ]
-    mutable_dirs: [ kibana, module, modules.d ]
+    mutable_dirs: [ modules.d ]
     service: true
 
   packetbeat:
@@ -45,7 +45,7 @@ products:
     published_name: Elastic Beats Packetbeat
     published_url: https://www.elastic.co/products/beats/packetbeat
     published_binaries: [ packetbeat.exe ]
-    mutable_dirs: [ kibana ]
+    mutable_dirs: [ ]
     service: true
 
   winlogbeat:
@@ -53,7 +53,7 @@ products:
     published_name: Elastic Beats Winlogbeat
     published_url: https://www.elastic.co/products/beats/winlogbeat
     published_binaries: [ winlogbeat.exe ]
-    mutable_dirs: [ kibana, module ]
+    mutable_dirs: [ ]
     service: true
 
   auditbeat-oss:
@@ -61,7 +61,7 @@ products:
     published_name: Elastic Beats Autditbeat OSS
     published_url: https://www.elastic.co/products/beats/auditbeat
     published_binaries: [ auditbeat.exe ]
-    mutable_dirs: [ kibana ]
+    mutable_dirs: [ ]
     service: true
 
   filebeat-oss:
@@ -69,7 +69,7 @@ products:
     published_name: Elastic Beats Filebeat OSS
     published_url: https://www.elastic.co/products/beats/filebeat
     published_binaries: [ filebeat.exe ]
-    mutable_dirs: [ kibana, module, modules.d ]
+    mutable_dirs: [ modules.d ]
     service: true
 
   heartbeat-oss:
@@ -77,7 +77,7 @@ products:
     published_name: Elastic Beats Heartbeat OSS
     published_url: https://www.elastic.co/products/beats/heartbeat
     published_binaries: [ heartbeat.exe ]
-    mutable_dirs: [ kibana, monitors.d ]
+    mutable_dirs: [ monitors.d ]
     service: true
 
   metricbeat-oss:
@@ -85,7 +85,7 @@ products:
     published_name: Elastic Beats Metricbeat OSS
     published_url: https://www.elastic.co/products/beats/metricbeat
     published_binaries: [ metricbeat.exe ]
-    mutable_dirs: [ kibana, modules.d ]
+    mutable_dirs: [ modules.d ]
     service: true
 
   packetbeat-oss:
@@ -93,7 +93,7 @@ products:
     published_name: Elastic Beats Packetbeat OSS
     published_url: https://www.elastic.co/products/beats/packetbeat
     published_binaries: [ packetbeat.exe ]
-    mutable_dirs: [ kibana ]
+    mutable_dirs: [ ]
     service: true
 
   winlogbeat-oss:
@@ -101,5 +101,5 @@ products:
     published_name: Elastic Beats Winlogbeat OSS
     published_url: https://www.elastic.co/products/beats/winlogbeat
     published_binaries: [ winlogbeat.exe ]
-    mutable_dirs: [ kibana ]
+    mutable_dirs: [ ]
     service: true

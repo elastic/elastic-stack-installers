@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using BeatPackageCompiler.Properties;
+using ElastiBuild.Extensions;
 using Elastic.Installer;
 using WixSharp;
 using WixSharp.CommonTasks;
@@ -98,6 +100,12 @@ namespace Elastic.PackageCompiler.Beats
                     System.IO.File.ReadAllText(
                         Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))));
 
+            var beatConfigPath = "[CommonAppDataFolder]" + Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
+            var beatDataPath = Path.Combine(beatConfigPath, "data");
+            var beatLogsPath = Path.Combine(beatConfigPath, "logs");
+
+            var textInfo = new CultureInfo("en-US", false).TextInfo;
+
             WixSharp.File service = null;
             if (pc.IsWindowsService)
             {
@@ -112,7 +120,7 @@ namespace Elastic.PackageCompiler.Beats
                     Interactive = false,
 
                     Name = ap.CanonicalTargetName,
-                    DisplayName = $"{displayName} {ap.SemVer}",
+                    DisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}",
                     Description = pc.Description,
 
                     DependsOn = new[]
@@ -122,8 +130,11 @@ namespace Elastic.PackageCompiler.Beats
                     },
 
                     Arguments =
-                        $" --path.home \"[CommonAppDataFolder]\\{Path.Combine(companyName, productSetName, ap.CanonicalTargetName)}\"" +
-                        $" -E logging.files.redirect_stderr=true",
+                        " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
+                        " --path.config " + beatConfigPath.Quote() +
+                        " --path.data " + beatDataPath.Quote() +
+                        " --path.logs " + beatLogsPath.Quote() +
+                        " -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = false,
                     Start = SvcStartType.auto,
@@ -251,15 +262,16 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            var beatsInstallPath = Path.Combine(
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]",
-                companyName,
-                productSetName);
+            var beatsInstallPath =
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
+                Path.Combine(companyName, productSetName);
 
             project.Dirs = new[]
             {
                 // Binaries
-                new InstallDir(beatsInstallPath,
+                new InstallDir(
+                     // Wix# directory parsing needs forward slash
+                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
                     new Dir(
                         ap.Version,
                         new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
