@@ -105,6 +105,7 @@ namespace Elastic.PackageCompiler.Beats
             var beatLogsPath = Path.Combine(beatConfigPath, "logs");
 
             var textInfo = new CultureInfo("en-US", false).TextInfo;
+            var serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
 
             WixSharp.File service = null;
             if (pc.IsWindowsService)
@@ -120,7 +121,7 @@ namespace Elastic.PackageCompiler.Beats
                     Interactive = false,
 
                     Name = ap.CanonicalTargetName,
-                    DisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}",
+                    DisplayName = serviceDisplayName,
                     Description = pc.Description,
 
                     DependsOn = new[]
@@ -190,10 +191,11 @@ namespace Elastic.PackageCompiler.Beats
             var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                $"NOTE: We put an example configuration file {ap.CanonicalTargetName}.example.yml in the data directory. " +
-                $"Please copy this example file to {ap.CanonicalTargetName}.yml and make changes according to your environment. " +
-                $"Once {ap.CanonicalTargetName}.yml is created, you can start {displayName} {ap.SemVer} Windows service and " +
-                $"configure {ap.CanonicalTargetName} from your favorite shell."));
+                $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
+                $"in the data directory caled {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
+                $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
+                $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
+                $"and then start {serviceDisplayName} Windows service.\r\n"));
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
