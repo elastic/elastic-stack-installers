@@ -59,7 +59,7 @@ namespace ElastiBuild
             var result = parser.ParseArguments<GlobalOptions>(string.Empty.Split(' '));
 
             HelpText htGlobals = new HelpText(
-                $"ElastiBuild v7.6.0",
+                $"ElastiBuild v7.6.2",
                 $"Copyright (c) {DateTime.Now.Year}, https://elastic.co")
             {
                 AdditionalNewLineAfterOption = false,
