@@ -7,7 +7,6 @@ using CommandLine;
 using CommandLine.Text;
 using ElastiBuild.BullseyeTargets;
 using ElastiBuild.Extensions;
-using ElastiBuild.Infra;
 using Elastic.Installer;
 
 namespace ElastiBuild.Commands
@@ -131,9 +130,7 @@ namespace ElastiBuild.Commands
 
             try
             {
-                await bt.RunWithoutExitingAsync(
-                    productBuildTargets,
-                    logPrefix: "ElastiBuild");
+                await bt.RunWithoutExitingAsync(productBuildTargets);
             }
             catch
             {

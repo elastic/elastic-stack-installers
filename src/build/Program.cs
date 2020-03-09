@@ -3,21 +3,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using Elastic.Installer;
 using ElastiBuild.Commands;
 using ElastiBuild.Infra;
 using ElastiBuild.Options;
 
 namespace ElastiBuild
 {
-    partial class Program
+    static class Program
     {
         static async Task Main(string[] args)
-        {
-            await new Program().Run(args);
-        }
-
-        async Task Run(string[] args)
         {
 #if DEBUG
             //args = "build --cid 8.0-snapshot functionbeat".Split();
@@ -44,7 +38,7 @@ namespace ElastiBuild
                 async (errs) => await HandleErrorsAndShowHelp(result, commands));
         }
 
-        Task HandleErrorsAndShowHelp(ParserResult<object> parserResult, Type[] commands)
+        static Task HandleErrorsAndShowHelp(ParserResult<object> parserResult, Type[] commands)
         {
             SentenceBuilder.Factory = () => new TweakedSentenceBuilder();
 
