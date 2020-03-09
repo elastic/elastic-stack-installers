@@ -53,9 +53,7 @@ namespace ElastiBuild.Commands
 
             try
             {
-                await bt.RunWithoutExitingAsync(
-                    productBuildTargets,
-                    logPrefix: "ElastiBuild");
+                await bt.RunWithoutExitingAsync(productBuildTargets);
             }
             catch
             {

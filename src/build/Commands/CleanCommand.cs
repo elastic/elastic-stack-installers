@@ -54,9 +54,7 @@ namespace ElastiBuild.Commands
 
             try
             {
-                await bt.RunWithoutExitingAsync(
-                    "Clean".Split(),
-                    logPrefix: "ElastiBuild");
+                await bt.RunWithoutExitingAsync("Clean".Split());
             }
             catch
             {
