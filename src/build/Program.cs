@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
@@ -11,6 +12,11 @@ namespace ElastiBuild
 {
     static class Program
     {
+        static readonly string ProductVersion = typeof(Program)
+            .Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            .InformationalVersion;
+
         static async Task Main(string[] args)
         {
             var commands = typeof(Program)
@@ -47,8 +53,8 @@ namespace ElastiBuild
 
             var result = parser.ParseArguments<GlobalOptions>(string.Empty.Split(' '));
 
-            HelpText htGlobals = new HelpText(
-                $"ElastiBuild v8.0.0",
+            var htGlobals = new HelpText(
+                "ElastiBuild " + ProductVersion,
                 $"Copyright (c) {DateTime.Now.Year}, https://elastic.co")
             {
                 AdditionalNewLineAfterOption = false,
@@ -65,7 +71,7 @@ namespace ElastiBuild
 
             if (isGlobalHelp)
             {
-                var htVerbs = new HelpText()
+                var htVerbs = new HelpText
                 {
                     AddDashesToOption = false,
                     AutoHelp = false,
