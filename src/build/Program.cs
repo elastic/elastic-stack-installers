@@ -13,11 +13,6 @@ namespace ElastiBuild
     {
         static async Task Main(string[] args)
         {
-#if DEBUG
-            //args = "build --cid 8.0-snapshot functionbeat".Split();
-            //Console.WriteLine("ARGS: " + string.Join(",", args));
-#endif
-
             var commands = typeof(Program)
                 .Assembly.GetTypes()
                 .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Length > 0)
@@ -53,7 +48,7 @@ namespace ElastiBuild
             var result = parser.ParseArguments<GlobalOptions>(string.Empty.Split(' '));
 
             HelpText htGlobals = new HelpText(
-                $"ElastiBuild v7.6.0",
+                $"ElastiBuild v8.0.0",
                 $"Copyright (c) {DateTime.Now.Year}, https://elastic.co")
             {
                 AdditionalNewLineAfterOption = false,
