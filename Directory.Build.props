@@ -1,0 +1,24 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!--Elastic Stack version for this release -->
+    <PropertyGroup>
+        <StackVersion>8.0.0</StackVersion>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <Company>Elastic</Company>
+        <Description>Elastic MSI package build system</Description>
+        <Copyright>(c) $([System.DateTime]::Now.ToString(yyyy)) Elastic</Copyright>
+        <FileVersion>$(StackVersion)</FileVersion>
+        <AssemblyVersion>$(StackVersion)</AssemblyVersion>
+        <InformationalVersion>$(StackVersion)</InformationalVersion>
+
+        <!-- Add commit hash if we can -->
+        <_GitHEADFilename>HEAD</_GitHEADFilename>
+        <_GitSHALength>7</_GitSHALength>
+        <_GitDir Condition="'$(_GitHEADFilename)' != '' And $(_GitSHALength) &gt; 0 And $(_GitSHALength) &lt; 40 And Exists('$(MSBuildThisFileDirectory).git')">$(MSBuildThisFileDirectory).git</_GitDir>
+        <_GitHEAD Condition="'$(_GitDir)' != '' And Exists('$(_GitDir)\$(_GitHEADFilename)')">$([System.IO.File]::ReadAllText('$(_GitDir)\$(_GitHEADFilename)').Trim())</_GitHEAD>
+        <_GitSHA Condition="'$(_GitHEAD)' != '' And '$(_GitHEAD.StartsWith(ref:))' == 'true'">$([System.IO.File]::ReadAllText('$(_GitDir)\$(_GitHEAD.Substring(5))').Substring(0,$(_GitSHALength)))</_GitSHA>
+        <_GitSHA Condition="'$(_GitHEAD)' != '' And '$(_GitHEAD.StartsWith(ref:))' == 'false'">$(_GitHEAD.Substring(0,$(_GitSHALength)))</_GitSHA>
+        <InformationalVersion Condition="'$(_GitSHA)' != ''">$(InformationalVersion)-$(_GitSHA)</InformationalVersion>
+    </PropertyGroup>
+</Project>

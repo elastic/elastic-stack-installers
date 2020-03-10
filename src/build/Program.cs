@@ -1,29 +1,24 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using CommandLine.Text;
-using Elastic.Installer;
 using ElastiBuild.Commands;
 using ElastiBuild.Infra;
 using ElastiBuild.Options;
 
 namespace ElastiBuild
 {
-    partial class Program
+    static class Program
     {
+        static readonly string ProductVersion = typeof(Program)
+            .Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            .InformationalVersion;
+
         static async Task Main(string[] args)
         {
-            await new Program().Run(args);
-        }
-
-        async Task Run(string[] args)
-        {
-#if DEBUG
-            //args = "build --cid 8.0-snapshot functionbeat".Split();
-            //Console.WriteLine("ARGS: " + string.Join(",", args));
-#endif
-
             var commands = typeof(Program)
                 .Assembly.GetTypes()
                 .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Length > 0)
@@ -44,7 +39,7 @@ namespace ElastiBuild
                 async (errs) => await HandleErrorsAndShowHelp(result, commands));
         }
 
-        Task HandleErrorsAndShowHelp(ParserResult<object> parserResult, Type[] commands)
+        static Task HandleErrorsAndShowHelp(ParserResult<object> parserResult, Type[] commands)
         {
             SentenceBuilder.Factory = () => new TweakedSentenceBuilder();
 
@@ -58,8 +53,8 @@ namespace ElastiBuild
 
             var result = parser.ParseArguments<GlobalOptions>(string.Empty.Split(' '));
 
-            HelpText htGlobals = new HelpText(
-                $"ElastiBuild v7.6.2",
+            var htGlobals = new HelpText(
+                "ElastiBuild " + ProductVersion,
                 $"Copyright (c) {DateTime.Now.Year}, https://elastic.co")
             {
                 AdditionalNewLineAfterOption = false,
@@ -76,7 +71,7 @@ namespace ElastiBuild
 
             if (isGlobalHelp)
             {
-                var htVerbs = new HelpText()
+                var htVerbs = new HelpText
                 {
                     AddDashesToOption = false,
                     AutoHelp = false,
