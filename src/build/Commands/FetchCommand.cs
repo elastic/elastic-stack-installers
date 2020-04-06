@@ -70,18 +70,18 @@ namespace ElastiBuild.Commands
                 return new List<Example>()
                 {
                     new Example(Environment.NewLine +
-                        "Fetch Winlogbeat packages for version 7.4.0",
+                        "Fetch Winlogbeat packages for version 7.6.0",
                         new FetchCommand
                         {
-                            ContainerId = "7.4.0",
+                            ContainerId = "7.6.0",
                             Targets = "winlogbeat".Split(),
                         }),
 
                     new Example(Environment.NewLine +
-                        "Fetch Winlogbeat OSS packages for alias 6.8",
+                        "Fetch Winlogbeat OSS packages for alias 7.6",
                         new FetchCommand
                         {
-                            ContainerId = "6.8",
+                            ContainerId = "7.6",
                             ForceSwitch = true,
                             Targets = "winlogbeat-oss".Split(),
                         })

@@ -17,7 +17,7 @@ namespace ElastiBuild.BullseyeTargets
             {
                 "--package=" + Path.GetFileNameWithoutExtension(ap.FileName).Quote(),
                 ((cmd as ISupportWxsOnlySwitch).WxsOnly ? "--wxs-only" : string.Empty),
-                "--keep-temp-files",
+                "--keep-temp-files --verbose",
             });
 
             var compilerPath = Path

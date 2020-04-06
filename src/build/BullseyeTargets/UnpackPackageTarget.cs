@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ElastiBuild.Commands;
 using ElastiBuild.Extensions;
 using Ionic.Zip;
 
@@ -10,7 +9,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class UnpackPackageTarget : BullseyeTargetBase<UnpackPackageTarget>
     {
-        public static async Task RunAsync(BuildContext ctx)
+        public static Task RunAsync(BuildContext ctx)
         {
             var ap = ctx.GetArtifactPackage();
 
@@ -59,7 +58,9 @@ namespace ElastiBuild.BullseyeTargets
                     Console.WriteLine((int) progress + "%");
             }
 
-            await Console.Out.WriteLineAsync($"Extracted to: {destDir}");
+            Console.WriteLine($"Extracted to: {destDir}");
+
+            return Task.CompletedTask;
         }
     }
 }
