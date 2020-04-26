@@ -8,9 +8,9 @@ namespace ElastiBuild.Commands
         {
             public static string ContainerId =>
                 "Container Id. One of: "
-                + "Branch, eg. 6.8, 7.x; "
-                + "Version, eg. 6.8.3-SNAPSHOT, 7.4.0; "
-                + "Alias, eg. 6.8, 7.x-SNAPSHOT; ";
+                + "Branch, eg. 7.6, 7.x; "
+                + "Version, eg. 7.6.0-SNAPSHOT, 7.6.1; "
+                + "Alias, eg. 7.6, 7.x-SNAPSHOT; ";
         }
     }
 

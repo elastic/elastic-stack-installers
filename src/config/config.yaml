@@ -16,9 +16,25 @@ products:
     mutable_dirs: [ ]
     service: true
 
+  auditbeat-oss:
+    description: Audit the activities of users and processes on your system
+    published_name: Elastic Beats Autditbeat OSS
+    published_url: https://www.elastic.co/products/beats/auditbeat
+    published_binaries: [ auditbeat.exe ]
+    mutable_dirs: [ ]
+    service: true
+
   filebeat:
     description: Filebeat sends log files to Logstash or directly to Elasticsearch
     published_name: Elastic Beats Filebeat
+    published_url: https://www.elastic.co/products/beats/filebeat
+    published_binaries: [ filebeat.exe ]
+    mutable_dirs: [ modules.d ]
+    service: true
+
+  filebeat-oss:
+    description: Filebeat sends log files to Logstash or directly to Elasticsearch
+    published_name: Elastic Beats Filebeat OSS
     published_url: https://www.elastic.co/products/beats/filebeat
     published_binaries: [ filebeat.exe ]
     mutable_dirs: [ modules.d ]
@@ -32,9 +48,25 @@ products:
     mutable_dirs: [ monitors.d ]
     service: true
 
+  heartbeat-oss:
+    description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
+    published_name: Elastic Beats Heartbeat OSS
+    published_url: https://www.elastic.co/products/beats/heartbeat
+    published_binaries: [ heartbeat.exe ]
+    mutable_dirs: [ monitors.d ]
+    service: true
+
   metricbeat:
     description: Metricbeat is a lightweight shipper for metrics
     published_name: Elastic Beats Metricbeat
+    published_url: https://www.elastic.co/products/beats/metricbeat
+    published_binaries: [ metricbeat.exe ]
+    mutable_dirs: [ modules.d ]
+    service: true
+
+  metricbeat-oss:
+    description: Metricbeat is a lightweight shipper for metrics
+    published_name: Elastic Beats Metricbeat OSS
     published_url: https://www.elastic.co/products/beats/metricbeat
     published_binaries: [ metricbeat.exe ]
     mutable_dirs: [ modules.d ]
@@ -48,51 +80,19 @@ products:
     mutable_dirs: [ ]
     service: true
 
-  winlogbeat:
-    description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
-    published_name: Elastic Beats Winlogbeat
-    published_url: https://www.elastic.co/products/beats/winlogbeat
-    published_binaries: [ winlogbeat.exe ]
-    mutable_dirs: [ ]
-    service: true
-
-  auditbeat-oss:
-    description: Audit the activities of users and processes on your system
-    published_name: Elastic Beats Autditbeat OSS
-    published_url: https://www.elastic.co/products/beats/auditbeat
-    published_binaries: [ auditbeat.exe ]
-    mutable_dirs: [ ]
-    service: true
-
-  filebeat-oss:
-    description: Filebeat sends log files to Logstash or directly to Elasticsearch
-    published_name: Elastic Beats Filebeat OSS
-    published_url: https://www.elastic.co/products/beats/filebeat
-    published_binaries: [ filebeat.exe ]
-    mutable_dirs: [ modules.d ]
-    service: true
-
-  heartbeat-oss:
-    description: Ping remote services for availability and log results to Elasticsearch or send to Logstash
-    published_name: Elastic Beats Heartbeat OSS
-    published_url: https://www.elastic.co/products/beats/heartbeat
-    published_binaries: [ heartbeat.exe ]
-    mutable_dirs: [ monitors.d ]
-    service: true
-
-  metricbeat-oss:
-    description: Metricbeat is a lightweight shipper for metrics
-    published_name: Elastic Beats Metricbeat OSS
-    published_url: https://www.elastic.co/products/beats/metricbeat
-    published_binaries: [ metricbeat.exe ]
-    mutable_dirs: [ modules.d ]
-    service: true
-
   packetbeat-oss:
     description: Packetbeat analyzes network traffic and sends the data to Elasticsearch
     published_name: Elastic Beats Packetbeat OSS
     published_url: https://www.elastic.co/products/beats/packetbeat
     published_binaries: [ packetbeat.exe ]
+    mutable_dirs: [ ]
+    service: true
+
+  winlogbeat:
+    description: Winlogbeat ships Windows event logs to Elasticsearch or Logstash
+    published_name: Elastic Beats Winlogbeat
+    published_url: https://www.elastic.co/products/beats/winlogbeat
+    published_binaries: [ winlogbeat.exe ]
     mutable_dirs: [ ]
     service: true
 

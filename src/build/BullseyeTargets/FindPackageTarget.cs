@@ -29,7 +29,7 @@ namespace ElastiBuild.BullseyeTargets
             Directory.CreateDirectory(ctx.InDir);
 
             if (!forceSwitch)
-                await Console.Out.WriteLineAsync($"Searching local directory {ctx.InDir} ...");
+                Console.WriteLine($"Searching local directory {ctx.InDir} ...");
 
             var packageList = forceSwitch
 
@@ -74,7 +74,7 @@ namespace ElastiBuild.BullseyeTargets
             if (packageList.Count == 0)
             {
                 // No local packages found, try Artifacts API
-                await Console.Out.WriteLineAsync($"Searching Artifacts API for {targetName}-{containerId} ...");
+                Console.WriteLine($"Searching Artifacts API for {targetName}-{containerId} ...");
 
                 packageList = (await ArtifactsApi.FindArtifact(targetName, filter =>
                 {
@@ -84,7 +84,7 @@ namespace ElastiBuild.BullseyeTargets
 
                 if (packageList.Count == 0)
                 {
-                    await Console.Out.WriteLineAsync("ERR: Nothing found");
+                    Console.WriteLine("ERR: Nothing found");
 
                     // TODO: should we skip or stop the build?
                     throw new Exception();
@@ -97,8 +97,8 @@ namespace ElastiBuild.BullseyeTargets
 
             if (packageList.Count > 1)
             {
-                await Console.Out.WriteLineAsync("WARN: More than one possibility for product:");
-                await Console.Out.WriteLineAsync(string.Join(
+                Console.WriteLine("WARN: More than one possibility for product:");
+                Console.WriteLine(string.Join(
                     Environment.NewLine,
                     packageList
                         .Select(itm => "  " + itm.FileName)
@@ -112,7 +112,7 @@ namespace ElastiBuild.BullseyeTargets
 
             ctx.SetArtifactPackage(ap);
 
-            await Console.Out.WriteLineAsync(actionPrefix + ap.FileName);
+            Console.WriteLine(actionPrefix + ap.FileName);
             return;
         }
     }

@@ -29,24 +29,24 @@ namespace ElastiBuild.Commands
             {
                 var items = await ArtifactsApi.ListNamedContainers();
 
-                await Console.Out.WriteLineAsync(Environment.NewLine + "Branches:");
-                await Console.Out.WriteLineAsync(string.Join(
+                Console.WriteLine(Environment.NewLine + "Branches:");
+                Console.WriteLine(string.Join(
                     Environment.NewLine,
                     items
                         .Where(itm => itm.IsBranch)
                         .Select(itm => "  " + itm.Name)
                     ));
 
-                await Console.Out.WriteLineAsync(Environment.NewLine + "Versions:");
-                await Console.Out.WriteLineAsync(string.Join(
+                Console.WriteLine(Environment.NewLine + "Versions:");
+                Console.WriteLine(string.Join(
                     Environment.NewLine,
                     items
                         .Where(itm => itm.IsVersion)
                         .Select(itm => "  " + itm.Name)
                     ));
 
-                await Console.Out.WriteLineAsync(Environment.NewLine + "Aliases:");
-                await Console.Out.WriteLineAsync(string.Join(
+                Console.WriteLine(Environment.NewLine + "Aliases:");
+                Console.WriteLine(string.Join(
                     Environment.NewLine,
                     items
                         .Where(itm => itm.IsAlias)
@@ -58,7 +58,7 @@ namespace ElastiBuild.Commands
 
             if (string.IsNullOrWhiteSpace(ContainerId))
             {
-                await Console.Out.WriteLineAsync(
+                Console.WriteLine(
                     $"ERROR(s):{Environment.NewLine}" +
                     MagicStrings.Errors.NeedCidWhenTargetSpecified);
                 return;
@@ -72,16 +72,12 @@ namespace ElastiBuild.Commands
                 if (!ForceSwitch && !BuildContext.Default.Config.ProductNames.Any(t => t.ToLower() == target))
                     throw new InvalidDataException($"Invalid product '{target}'");
 
-                await Console.Out.WriteLineAsync(Environment.NewLine +
+                Console.WriteLine(Environment.NewLine +
                     $"Discovering '{target}' in '{ContainerId}' ...");
 
-                var items = await ArtifactsApi.FindArtifact(target, filter =>
-                {
-                    filter.ContainerId = ContainerId;
-                    filter.Bitness = Bitness;
-                });
+                var items = await ArtifactsApi.DiscoverArtifacts(target, ContainerId);
 
-                await Console.Out.WriteLineAsync(string.Join(
+                Console.WriteLine(string.Join(
                     Environment.NewLine,
                     items.Select(itm => "  " + itm.FileName + Environment.NewLine + "  " + itm.Url + Environment.NewLine)
                     ));
@@ -103,10 +99,10 @@ namespace ElastiBuild.Commands
                         }),
 
                     new Example(Environment.NewLine +
-                        "Discover available Winlogbeat packages for alias 6.8",
+                        "Discover available Winlogbeat packages for alias 7.6",
                         new DiscoverCommand
                         {
-                            ContainerId = "6.8",
+                            ContainerId = "7.6",
                             Targets = new List<string> { "winlogbeat" },
                         }),
 
