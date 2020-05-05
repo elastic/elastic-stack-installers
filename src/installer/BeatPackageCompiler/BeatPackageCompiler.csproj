@@ -47,11 +47,10 @@
       <WixToolsetFiles Include="$(PkgWixSharp_wix_bin)/tools/**/*.*" />
     </ItemGroup>
     
-    <Copy
-      SourceFiles="@(WixToolsetFiles)"
-      DestinationFolder="$(MSBuildProjectDirectory)/../../../bin/WixToolset/%(RecursiveDir)"
-      UseHardlinksIfPossible="true"
-      SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(WixToolsetFiles)"
+          DestinationFolder="$(MSBuildProjectDirectory)/../../../bin/WixToolset/%(RecursiveDir)"
+          UseHardlinksIfPossible="true"
+          SkipUnchangedFiles="true" />
   </Target>
 
   <Import Project="..\..\shared\shared.projitems" Label="Shared" />
