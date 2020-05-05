@@ -31,8 +31,8 @@ namespace ElastiBuild.BullseyeTargets
                         Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi)
                     .Quote();
 
-                await Console.Out.WriteLineAsync(SignToolExePath + " ");
-                await Console.Out.WriteLineAsync(SignToolArgs.Replace(certPass, "[redacted]"));
+                Console.WriteLine(SignToolExePath + " ");
+                Console.WriteLine(SignToolArgs.Replace(certPass, "[redacted]"));
 
                 try
                 {
@@ -42,7 +42,7 @@ namespace ElastiBuild.BullseyeTargets
                 }
                 catch (Exception /*ex*/)
                 {
-                    await Console.Out.WriteLineAsync(
+                    Console.WriteLine(
                         $"Error: timestap server {timestampUrl} is unavailable, " +
                         $"{tryCount - tryNr - 1} server(s) left to try.");
                 }

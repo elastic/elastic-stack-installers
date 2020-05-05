@@ -135,7 +135,8 @@ namespace ElastiBuild.Infra
         }
 
         public static async Task<(bool wasAlreadyPresent, string localPath)> FetchArtifact(
-            BuildContext ctx, ArtifactPackage ap, bool forceSwitch)
+            BuildContext ctx, ArtifactPackage ap, bool forceSwitch,
+            Action<long, long> fetchProgress = null, Action<long> fetchComplete = null)
         {
             var localPath = Path.Combine(ctx.InDir, ap.FileName);
 
@@ -161,14 +162,22 @@ namespace ElastiBuild.Infra
             try
             {
                 int bytesRead = 0;
+                long bytesReadTotal = 0;
 
                 while (true)
                 {
                     if ((bytesRead = await stm.ReadAsync(bytes, 0, bytes.Length)) <= 0)
                         break;
 
-                    await fs.WriteAsync(bytes, 0, bytesRead);
+                    bytesReadTotal += bytesRead;
+
+                    var writeTask = fs.WriteAsync(bytes, 0, bytesRead);
+                    fetchProgress?.Invoke(bytesRead, bytesReadTotal);
+
+                    await writeTask;
                 }
+
+                fetchComplete?.Invoke(bytesReadTotal);
             }
             finally
             {

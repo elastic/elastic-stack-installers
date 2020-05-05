@@ -94,7 +94,7 @@ namespace ElastiBuild.Commands
                     bt.Add(
                         SignProductBinariesTarget.NameWith(target),
                         Bullseye.Targets.DependsOn(UnpackPackageTarget.NameWith(target)),
-                        async () => await Console.Out.WriteLineAsync("Skipping digital signature for product binaries"));
+                        () => Console.WriteLine("Skipping digital signature for product binaries"));
                 }
 
                 bt.Add(
@@ -117,7 +117,7 @@ namespace ElastiBuild.Commands
                     bt.Add(
                         SignMsiPackageTarget.NameWith(target),
                         Bullseye.Targets.DependsOn(CompileMsiTarget.NameWith(target)),
-                        async () => await Console.Out.WriteLineAsync("Skipping digital signature for MSI package"));
+                        () => Console.WriteLine("Skipping digital signature for MSI package"));
                 }
 
                 bt.Add(

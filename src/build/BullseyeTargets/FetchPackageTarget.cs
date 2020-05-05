@@ -16,14 +16,34 @@ namespace ElastiBuild.BullseyeTargets
             bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
 
             var ap = ctx.GetArtifactPackage();
-            var (wasAlreadyPresent, localPath) = await ArtifactsApi.FetchArtifact(ctx, ap, forceSwitch);
+
+            long reportThreshold = 0;
+
+            var (wasAlreadyPresent, localPath) =
+                await ArtifactsApi.FetchArtifact(
+                    ctx, ap, forceSwitch,
+                    (bytesRead, bytesReadTotal) =>
+                    {
+                        reportThreshold += bytesRead;
+
+                        // Throttle reporting
+                        if (reportThreshold >= (1024 * 1024 * 5))
+                        {
+                            reportThreshold = 0;
+                            Console.Out.WriteAsync(".");
+                        }
+                    },
+                    bytesReadTotal =>
+                    {
+                        Console.Out.WriteLineAsync();
+                    });
 
             if (wasAlreadyPresent)
-                await Console.Out.WriteLineAsync("Download skipped, file exists: " + localPath);
+                Console.WriteLine("Download skipped, file exists: " + localPath);
             else
             {
                 var fileSize = new FileInfo(localPath).Length;
-                await Console.Out.WriteLineAsync($"Saved: ({fileSize.Bytes().Humanize("MB")}) {localPath}");
+                Console.WriteLine($"Saved: ({fileSize.Bytes().Humanize("MB")}) {localPath}");
             }
         }
     }
