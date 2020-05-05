@@ -147,19 +147,19 @@ namespace ElastiBuild.Commands
                 return new List<Example>()
                 {
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat x86 version 7.4.0",
+                        "Build Winlogbeat x86 version 7.6.0",
                         new BuildCommand
                         {
-                            ContainerId = "7.4.0",
+                            ContainerId = "7.6.0",
                             Bitness = eBitness.x86,
                             Targets = "winlogbeat".Split(),
                         }),
 
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat x64 for alias 6.8",
+                        "Build Winlogbeat x64 for alias 7.6",
                         new BuildCommand
                         {
-                            ContainerId = "6.8",
+                            ContainerId = "7.6",
                             Targets = "winlogbeat".Split(),
                         }),
 

@@ -103,10 +103,10 @@ namespace ElastiBuild.Commands
                         }),
 
                     new Example(Environment.NewLine +
-                        "Discover available Winlogbeat packages for alias 6.8",
+                        "Discover available Winlogbeat packages for alias 7.6",
                         new DiscoverCommand
                         {
-                            ContainerId = "6.8",
+                            ContainerId = "7.6",
                             Targets = new List<string> { "winlogbeat" },
                         }),
 
