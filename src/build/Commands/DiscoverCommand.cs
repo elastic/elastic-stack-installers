@@ -75,11 +75,7 @@ namespace ElastiBuild.Commands
                 await Console.Out.WriteLineAsync(Environment.NewLine +
                     $"Discovering '{target}' in '{ContainerId}' ...");
 
-                var items = await ArtifactsApi.FindArtifact(target, filter =>
-                {
-                    filter.ContainerId = ContainerId;
-                    filter.Bitness = Bitness;
-                });
+                var items = await ArtifactsApi.DiscoverArtifacts(target, ContainerId);
 
                 await Console.Out.WriteLineAsync(string.Join(
                     Environment.NewLine,

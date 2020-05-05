@@ -54,6 +54,40 @@ namespace ElastiBuild.Infra
             return namedItems;
         }
 
+        public static async Task<IEnumerable<ArtifactPackage>> DiscoverArtifacts(string target, string containerId)
+        {
+            using var http = new HttpClient()
+            {
+                BaseAddress = BaseAddress,
+                Timeout = TimeSpan.FromMilliseconds(3000)
+            };
+
+            var query = $"search/{containerId}/{target},windows,zip";
+            using var stm = await http.GetStreamAsync(query);
+
+            using var sr = new StreamReader(stm);
+            using var jtr = new JsonTextReader(sr);
+
+            var js = new JsonSerializer();
+            var data = js.Deserialize<JToken>(jtr);
+
+            var packages = new List<ArtifactPackage>();
+
+            foreach (JProperty itm in data["packages"] ?? new JArray())
+            {
+                var packageUrl = (string) itm.Value[MagicStrings.ArtifactsApi.Url];
+                if (packageUrl.IsEmpty())
+                    continue;
+
+                if (!ArtifactPackage.FromUrl(packageUrl, out var package))
+                    continue;
+
+                packages.Add(package);
+            }
+
+            return packages;
+        }
+
         public static async Task<IEnumerable<ArtifactPackage>> FindArtifact(
             string target, Action<ArtifactFilter> filterConfiguration)
         {
