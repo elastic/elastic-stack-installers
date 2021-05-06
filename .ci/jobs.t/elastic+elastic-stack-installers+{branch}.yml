@@ -1,0 +1,18 @@
+---
+
+- job:
+    name: elastic+elastic-stack-installers+%BRANCH%
+    display-name: 'elastic / elastic-stack-installers # %BRANCH%'
+    description: Testing the elastic-stack-installers %BRANCH% branch.
+    scm:
+      - git:
+          branches:
+            - refs/heads/master
+    triggers:
+      - github
+      #- timed: H H(02-04) * * *
+    builders:
+      - powershell: |
+          echo "-- COMMIT 8< ----------------------------"
+          ./build show
+          echo "-- COMMIT 8< ----------------------------"
