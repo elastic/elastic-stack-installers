@@ -9,6 +9,8 @@
 
 - job:
     project-type: freestyle
+    # use custom workspace due to shorten paths
+    workspace: "C:\\wsmsici"
     logrotate:
       daysToKeep: 30
       numToKeep: 100
