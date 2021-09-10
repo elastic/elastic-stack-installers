@@ -1,13 +1,13 @@
 ---
 
 - job:
-    name: elastic+elastic-stack-installers+master
-    display-name: 'elastic / elastic-stack-installers # master'
-    description: Testing the elastic-stack-installers master branch.
+    name: elastic+elastic-stack-installers+main
+    display-name: 'elastic / elastic-stack-installers # main'
+    description: Testing the elastic-stack-installers main branch.
     scm:
       - git:
           branches:
-            - refs/heads/master
+            - refs/heads/main
     triggers:
       - github
       - timed: "@daily"
