@@ -55,7 +55,7 @@ namespace Elastic.PackageCompiler.Beats
                     opts.PackageOutDir,
                     MagicStrings.Files.PackageLicenseRtf(opts.PackageName)),
 
-                Platform = ap.Is32Bit ? Platform.x86 : Platform.x64,
+                Platform = Platform.x64,
 
                 InstallScope = InstallScope.perMachine,
 

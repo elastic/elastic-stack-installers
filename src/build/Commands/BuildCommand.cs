@@ -16,13 +16,11 @@ namespace ElastiBuild.Commands
         : IElastiBuildCommand
         , ISupportRequiredTargets
         , ISupportRequiredContainerId
-        , ISupportBitnessChoice
         , ISupportCodeSigning
         , ISupportWxsOnlySwitch
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
-        public eBitness Bitness { get; set; }
         public string CertFile { get; set; }
         public string CertPass { get; set; }
         public bool WxsOnly { get; set; }
@@ -147,11 +145,10 @@ namespace ElastiBuild.Commands
                 return new List<Example>()
                 {
                     new Example(Environment.NewLine +
-                        "Build Winlogbeat x86 version 7.6.0",
+                        "Build Winlogbeat x64 version 7.6.0",
                         new BuildCommand
                         {
                             ContainerId = "7.6.0",
-                            Bitness = eBitness.x86,
                             Targets = "winlogbeat".Split(),
                         }),
 

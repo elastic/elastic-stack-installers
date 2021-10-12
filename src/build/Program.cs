@@ -34,9 +34,17 @@ namespace ElastiBuild
             });
 
             var result = parser.ParseArguments(args, commands);
-            await result.MapResult(
-                async (IElastiBuildCommand cmd) => await cmd.RunAsync(),
-                async (errs) => await HandleErrorsAndShowHelp(result, commands));
+
+            try
+            {
+                await result.MapResult(
+                    async (IElastiBuildCommand cmd) => await cmd.RunAsync(),
+                    async (errs) => await HandleErrorsAndShowHelp(result, commands));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         static Task HandleErrorsAndShowHelp(ParserResult<object> parserResult, Type[] commands)
