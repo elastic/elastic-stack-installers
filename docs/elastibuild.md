@@ -42,7 +42,6 @@ Global Flags:
 DISCOVER Flags:
 
   --cid               Container Id. One of: Branch, eg. 6.8, 7.x; Version, eg. 6.8.3-SNAPSHOT, 7.4.0; Alias, eg. 6.8, 7.x-SNAPSHOT;
-  --bitness           (Default: x64) Show packages of specific bitness: x86, x64, both
   PRODUCT (pos. 0)    Required. [PRODUCT [PRODUCT [...]]]
 
 Usage Examples:
