@@ -20,7 +20,6 @@ namespace ElastiBuild.BullseyeTargets
             if (!forceSwitch && !ctx.Config.ProductNames.Any(t => t.ToLower() == targetName))
                 throw new InvalidDataException($"Invalid product '{targetName}'");
 
-            var bitness = (cmd as ISupportBitnessChoice).Bitness;
             var containerId = (cmd as ISupportRequiredContainerId).ContainerId;
 
             if (!QualifiedVersion.FromString(containerId, out var qv))
@@ -55,16 +54,7 @@ namespace ElastiBuild.BullseyeTargets
 
                         return ap;
                     })
-                    .Where(ap =>
-                    {
-                        return (ap != null) && bitness switch
-                        {
-                            eBitness.x86 => ap.Is32Bit,
-                            eBitness.x64 => ap.Is64Bit,
-                            eBitness.both => true,
-                            _ => false
-                        };
-                    })
+                    .Where(ap => ap?.Is64Bit ?? false)
                     .ToList();
 
             var actionPrefix = "<BUGBUG> ";
@@ -79,7 +69,6 @@ namespace ElastiBuild.BullseyeTargets
                 packageList = (await ArtifactsApi.FindArtifact(targetName, filter =>
                 {
                     filter.ContainerId = containerId;
-                    filter.Bitness = bitness;
                 })).ToList();
 
                 if (packageList.Count == 0)
