@@ -74,6 +74,15 @@ namespace ElastiBuild.Commands
                             ContainerId = "7.6.0",
                             Targets = "winlogbeat".Split(),
                         }),
+
+                    new Example(Environment.NewLine +
+                        "Fetch Winlogbeat OSS packages for alias 7.6",
+                        new FetchCommand
+                        {
+                            ContainerId = "7.6",
+                            ForceSwitch = true,
+                            Targets = "winlogbeat-oss".Split(),
+                        })
                 };
             }
         }

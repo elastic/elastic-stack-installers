@@ -41,6 +41,7 @@ namespace Elastic.Installer
             public static readonly string LeftBannerBmp = "leftbanner.bmp";
             public static readonly string BuildRoot = ".buildroot";
             public static readonly string SignToolExe = "signtool.exe";
+            public static readonly string DashOssSuffix = "-oss";
 
             public static readonly string LicenseRtf = "LICENSE.rtf";
             public static string PackageLicenseRtf(string packageName) =>
