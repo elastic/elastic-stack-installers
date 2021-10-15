@@ -62,7 +62,7 @@ namespace ElastiBuild.Infra
                 Timeout = TimeSpan.FromMilliseconds(3000)
             };
 
-            var query = $"search/{containerId}/{target},windows,zip,-oss,x86_64";
+            var query = $"search/{containerId}/{target},windows,zip,x86_64";
             using var stm = await http.GetStreamAsync(query);
 
             using var sr = new StreamReader(stm);

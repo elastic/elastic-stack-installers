@@ -1,4 +1,8 @@
-﻿namespace ElastiBuild.Infra
+﻿using System;
+using ElastiBuild.Commands;
+using Elastic.Installer;
+
+namespace ElastiBuild.Infra
 {
     public class ArtifactFilter
     {
@@ -6,7 +10,11 @@
         public string ContainerId { get; set; }
 
         public string QueryString =>
-            ",windows,zip,-oss,x86_64";
+            ",windows,zip,x86_64"
+            + (TargetName.EndsWith(MagicStrings.Files.DashOssSuffix, StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : ("," + MagicStrings.Files.DashOssSuffix))
+            ;
 
         public ArtifactFilter(string targetName) =>
             TargetName = targetName;

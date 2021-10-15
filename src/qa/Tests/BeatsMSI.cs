@@ -36,7 +36,7 @@ namespace QA
         [Test, TestCaseSource(nameof(Installers))]
         public void SilentInstallerTest(MSIInstaller installer)
         {
-            string actualProductName = installer.ProductName;
+            string actualProductName = installer.ProductName.Replace("-oss", "");
 
             // Install
             TestContext.Out.WriteLine($"Installing {actualProductName}...");

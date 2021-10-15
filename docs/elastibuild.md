@@ -42,6 +42,7 @@ Global Flags:
 DISCOVER Flags:
 
   --cid               Container Id. One of: Branch, eg. 6.8, 7.x; Version, eg. 6.8.3-SNAPSHOT, 7.4.0; Alias, eg. 6.8, 7.x-SNAPSHOT;
+  --oss               (Default: false) Show OSS packages
   PRODUCT (pos. 0)    Required. [PRODUCT [PRODUCT [...]]]
 
 Usage Examples:
