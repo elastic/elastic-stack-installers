@@ -1,7 +1,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!--Elastic Stack version for this release -->
     <PropertyGroup>
-        <StackVersion>8.2.3</StackVersion>
+        <StackVersion>8.2.4</StackVersion>
     </PropertyGroup>
     
     <PropertyGroup>
