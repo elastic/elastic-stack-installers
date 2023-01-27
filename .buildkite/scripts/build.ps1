@@ -28,16 +28,21 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
     New-Item bin/in -Type Directory -Force
     $version = $stack_version + $kind
+    $response = Invoke-WebRequest -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
+    $json = $response.Content | ConvertFrom-Json
+    $buildId = $json.build.build_id
     if ($kind -eq "") {
-        $hostname = "snapshot.elastic.co"
+        $hostname = "snapshots.elastic.co"
     } else {
         $hostname = "staging.elastic.co"
     }
     foreach ($beat in ($beats + $ossBeats)) {
         try {
+            $url = "https://$hostname/$buildId/downloads/beats/$beat/$beat-$buildId-windows-x86_64.zip"
+            echo "Downloading from $url"
             $client.DownloadFile(
-               "https://$hostname/$version/downloads/beats/$beat/$beat-$version-windows-x86_64.zip",
-               "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
+               $url,
+               "$currentDir/bin/in/$beat-$buildId-windows-x86_64.zip"
             )
         }
         catch [System.Net.WebException] {
