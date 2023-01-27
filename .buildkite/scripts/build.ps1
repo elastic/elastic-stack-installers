@@ -4,7 +4,7 @@ echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 
- & $PROJECT_DIR/tools/dotnet-install.ps1 -NoPath -JSonFile "$PROJECT_DIR/global.json" -Architecture "x64" -InstallDir $PROJECT_DIR/../dotnet-sdk
+& .tools/dotnet-install.ps1 -NoPath -JSonFile "./global.json" -Architecture "x64" -InstallDir ../dotnet-sdk
 
 echo "--- build show"
 ./build show
