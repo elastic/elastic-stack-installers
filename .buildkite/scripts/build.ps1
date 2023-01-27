@@ -52,7 +52,7 @@ foreach ($kind in @("-SNAPSHOT", "")) {
 
 
     echo "--- Building msi$kind"
-    args=&(
+    args=@(
       "build",
       "--cid", version,
       "--cert-file", "$cert_home/msi_certificate.p12",
