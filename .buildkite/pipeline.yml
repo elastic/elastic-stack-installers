@@ -5,3 +5,6 @@ steps:
     agents:
       provider: gcp
       image: family/ci-windows-2022
+notify:
+  - slack: "#release-eng-alerts"
+    if: 'build.pull_request.id == null && build.state != "passed"'
