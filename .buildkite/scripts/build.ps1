@@ -4,6 +4,7 @@ echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 
+ & $PROJECT_DIR/tools/dotnet-install.ps1 -NoPath -JSonFile "$PROJECT_DIR/global.json" -Architecture "x64" -InstallDir $PROJECT_DIR/../dotnet-sdk
 
 echo "--- build show"
 ./build show
@@ -62,4 +63,8 @@ foreach ($kind in @("-SNAPSHOT")) {
     $args += ($beats + $ossBeats)
     echo "Starting processs"
     Start-Process -NoNewWindow -PassThru -FilePath ./build -ArgumentList $args -Wait
+    if ($LastExitCode -ne 0) {
+        Write-Error "Build$kind failed with exit code $LastExitCode"
+        exit $LastExitCode
+    }
 }
