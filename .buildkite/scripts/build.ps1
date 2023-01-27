@@ -58,9 +58,7 @@ foreach ($kind in @("-SNAPSHOT", "")) {
 
 
     echo "--- Building msi$kind"
-    args = @("build", "--cid", $version, "--cert-file", "$cert_home/msi_certificate.p12", "--cert-pass", "$cert_home/msi_password.txt")
-    args += ($beats + $ossBeats)
+    $args = @("build", "--cid", $version, "--cert-file", "$cert_home/msi_certificate.p12", "--cert-pass", "$cert_home/msi_password.txt")
+    $args += ($beats + $ossBeats)
     Start-Process -FilePath ./build -ArgumentList $args -Wait
 }
-# https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/auditbeat/auditbeat-oss-8.7.0-SNAPSHOT-windows-x86_64.zip
-# https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/auditbeat-oss/auditbeat-oss-8.7.0-SNAPSHOT-windows-x86_64.zip
