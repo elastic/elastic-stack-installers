@@ -52,11 +52,7 @@ foreach ($kind in @("-SNAPSHOT", "")) {
 
 
     echo "--- Building msi$kind"
-    args=@(
-      "build",
-      "--cid", version,
-      "--cert-file", "$cert_home/msi_certificate.p12",
-      "--cert-pass", "$cert_home/msi_password.txt"
-    )
-    Start-Process -FilePath ./build -ArgumentList $beats -Wait
+    args=@("build", "--cid", version, "--cert-file", "$cert_home/msi_certificate.p12", "--cert-pass", "$cert_home/msi_password.txt")
+    args+=($beats + $ossBeats)
+    Start-Process -FilePath ./build -ArgumentList $args -Wait
 }
