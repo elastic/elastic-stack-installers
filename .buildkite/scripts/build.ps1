@@ -23,7 +23,7 @@ $client = new-object System.Net.WebClient
 $currentDir = $(Get-Location).Path
 $beats = @('auditbeat', 'filebeat', 'heartbeat', 'metricbeat', 'packetbeat', 'winlogbeat')
 $ossBeats = $beats | ForEach-Object { $_ + "-oss" }
-foreach ($kind in @("-SNAPSHOT", "")) {
+foreach ($kind in @("-SNAPSHOT")) {
     echo "~~~ downloading beat dependencies$kind"
     Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
     New-Item bin/in -Type Directory -Force
@@ -60,5 +60,6 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     echo "--- Building msi$kind"
     $args = @("build", "--cid", $version, "--cert-file", "$cert_home/msi_certificate.p12", "--cert-pass", "$cert_home/msi_password.txt")
     $args += ($beats + $ossBeats)
-    Start-Process -FilePath ./build -ArgumentList $args -Wait
+    echo "Starting processs"
+    Start-Process -NoNewWindow -PassThru -FilePath ./build -ArgumentList $args -Wait
 }
