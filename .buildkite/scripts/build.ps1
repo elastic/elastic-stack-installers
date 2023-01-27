@@ -38,11 +38,11 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     }
     foreach ($beat in ($beats + $ossBeats)) {
         try {
-            $url = "https://$hostname/$buildId/downloads/beats/$beat/$beat-$buildId-windows-x86_64.zip"
+            $url = "https://$hostname/$buildId/downloads/beats/$beat/$beat-$version-windows-x86_64.zip"
             echo "Downloading from $url"
             $client.DownloadFile(
                $url,
-               "$currentDir/bin/in/$beat-$buildId-windows-x86_64.zip"
+               "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
             )
         }
         catch [System.Net.WebException] {
