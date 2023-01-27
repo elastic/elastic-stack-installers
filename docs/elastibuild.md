@@ -43,7 +43,6 @@ DISCOVER Flags:
 
   --cid               Container Id. One of: Branch, eg. 6.8, 7.x; Version, eg. 6.8.3-SNAPSHOT, 7.4.0; Alias, eg. 6.8, 7.x-SNAPSHOT;
   --oss               (Default: false) Show OSS packages
-  --bitness           (Default: x64) Show packages of specific bitness: x86, x64, both
   PRODUCT (pos. 0)    Required. [PRODUCT [PRODUCT [...]]]
 
 Usage Examples:
@@ -62,7 +61,7 @@ Discover package names for all supported products in 8.0-SNAPSHOT:
     .\build.bat build --cid 8.0-SNAPSHOT winlogbeat filebeat
 
 ### Requirements
-- .Net Core v3.0, SDK v3.0.100
+- .Net Core v3.1, SDK v3.1.408
 - Full Framework >= 4.5 ([WixSharp](https://github.com/oleg-shilo/wixsharp) dependency)
 
 ### Known issues

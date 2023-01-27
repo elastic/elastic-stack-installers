@@ -62,7 +62,7 @@ namespace ElastiBuild.Infra
                 Timeout = TimeSpan.FromMilliseconds(3000)
             };
 
-            var query = $"search/{containerId}/{target},windows,zip";
+            var query = $"search/{containerId}/{target},windows,zip,x86_64";
             using var stm = await http.GetStreamAsync(query);
 
             using var sr = new StreamReader(stm);
@@ -115,11 +115,8 @@ namespace ElastiBuild.Infra
 
             foreach (JProperty itm in data["packages"] ?? new JArray())
             {
-                if (filter.Bitness == eBitness.x64 &&
-                    (string) itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
-                {
+                if ((string) itm.Value[MagicStrings.ArtifactsApi.Architecture] != MagicStrings.Arch.x86_64)
                     continue;
-                }
 
                 var packageUrl = (string) itm.Value[MagicStrings.ArtifactsApi.Url];
                 if (packageUrl.IsEmpty())

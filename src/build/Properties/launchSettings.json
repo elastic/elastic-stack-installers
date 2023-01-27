@@ -4,6 +4,12 @@
       "commandName": "Project",
       "commandLineArgs": "build --cid 7.5 winlogbeat --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
       "workingDirectory": "$(SolutionDir)"
+    },
+
+    "Winlogbeat 8.0": {
+      "commandName": "Project",
+      "commandLineArgs": "build --cid 8.0-SNAPSHOT winlogbeat",
+      "workingDirectory": "$(SolutionDir)"
     }
   }
 }

@@ -83,7 +83,6 @@ namespace Elastic.Installer
 
         public static class Arch
         {
-            public static readonly string x86 = "x86";
             public static readonly string x86_64 = "x86_64";
         }
 

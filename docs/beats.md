@@ -20,4 +20,3 @@ Beats is the platform for single-purpose data shippers. They send data from hund
 ### Known Issues:
 
 - When running Beats from CLI (to register Kibana dashboards, or work with KeyStore for example), `path.home` and its related paths must be specified manually. This will be addressed in future versions.
-- Current version of [ElastiBuild](elastibuild.md) supports building Non-OSS packages only.

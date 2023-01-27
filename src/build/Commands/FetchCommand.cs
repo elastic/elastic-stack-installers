@@ -15,12 +15,10 @@ namespace ElastiBuild.Commands
         : IElastiBuildCommand
         , ISupportRequiredTargets
         , ISupportRequiredContainerId
-        , ISupportBitnessChoice
         , ISupportForceSwitch
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
-        public eBitness Bitness { get; set; }
         public bool ForceSwitch { get; set; }
 
         public async Task RunAsync()

@@ -25,7 +25,6 @@ namespace Elastic.Installer
         public bool IsOss { get; private set; }
         public string CanonicalTargetName { get; private set; }
 
-        public bool Is32Bit => Architecture == MagicStrings.Arch.x86;
         public bool Is64Bit => Architecture == MagicStrings.Arch.x86_64;
         public bool IsDownloadable => !Url.IsEmpty();
         public bool IsQualified => !Qualifier.IsEmpty();
