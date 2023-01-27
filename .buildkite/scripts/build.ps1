@@ -28,7 +28,7 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
     New-Item bin/in -Type Directory -Force
     $version = $stack_version + $kind
-    $response = Invoke-WebRequest -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
+    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
     if ($kind -eq "") {
