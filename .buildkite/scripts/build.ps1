@@ -32,9 +32,9 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
     if ($kind -eq "") {
-        $hostname = "snapshots.elastic.co"
-    } else {
         $hostname = "staging.elastic.co"
+    } else {
+        $hostname = "snapshots.elastic.co"
     }
     foreach ($beat in ($beats + $ossBeats)) {
         try {
