@@ -38,7 +38,8 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     }
     foreach ($beat in ($beats + $ossBeats)) {
         try {
-            $url = "https://$hostname/$buildId/downloads/beats/$beat/$beat-$version-windows-x86_64.zip"
+            $beatName = $beat.Replace("-oss", "")
+            $url = "https://$hostname/$buildId/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
             echo "Downloading from $url"
             $client.DownloadFile(
                $url,
@@ -61,3 +62,5 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     args+=($beats + $ossBeats)
     Start-Process -FilePath ./build -ArgumentList $args -Wait
 }
+# https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/auditbeat/auditbeat-oss-8.7.0-SNAPSHOT-windows-x86_64.zip
+# https://snapshots.elastic.co/8.7.0-1604eae1/downloads/beats/auditbeat-oss/auditbeat-oss-8.7.0-SNAPSHOT-windows-x86_64.zip
