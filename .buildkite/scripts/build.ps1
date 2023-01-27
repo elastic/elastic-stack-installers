@@ -17,7 +17,7 @@ $cert_home="C:/.cert"
 New-Item $cert_home -Type Directory -Force
 [IO.File]::WriteAllBytes("$cert_home/msi_certificate.p12", [Convert]::FromBase64String($MsiCertificate))
 [IO.File]::WriteAllText("$cert_home/msi_password.txt", $MsiPassword)
-
+echo "Certificate successfully written to $cert_home"
 
 $client = new-object System.Net.WebClient
 $currentDir = $(Get-Location).Path
@@ -28,7 +28,7 @@ foreach ($kind in @("-SNAPSHOT", "")) {
     Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
     New-Item bin/in -Type Directory -Force
     $version = $stack_version + $kind
-    if ($kind == "") {
+    if ($kind -eq "") {
         $hostname = "snapshot.elastic.co"
     } else {
         $hostname = "staging.elastic.co"
