@@ -2,6 +2,7 @@ $stack_version="8.7.0"
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
+& "./tools/dotnet-install.ps1" -NoPath -Version 5.0.408 -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
