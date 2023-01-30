@@ -45,7 +45,7 @@ namespace ElastiBuild.BullseyeTargets
                     {
                         Console.WriteLine(
                             $"Error: timestap server {timestampUrl} is unavailable, " +
-                            $"{tryCount - tryNr - 1} server(s) left to try.");
+                            $"{tryCount - tryNr - 1} server(s) left to try. Exception: {ex.Message}");
                     }
                 }
 
