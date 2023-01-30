@@ -13,6 +13,24 @@ namespace ElastiBuild.BullseyeTargets
         {
             var ap = ctx.GetArtifactPackage();
 
+            string filePath = Path.Combine(
+                 ctx.OutDir,
+                 ap.CanonicalTargetName,
+                 Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
+            );
+
+            try
+            {
+                FileInfo fileInfo = new FileInfo(filePath);
+                if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
+                    fileInfo.Attributes &= ~FileAttributes.ReadOnly;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error changing file attributes: " + ex.Message);
+            }
+
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
                 MagicStrings.Dirs.Cert,
@@ -40,10 +58,10 @@ namespace ElastiBuild.BullseyeTargets
                     signed = true;
                     break;
                 }
-                catch (Exception /*ex*/)
+                catch (Exception ex)
                 {
                     Console.WriteLine(
-                        $"Error: timestap server {timestampUrl} is unavailable, " +
+                        $"Error: SigTool failed, check it's output: {ex.Message}" +
                         $"{tryCount - tryNr - 1} server(s) left to try.");
                 }
             }
