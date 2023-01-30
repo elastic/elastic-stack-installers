@@ -72,11 +72,12 @@ foreach ($kind in @("-SNAPSHOT")) {
     )
     $args += ($beats + $ossBeats)
     echo "Starting processs"
-    Start-Process -NoNewWindow -PassThru -FilePath dotnet -ArgumentList $args -Wait
-    if ($LastExitCode -ne 0) {
-        Write-Error "Build$kind failed with exit code $LastExitCode"
-        exit $LastExitCode
+    $process = Start-Process -NoNewWindow -PassThru -FilePath dotnet -ArgumentList $args -Wait
+    $exitCode = $process.ExitCode
+    if ($exitCode -ne 0) {
+        Write-Error "Build$kind failed with exit code $exitCode"
+        exit $exitCode
     } else {
-        echo "Build$kind completed with exit code $LastExitCode"
+        echo "Build$kind completed with exit code $exitCode"
     }
 }
