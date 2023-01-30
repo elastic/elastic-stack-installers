@@ -8,6 +8,14 @@ echo "~~~ Installing dotnet-sdk"
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
+$url = "https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.net45/1.0.2"
+$zipFile = "$env:TEMP\Microsoft.NETFramework.ReferenceAssemblies.net45.zip"
+$destination = "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5"
+
+Invoke-WebRequest $url -OutFile $zipFile
+Expand-Archive $zipFile -DestinationPath $destination
+Remove-Item $zipFile
+
 echo "~~~ Reading msi certificate from vault"
 $MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
 $MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/msi
