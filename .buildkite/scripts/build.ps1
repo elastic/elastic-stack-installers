@@ -1,7 +1,8 @@
 $stack_version="8.7.0"
 
 echo "~~~ Enable IE"
-dism /online /Add-Capability /CapabilityName:Browser.InternetExplorer~~~~0.0.11.0.
+dism /online /Add-Capability /CapabilityName:Browser.InternetExplorer~~~~0.0.11.0
+dism /online /Enable-Feature /FeatureName:Internet-Explorer-Optional-amd64
 
 #Check Script is running with Elevated Privileges
 Check-RunAsAdministrator
