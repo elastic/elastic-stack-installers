@@ -1,10 +1,5 @@
 ---
 timestamp_urls:
-  - https://rfc3161.ai.moda
-  - https://rfc3161.ai.moda/adobe
-  - https://rfc3161.ai.moda/microsoft
-  - https://rfc3161.ai.moda/apple
-  - https://rfc3161.ai.moda/any
   - http://timestamp.digicert.com
   - http://timestamp.globalsign.com/tsa/r6advanced1
   - http://rfc3161timestamp.globalsign.com/advanced

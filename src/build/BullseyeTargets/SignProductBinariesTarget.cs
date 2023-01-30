@@ -50,7 +50,7 @@ namespace ElastiBuild.BullseyeTargets
                 }
 
                 if (!signed)
-                    throw new Exception("Error: None of the timestamp servers available.");
+                    throw new Exception("Error: Failed to sign msi after all retries.");
             }
         }
     }
