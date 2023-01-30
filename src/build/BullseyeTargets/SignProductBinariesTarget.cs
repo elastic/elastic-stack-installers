@@ -44,8 +44,8 @@ namespace ElastiBuild.BullseyeTargets
                     catch (Exception ex)
                     {
                         Console.WriteLine(
-                            $"Error: timestap server {timestampUrl} is unavailable, " +
-                            $"{tryCount - tryNr - 1} server(s) left to try. Exception: {ex.Message}");
+                            $"Error: SigTool failed, check it's output: {ex.Message}" +
+                            $"{tryCount - tryNr - 1} server(s) timestamp servers left to try.");
                     }
                 }
 
