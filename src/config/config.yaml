@@ -1,5 +1,25 @@
 ---
 timestamp_urls:
+  - https://rfc3161.ai.moda
+  - https://rfc3161.ai.moda/adobe
+  - https://rfc3161.ai.moda/microsoft
+  - https://rfc3161.ai.moda/apple
+  - https://rfc3161.ai.moda/any
+  - http://timestamp.digicert.com
+  - http://timestamp.globalsign.com/tsa/r6advanced1
+  - http://rfc3161timestamp.globalsign.com/advanced
+  - http://timestamp.sectigo.com
+  - http://timestamp.apple.com/ts01
+  - http://tsa.mesign.com
+  - http://time.certum.pl
+  - https://freetsa.org
+  - http://tsa.startssl.com/rfc3161
+  - http://dse200.ncipher.com/TSS/HttpTspServer
+  - http://zeitstempel.dfn.de
+  - https://ca.signfiles.com/tsa/get.aspx
+  - http://services.globaltrustfinder.com/adss/tsa
+  - https://tsp.iaik.tugraz.at/tsp/TspRequest
+  - http://timestamp.entrust.net/TSS/RFC3161sha2TS
   - http://timestamp.digicert.com
   - http://rfc3161timestamp.globalsign.com/advanced
   - http://tsa.starfieldtech.com
