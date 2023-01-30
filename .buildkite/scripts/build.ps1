@@ -58,6 +58,7 @@ foreach ($kind in @("-SNAPSHOT")) {
 
 
     echo "--- Building msi$kind"
+    New-Item bin/out -Type Directory -Force
     $args = @(
         "run",
         "--project",
