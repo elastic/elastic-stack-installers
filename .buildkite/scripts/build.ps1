@@ -5,9 +5,6 @@ echo "~~~ Installing dotnet-sdk"
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
-echo "--- build show"
-./build show
-
 echo "~~~ Reading msi certificate from vault"
 $MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
 $MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/msi
