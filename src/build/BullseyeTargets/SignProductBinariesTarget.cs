@@ -41,7 +41,7 @@ namespace ElastiBuild.BullseyeTargets
                         signed = true;
                         break;
                     }
-                    catch (Exception /*ex*/)
+                    catch (Exception ex)
                     {
                         Console.WriteLine(
                             $"Error: timestap server {timestampUrl} is unavailable, " +
