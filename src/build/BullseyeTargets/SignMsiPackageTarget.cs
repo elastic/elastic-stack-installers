@@ -25,10 +25,12 @@ namespace ElastiBuild.BullseyeTargets
                 if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
                     fileInfo.Attributes &= ~FileAttributes.ReadOnly;
                 }
+                Console.WriteLine(filePath + " is writable")
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error changing file attributes: " + ex.Message);
+                throw ex;
             }
 
             var SignToolExePath = Path.Combine(
@@ -61,13 +63,13 @@ namespace ElastiBuild.BullseyeTargets
                 catch (Exception ex)
                 {
                     Console.WriteLine(
-                        $"Error: SigTool failed, check it's output: {ex.Message}" +
+                        $"Error: SigTool failed, check it's output: {ex.Message}\n" +
                         $"{tryCount - tryNr - 1} server(s) left to try.");
                 }
             }
 
             if (!signed)
-                throw new Exception("Error: None of the timestamp servers available.");
+                throw new Exception("Error: Failed to sign msi after all retries.");
         }
     }
 }
