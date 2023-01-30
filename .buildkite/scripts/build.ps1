@@ -66,5 +66,7 @@ foreach ($kind in @("-SNAPSHOT")) {
     if ($LastExitCode -ne 0) {
         Write-Error "Build$kind failed with exit code $LastExitCode"
         exit $LastExitCode
+    } else {
+        echo "Build$kind completed with exit code $LastExitCode"
     }
 }
