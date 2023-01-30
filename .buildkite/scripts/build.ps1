@@ -3,8 +3,7 @@ $stack_version="8.7.0"
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
-
-& ./tools/dotnet-install.ps1 -NoPath -JSonFile "./global.json" -Architecture "x64" -InstallDir ../dotnet-sdk
+Get-Command dotnet | Select-Object -ExpandProperty Definition
 
 echo "--- build show"
 ./build show
@@ -59,10 +58,24 @@ foreach ($kind in @("-SNAPSHOT")) {
 
 
     echo "--- Building msi$kind"
-    $args = @("build", "--cid", $version, "--cert-file", "$cert_home/msi_certificate.p12", "--cert-pass", "$cert_home/msi_password.txt")
+    $args = @(
+        "run",
+        "--project",
+        "src\build\ElastiBuild.csproj",
+        "-c",
+        "Release",
+        "--",
+        "build",
+        "--cid",
+        $version,
+        "--cert-file",
+        "$cert_home/msi_certificate.p12",
+        "--cert-pass",
+        "$cert_home/msi_password.txt"
+    )
     $args += ($beats + $ossBeats)
     echo "Starting processs"
-    Start-Process -NoNewWindow -PassThru -FilePath ./build -ArgumentList $args -Wait
+    Start-Process -NoNewWindow -PassThru -FilePath dotnet -ArgumentList $args -Wait
     if ($LastExitCode -ne 0) {
         Write-Error "Build$kind failed with exit code $LastExitCode"
         exit $LastExitCode
