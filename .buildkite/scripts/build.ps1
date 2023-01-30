@@ -3,7 +3,7 @@ $stack_version="8.7.0"
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk/3.5
 & "./tools/dotnet-install.ps1" -NoPath -Version 5.0.408 -Architecture "x64" -InstallDir c:/dotnet-sdk/5.0
-${env:PATH} = "c:\dotnet-sdk\3.5;c:\dotnet-sdk\5.0;" + ${env:PATH}
+${env:PATH} = "c:\dotnet-sdk\5.0;c:\dotnet-sdk\3.5" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
 echo "~~~ Reading msi certificate from vault"
@@ -80,5 +80,11 @@ foreach ($kind in @("-SNAPSHOT")) {
         exit $exitCode
     } else {
         echo "Build$kind completed with exit code $exitCode"
+    }
+
+    $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+    if ($msiCount -ne 8) {
+        Write-Error "Expected 8 msi executable to be produced, but $msiCount were"
+        exit 1
     }
 }
