@@ -79,13 +79,12 @@ foreach ($kind in @("-SNAPSHOT")) {
     )
     $args += ($beats + $ossBeats)
     echo "Starting processs"
-    $process = Start-Process -Verb runAs -NoNewWindow -PassThru -FilePath dotnet -ArgumentList $args -Wait
-    $exitCode = $process.ExitCode
-    if ($exitCode -ne 0) {
-        Write-Error "Build$kind failed with exit code $exitCode"
+    &dotnet $args
+    if ($LastExitcode -ne 0) {
+        Write-Error "Build$kind failed with exit code $LastExitcode"
         exit $exitCode
     } else {
-        echo "Build$kind completed with exit code $exitCode"
+        echo "Build$kind completed with exit code $LastExitcode"
     }
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
