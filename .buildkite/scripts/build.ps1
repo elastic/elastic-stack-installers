@@ -1,10 +1,5 @@
 $stack_version="8.7.0"
 
-echo "~~~ Enable IE"
-dism /online /Add-Capability /CapabilityName:Browser.InternetExplorer~~~~0.0.11.0
-dism /online /Enable-Feature /FeatureName:Internet-Explorer-Optional-amd64
-
-
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
 & "./tools/dotnet-install.ps1" -NoPath -Version 5.0.408 -Architecture "x64" -InstallDir c:/dotnet-sdk
