@@ -90,7 +90,7 @@ foreach ($kind in @("-SNAPSHOT")) {
 
     echo "~~~ Processing monitoring"
     C:\ProcessMonitor\procmon.exe /Terminate
-    while (Invoke-Command -Computer MYPC -ScriptBlock { Get-Process procmon -ErrorAction Ignore }) {
+    while (Get-Process procmon -ErrorAction Ignore) {
          Write-Host "Waiting on procmon to exit…"
          Start-Sleep -Seconds 5
     }
