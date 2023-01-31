@@ -82,6 +82,14 @@ foreach ($kind in @("-SNAPSHOT")) {
     Get-Acl -Path bin  | Format-Table -Wrap
     Get-Acl -Path bin/out  | Format-Table -Wrap
     Get-Acl -Path bin/out/auditbeat  | Format-Table -Wrap
+    Get-Acl -Path bin/out/auditbeat/auditbeat-8.7.0-SNAPSHOT-windows-x86_64.msi | Format-Table -Wrap
+
+    echo "Granting full control"
+    icacls "bin" /grant Users:(OI)(CI)F /T
+    icacls "bin/out/auditbeat/auditbeat-8.7.0-SNAPSHOT-windows-x86_64.msi" /grant Users:(OI)(CI)F /T
+    
+    Get-Acl -Path bin/out/auditbeat/auditbeat-8.7.0-SNAPSHOT-windows-x86_64.msi | Format-Table -Wrap
+
 
     echo "--- Checking that all artefacts are there"
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
