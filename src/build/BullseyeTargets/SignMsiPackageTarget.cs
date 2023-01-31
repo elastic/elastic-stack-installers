@@ -22,11 +22,11 @@ namespace ElastiBuild.BullseyeTargets
             try
             {
                 FileInfo fileInfo = new FileInfo(filePath);
-                if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
-                    fileInfo.Attributes &= ~FileAttributes.ReadOnly;
-                    fileInfo.Attributes |= FileAttributes.Normal | FileAttributes.Archive;
-                }
-                Console.WriteLine(filePath + " is writable");
+                FileAttributes attributes = File.GetAttributes(path);
+                attributes &= ~FileAttributes.ReadOnly;
+                attributes |= FileAttributes.Normal;
+                File.SetAttributes(filePath, attributes);
+                Console.WriteLine(filePath + " is writable and a normal file");
             }
             catch (Exception ex)
             {

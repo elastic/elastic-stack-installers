@@ -80,9 +80,6 @@ foreach ($kind in @("-SNAPSHOT")) {
     } else {
         echo "Build$kind completed with exit code $LastExitcode"
     }
-    $logFile = "bin\out\logfile.csv"
-
-    Get-WinEvent | Export-Csv $logFile
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
