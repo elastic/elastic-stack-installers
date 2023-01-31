@@ -24,7 +24,7 @@ namespace ElastiBuild.BullseyeTargets
                 FileInfo fileInfo = new FileInfo(filePath);
                 if ((fileInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
                     fileInfo.Attributes &= ~FileAttributes.ReadOnly;
-                    fileInfo.Attributes |= FileAttributes.Normal | FileAttributes.Archive | FileAttributes.Executable;
+                    fileInfo.Attributes |= FileAttributes.Normal | FileAttributes.Archive;
                 }
                 Console.WriteLine(filePath + " is writable");
             }
