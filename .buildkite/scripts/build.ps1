@@ -96,6 +96,7 @@ foreach ($kind in @("-SNAPSHOT")) {
     }
     C:\ProcessMonitor\procmon.exe /OpenLog C:\capture.pml /SaveAs "bin/out/capture.csv"
 
+    takeown /F bin/out /R
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
