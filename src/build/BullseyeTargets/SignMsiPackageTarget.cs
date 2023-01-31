@@ -21,8 +21,6 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-           Thread.Sleep(TimeSpan.FromMinutes(2));
-
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
                 MagicStrings.Dirs.Cert,
