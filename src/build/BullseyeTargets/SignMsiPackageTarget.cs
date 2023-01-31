@@ -22,7 +22,7 @@ namespace ElastiBuild.BullseyeTargets
             try
             {
                 FileInfo fileInfo = new FileInfo(filePath);
-                FileAttributes attributes = File.GetAttributes(path);
+                FileAttributes attributes = File.GetAttributes(filePath);
                 attributes &= ~FileAttributes.ReadOnly;
                 attributes |= FileAttributes.Normal;
                 File.SetAttributes(filePath, attributes);
