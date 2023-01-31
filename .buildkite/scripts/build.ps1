@@ -121,7 +121,7 @@ foreach ($kind in @("-SNAPSHOT")) {
     }
     foreach ($result in $results) {
         echo "$result.Name  -> $result.Handles"
-        foreach (handle in $result.Handles) {
+        foreach ($handle in $result.Handles) {
            handle64 -p $result.PID -c $handle.Hex -y -nobanner
         }
     }
