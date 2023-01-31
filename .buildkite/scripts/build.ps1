@@ -5,6 +5,11 @@ echo "~~~ Installing dotnet-sdk"
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
+echo "~~~ Installing procmon.exe"
+Invoke-WebRequest -Uri "https://download.sysinternals.com/files/ProcessMonitor.zip" -OutFile 'C:\ProcessMonitor.zip'
+Expand-Archive -Path 'C:\ProcessMonitor.zip' -Destination C:\ProcessMonitor
+
+
 echo "~~~ Reading msi certificate from vault"
 $MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
 $MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/msi
@@ -53,6 +58,9 @@ foreach ($kind in @("-SNAPSHOT")) {
         }
     }
 
+    echo "--- Starting monitoring"
+    Start-Process -FilePath C:\ProcessMonitor\procmon.exe -ArgumentList "/AcceptEula /BackingFile C:\capture.pml /Quiet"
+
 
     echo "--- Building msi$kind"
     New-Item bin/out -Type Directory -Force
@@ -72,7 +80,6 @@ foreach ($kind in @("-SNAPSHOT")) {
         "$cert_home/msi_password.txt"
     )
     $args += ($beats + $ossBeats)
-    echo "Starting processs"
     &dotnet $args
     if ($LastExitcode -ne 0) {
         Write-Error "Build$kind failed with exit code $LastExitcode"
@@ -80,6 +87,15 @@ foreach ($kind in @("-SNAPSHOT")) {
     } else {
         echo "Build$kind completed with exit code $LastExitcode"
     }
+
+    echo "~~~ Processing monitoring"
+    C:\ProcessMonitor\procmon.exe /Terminate
+    while (Invoke-Command -Computer MYPC -ScriptBlock { Get-Process procmon -ErrorAction Ignore }) {
+         Write-Host "Waiting on procmon to exit…"
+         Start-Sleep -Seconds 5
+    }
+    C:\ProcessMonitor\procmon.exe /OpenLog C:\capture.pml /SaveAs "bin/out/capture.csv"
+
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
