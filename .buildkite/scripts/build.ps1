@@ -104,6 +104,7 @@ foreach ($kind in @("-SNAPSHOT")) {
     echo "---Dealing with handles"
     $Processes = Get-Process
     $results = $Processes | Foreach-Object {
+        echo $_.Name
         $handles = (handle64 -p $_.ID -NoBanner) | Where-Object { $_ -Match " File " } | Foreach-Object {
                 [PSCustomObject]@{
             "Hex"  = ((($_ -Split " ").Where({ $_ -NE "" })[0]).Split(":")[0]).Trim()
@@ -126,6 +127,7 @@ foreach ($kind in @("-SNAPSHOT")) {
         }
     }
 
+    echo "--- Checking that all artefacts are there"
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
         Write-Error "Expected 8 msi executable to be produced, but $msiCount were"
