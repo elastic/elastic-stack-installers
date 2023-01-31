@@ -19,20 +19,7 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            try
-            {
-                FileInfo fileInfo = new FileInfo(filePath);
-                FileAttributes attributes = File.GetAttributes(filePath);
-                attributes &= ~FileAttributes.ReadOnly;
-                attributes |= FileAttributes.Normal;
-                File.SetAttributes(filePath, attributes);
-                Console.WriteLine(filePath + " is writable and a normal file");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error changing file attributes: " + ex.Message);
-                throw ex;
-            }
+           Thread.Sleep(TimeSpan.FromMinutes(2));
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
