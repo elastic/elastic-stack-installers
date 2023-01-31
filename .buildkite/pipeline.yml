@@ -1,7 +1,8 @@
 steps:
   - label: ":hammer: Build stack installers"
     command: ".buildkite/scripts/build.ps1"
-    artifact_paths: "bin/out/**/*"
+    #artifact_paths: "bin/out/**/*"
+    artifact_paths: "bin/out/logfile.csv"
     agents:
       provider: gcp
       image: family/ci-windows-2022
