@@ -21,6 +21,8 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
+            Copy(filePath, "signed_" + filePath);
+
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
                 MagicStrings.Dirs.Cert,
@@ -34,10 +36,7 @@ namespace ElastiBuild.BullseyeTargets
                 var timestampUrl = ctx.Config.TimestampUrls[tryNr];
                 var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, timestampUrl);
 
-                SignToolArgs += Path
-                    .Combine(ctx.OutDir, ap.CanonicalTargetName,
-                        Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi)
-                    .Quote();
+                SignToolArgs += ("signed_" + filePath).Quote();
 
                 Console.WriteLine(SignToolExePath + " ");
                 Console.WriteLine(SignToolArgs.Replace(certPass, "[redacted]"));
