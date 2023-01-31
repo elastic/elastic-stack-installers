@@ -63,8 +63,8 @@ foreach ($kind in @("-SNAPSHOT")) {
         }
     }
 
-    echo "--- Starting monitoring"
-    Start-Process -FilePath C:\ProcessMonitor\procmon.exe -ArgumentList "/AcceptEula /BackingFile C:\capture.pml /Quiet"
+    #echo "--- Starting monitoring"
+    #Start-Process -FilePath C:\ProcessMonitor\procmon.exe -ArgumentList "/AcceptEula /BackingFile C:\capture.pml /Quiet"
 
 
     echo "--- Building msi$kind"
@@ -93,13 +93,13 @@ foreach ($kind in @("-SNAPSHOT")) {
         echo "Build$kind completed with exit code $LastExitcode"
     }
 
-    echo "~~~ Processing monitoring"
-    C:\ProcessMonitor\procmon.exe /Terminate
-    while (Get-Process procmon -ErrorAction Ignore) {
-         Write-Host "Waiting on procmon to exit…"
-         Start-Sleep -Seconds 5
-    }
-    C:\ProcessMonitor\procmon.exe /OpenLog C:\capture.pml /SaveAs "bin/out/capture.csv"
+    #echo "~~~ Processing monitoring"
+    #C:\ProcessMonitor\procmon.exe /Terminate
+    #while (Get-Process procmon -ErrorAction Ignore) {
+    #     Write-Host "Waiting on procmon to exit…"
+    #     Start-Sleep -Seconds 5
+    #}
+    #C:\ProcessMonitor\procmon.exe /OpenLog C:\capture.pml /SaveAs "bin/out/capture.csv"
 
     echo "---Dealing with handles"
     $Processes = Get-Process
