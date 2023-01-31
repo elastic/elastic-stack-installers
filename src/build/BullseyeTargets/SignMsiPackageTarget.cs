@@ -21,7 +21,7 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            Copy(filePath, "signed_" + filePath);
+            File.Copy(filePath, "signed_" + filePath);
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
