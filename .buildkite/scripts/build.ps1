@@ -53,10 +53,6 @@ foreach ($kind in @("-SNAPSHOT")) {
         }
     }
 
-    #echo "--- Starting monitoring"
-    #Start-Process -FilePath C:\ProcessMonitor\procmon.exe -ArgumentList "/AcceptEula /BackingFile C:\capture.pml /Quiet"
-
-
     echo "--- Building msi$kind"
     New-Item bin/out -Type Directory -Force
     $args = @(
@@ -82,6 +78,10 @@ foreach ($kind in @("-SNAPSHOT")) {
     } else {
         echo "Build$kind completed with exit code $LastExitcode"
     }
+
+    Get-Acl -Path bin  | Format-Table -Wrap
+    Get-Acl -Path bin/out  | Format-Table -Wrap
+    Get-Acl -Path bin/out/auditbeat  | Format-Table -Wrap
 
     echo "--- Checking that all artefacts are there"
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
