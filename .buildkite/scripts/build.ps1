@@ -9,6 +9,11 @@ echo "~~~ Installing procmon.exe"
 Invoke-WebRequest -Uri "https://download.sysinternals.com/files/ProcessMonitor.zip" -OutFile 'C:\ProcessMonitor.zip'
 Expand-Archive -Path 'C:\ProcessMonitor.zip' -Destination C:\ProcessMonitor
 
+echo "~~~ Installing handle.exe"
+Invoke-WebRequest -Uri "https://download.sysinternals.com/files/Handle.zip" -OutFile 'C:\Handle.zip'
+Expand-Archive -Path 'C:\Handle.zip' -Destination C:\Handle
+${env:PATH} = "c:\Handle;" + ${env:PATH}
+
 
 echo "~~~ Reading msi certificate from vault"
 $MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
@@ -96,7 +101,30 @@ foreach ($kind in @("-SNAPSHOT")) {
     }
     C:\ProcessMonitor\procmon.exe /OpenLog C:\capture.pml /SaveAs "bin/out/capture.csv"
 
-    takeown /F bin/out /R
+    echo "---Dealing with handles"
+    $Processes = Get-Process
+    $results = $Processes | Foreach-Object {
+        $handles = (handle64 -p $_.ID -NoBanner) | Where-Object { $_ -Match " File " } | Foreach-Object {
+                [PSCustomObject]@{
+            "Hex"  = ((($_ -Split " ").Where({ $_ -NE "" })[0]).Split(":")[0]).Trim()
+            "File" = (($_ -Split " ")[-1]).Trim()
+            }
+        }
+
+        If ( $handles ) {
+            [PSCustomObject]@{
+                "Name"    = $_.Name
+                "PID"     = $_.ID
+                "Handles" = $handles
+            }
+        }
+    }
+    foreach ($result in $results) {
+        echo "$result.Name  -> $result.Handles"
+        foreach (handle in $result.Handles) {
+           handle64 -p $result.PID -c $handle.Hex -y -nobanner
+        }
+    }
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
