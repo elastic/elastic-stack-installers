@@ -1,7 +1,7 @@
 $stack_version="8.7.0"
 
-echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
+echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -Version 5.0.408 -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
@@ -81,6 +81,10 @@ foreach ($kind in @("-SNAPSHOT")) {
     } else {
         echo "Build$kind completed with exit code $LastExitcode"
     }
+    $logFile = "bin\out\logfile.csv"
+
+    Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Sysmon/Operational'; Id = 13 } |
+        Export-Csv $logFile 
 
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
     if ($msiCount -ne 8) {
