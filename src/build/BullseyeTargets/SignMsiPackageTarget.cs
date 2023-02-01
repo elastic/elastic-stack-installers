@@ -21,19 +21,8 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            FileInfo fileInfo = new FileInfo(filePath);
-            FileSecurity security = fileInfo.GetAccessControl();
-            security.SetAccessRuleProtection(false, false);
-
-            FileSystemAccessRule rule = new FileSystemAccessRule(
-                "Users",
-                FileSystemRights.FullControl,
-                AccessControlType.Allow
-            );
-            security.SetAccessRule(rule);
-            fileInfo.SetAccessControl(security);
-
-            Console.WriteLine("Access control set on " + filePath);
+            await Command.RunAsync("icacls", ctx.OutDir + " /grant 'Users:(OI)(CI)F' /T", noEcho: false);
+            Console.WriteLine("Access control set on " + ctx.OutDir);
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
