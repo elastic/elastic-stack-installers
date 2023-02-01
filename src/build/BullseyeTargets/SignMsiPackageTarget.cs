@@ -21,7 +21,7 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            await Command.RunAsync("icacls", ctx.OutDir + " /grant 'Users:(OI)(CI)F' /T", noEcho: false);
+            await Command.RunAsync("icacls", ctx.OutDir + " /grant Users:(OI)(CI)F /T", noEcho: false);
             Console.WriteLine("Access control set on " + ctx.OutDir);
 
             var SignToolExePath = Path.Combine(
