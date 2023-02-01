@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Threading;
 using ElastiBuild.Extensions;
@@ -21,7 +22,20 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            File.Copy(filePath, "signed_" + filePath);
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(ctx.OutDir);
+            DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
+            SecurityIdentifier users = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            FileSystemAccessRule rule = new FileSystemAccessRule(
+                users,
+                FileSystemRights.FullControl,
+                InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit,
+                PropagationFlags.None,
+                AccessControlType.Allow
+            );
+            directorySecurity.SetAccessRule(rule);
+            directoryInfo.SetAccessControl(directorySecurity);
+            Console.WriteLine("Access control set on directory " + ctx.OutDir);
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
@@ -36,7 +50,7 @@ namespace ElastiBuild.BullseyeTargets
                 var timestampUrl = ctx.Config.TimestampUrls[tryNr];
                 var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, timestampUrl);
 
-                SignToolArgs += ("signed_" + filePath).Quote();
+                SignToolArgs += filePath.Quote();
 
                 Console.WriteLine(SignToolExePath + " ");
                 Console.WriteLine(SignToolArgs.Replace(certPass, "[redacted]"));
