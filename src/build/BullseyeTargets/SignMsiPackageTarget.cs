@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.FileSystem.AccessControl;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Threading;
 using ElastiBuild.Extensions;
@@ -23,18 +21,18 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
-            FileSecurity security = File.GetAccessControl(filePath);
+            FileInfo fileInfo = new FileInfo(filePath);
+            FileSecurity security = fileInfo.GetAccessControl();
             security.SetAccessRuleProtection(false, false);
 
             FileSystemAccessRule rule = new FileSystemAccessRule(
                 "Users",
                 FileSystemRights.FullControl,
-                InheritanceFlags.None,
-                PropagationFlags.None,
                 AccessControlType.Allow
             );
             security.SetAccessRule(rule);
-            File.SetAccessControl(filePath, security);
+            fileInfo.SetAccessControl(security);
+
             Console.WriteLine("Access control set on " + filePath);
 
             var SignToolExePath = Path.Combine(
