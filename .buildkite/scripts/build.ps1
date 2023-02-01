@@ -84,7 +84,6 @@ foreach ($kind in @("-SNAPSHOT")) {
       -e VAULT_ADDR `
       -e VAULT_ROLE_ID `
       -e VAULT_SECRET_ID `
-      --mount type=bind,readonly=false,src="${pwd}",target=/artifacts `
       docker.elastic.co/infra/release-manager:latest `
         cli collect `
           --help
@@ -92,8 +91,9 @@ foreach ($kind in @("-SNAPSHOT")) {
 
     echo "--- Checking that all artefacts are there"
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
-    if ($msiCount -ne 8) {
-        Write-Error "Expected 8 msi executable to be produced, but $msiCount were"
+    $expected = 2 * $beats.Length
+    if ($msiCount -ne $expected) {
+        Write-Error "Expected $expected msi executable to be produced, but $msiCount were"
         exit 1
     }
 }
