@@ -22,20 +22,19 @@ namespace ElastiBuild.BullseyeTargets
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
+            FileSecurity security = File.GetAccessControl(filePath);
+            security.SetAccessRuleProtection(false, false);
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(ctx.OutDir);
-            DirectorySecurity directorySecurity = directoryInfo.GetAccessControl();
-            SecurityIdentifier users = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             FileSystemAccessRule rule = new FileSystemAccessRule(
-                users,
+                "Users",
                 FileSystemRights.FullControl,
-                InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit,
+                InheritanceFlags.None,
                 PropagationFlags.None,
                 AccessControlType.Allow
             );
-            directorySecurity.SetAccessRule(rule);
-            directoryInfo.SetAccessControl(directorySecurity);
-            Console.WriteLine("Access control set on directory " + ctx.OutDir);
+            security.SetAccessRule(rule);
+            File.SetAccessControl(filePath, security);
+            Console.WriteLine("Access control set on " + filePath);
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,

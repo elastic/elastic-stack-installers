@@ -79,10 +79,15 @@ foreach ($kind in @("-SNAPSHOT")) {
         echo "Build$kind completed with exit code $LastExitcode"
     }
 
-    echo "Granting full control"
-    icacls "bin" /grant 'Users:(OI)(CI)F' /T
-
-    Get-Acl -Path bin/out/auditbeat/auditbeat-8.7.0-SNAPSHOT-windows-x86_64.msi | Format-Table -Wrap
+    docker run --rm `
+      --name release-manager `
+      -e VAULT_ADDR `
+      -e VAULT_ROLE_ID `
+      -e VAULT_SECRET_ID `
+      --mount type=bind,readonly=false,src="${pwd}",target=/artifacts `
+      docker.elastic.co/infra/release-manager:latest `
+        cli collect `
+          --help
 
 
     echo "--- Checking that all artefacts are there"
