@@ -20,7 +20,11 @@ $client = new-object System.Net.WebClient
 $currentDir = $(Get-Location).Path
 $beats = @('auditbeat', 'filebeat', 'heartbeat', 'metricbeat', 'packetbeat', 'winlogbeat')
 $ossBeats = $beats | ForEach-Object { $_ + "-oss" }
-foreach ($kind in @("-SNAPSHOT")) {
+$kinds =  @("-SNAPSHOT")
+if ($env:BUILDKITE_BRANCH -match '^\d+\.\d+$') {
+   $kinds += "" # empty string for staging
+}
+foreach ($kind in $kinds) {
     echo "~~~ downloading beat dependencies$kind"
     Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
     New-Item bin/in -Type Directory -Force
@@ -54,7 +58,6 @@ foreach ($kind in @("-SNAPSHOT")) {
     }
 
     echo "--- Building msi$kind"
-    New-Item bin/out -Type Directory -Force
     $args = @(
         "run",
         "--project",
@@ -74,20 +77,10 @@ foreach ($kind in @("-SNAPSHOT")) {
     &dotnet $args
     if ($LastExitcode -ne 0) {
         Write-Error "Build$kind failed with exit code $LastExitcode"
-        exit $exitCode
+        exit $LastExitcode
     } else {
         echo "Build$kind completed with exit code $LastExitcode"
     }
-
-    docker run --rm `
-      --name release-manager `
-      -e VAULT_ADDR `
-      -e VAULT_ROLE_ID `
-      -e VAULT_SECRET_ID `
-      docker.elastic.co/infra/release-manager:latest `
-        cli collect `
-          --help
-
 
     echo "--- Checking that all artefacts are there"
     $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
