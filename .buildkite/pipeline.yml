@@ -5,6 +5,11 @@ steps:
     agents:
       provider: gcp
       image: family/ci-windows-2022
+  - label: ":package: DRA Publish"
+    command: ".buildkite/scripts/dra-publish.sh"
+    depends_on: ":hammer: Build stack installers"
+    agents:
+      provider: gcp
 notify:
   - slack: "#release-eng-alerts"
     if: 'build.pull_request.id == null && build.state != "passed"'
