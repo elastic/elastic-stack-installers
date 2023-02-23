@@ -8,7 +8,7 @@ steps:
       image: family/ci-windows-2022
   - label: ":package: DRA Publish"
     command: ".buildkite/scripts/dra-publish.sh"
-    key: "publish dra"
+    key: "publish-dra"
     depends_on: "build"
     agents:
       provider: gcp
