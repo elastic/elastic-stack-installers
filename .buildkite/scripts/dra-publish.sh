@@ -7,7 +7,7 @@ set +x
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
 mkdir -p bin/out
-buildkite-agent artifact download "bin/out/**/*.msi" "bin/out/"
+buildkite-agent artifact download 'bin/out/**/*.msi' bin/out/ --step build
 
 # Check if any artifacts were downloaded 
 if [ -n "$(find bin/out/ -maxdepth 1 -name '*.msi' -print -quit)" ]
@@ -49,4 +49,4 @@ echo "+++ Publishing DRA artifacts..."
         --artifact-set main \
         --dry-run
 
-# I can run snapshot on main/ and both version branches.
+# I can run snapshot on main+both on version branches and use a matrix step.
