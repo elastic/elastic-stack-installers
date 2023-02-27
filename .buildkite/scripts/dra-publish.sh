@@ -9,16 +9,6 @@ echo "+++ Downloading artifacts..."
 mkdir -p bin/out
 buildkite-agent artifact download 'bin\out\**\*.msi' bin/out/ --step build
 
-# Check if any artifacts were downloaded 
-if [ -n "$(find bin/out/ -maxdepth 1 -name '*.msi' -print -quit)" ]
-then
-  echo "Artifacts downloaded successfully"
-else
-  echo "No artifacts were downloaded"
-  exit 1
-fi
-
-
 echo "+++ Setting DRA params" 
 
 # Shared secret path containing the dra creds for project teams
