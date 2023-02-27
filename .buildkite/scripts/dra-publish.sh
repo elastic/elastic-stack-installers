@@ -7,7 +7,7 @@ set +x
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
 mkdir -p bin/out
-buildkite-agent artifact download 'bin/out/**/*.msi' bin/out/ --step build
+buildkite-agent artifact download 'bin\out\**\*.msi' bin/out/ --step build
 
 # Check if any artifacts were downloaded 
 if [ -n "$(find bin/out/ -maxdepth 1 -name '*.msi' -print -quit)" ]
