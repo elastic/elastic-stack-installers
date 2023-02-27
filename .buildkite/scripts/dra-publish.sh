@@ -8,7 +8,7 @@ set +x
 echo "+++ Downloading artifacts..."
 mkdir -p bin/out
 buildkite-agent artifact download 'bin\out\**\*.msi' bin/out/ --step build
-mv bin/out/*/*.msi bin/out/.
+# mv bin/out/*/*.msi bin/out/.
 
 echo "+++ Setting DRA params" 
 
