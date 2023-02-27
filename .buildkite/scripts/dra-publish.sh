@@ -14,7 +14,10 @@ echo "+++ Setting DRA params"
 
 # Shared secret path containing the dra creds for project teams
 DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
-export DRA_CREDS
+VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr')
+VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
+VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
+export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 
 # Retrieve version value
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
