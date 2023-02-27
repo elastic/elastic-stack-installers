@@ -8,6 +8,7 @@ set +x
 echo "+++ Downloading artifacts..."
 mkdir -p bin/out
 buildkite-agent artifact download 'bin\out\**\*.msi' bin/out/ --step build
+mv bin/out/*/*.msi bin/out/.
 
 echo "+++ Setting DRA params" 
 
@@ -28,7 +29,7 @@ echo "+++ Publishing DRA artifacts..."
     -e VAULT_ADDR="$(echo "$DRA_CREDS" | jq -r '.vault_addr')" \
     -e VAULT_ROLE_ID="$(echo "$DRA_CREDS" | jq -r '.role_id')" \
     -e VAULT_SECRET_ID="$(echo "$DRA_CREDS" | jq -r '.secret_id')" \
-    --mount type=bind,readonly=false,src="$PWD/artifacts",target=<Your/Projects/Build/Dir> \   # The directory containing the projects artifacts
+    --mount type=bind,readonly=false,src="$PWD",target=/artifacts \
     docker.elastic.co/infra/release-manager:latest \
         cli collect \
         --project elastic-stack-installers \
