@@ -37,25 +37,19 @@ function run_release_manager() {
         docker.elastic.co/infra/release-manager:latest \
         cli collect \
         --project elastic-stack-installers \
-        --branch main \
+        --branch "$BUILDKITE_BRANCH" \
         --commit "${BUILDKITE_COMMIT}" \
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
-        --artifact-set main \
-        --dry-run
+        --artifact-set main
 }
 
-export WORKFLOW="snapshot"
-run_release_manager
-# if [[ $BUILDKITE_BRANCH == "main" ]]; then
-#     WORKFLOW="snapshot"
-#     run_release_manager
-# else
-#     WORKFLOW="staging"
-#     run_release_manager
-#     WORKFLOW="snapshot"
-#     run_release_manager
-# fi
-
-
-# I can run snapshot on main+both on version branches and use a matrix step.
+if [[ $BUILDKITE_BRANCH == "main" ]]; then
+    WORKFLOW="snapshot"
+    run_release_manager
+else
+    WORKFLOW="staging"
+    run_release_manager
+    WORKFLOW="snapshot"
+    run_release_manager
+fi

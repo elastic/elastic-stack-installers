@@ -8,11 +8,11 @@ steps:
       image: family/ci-windows-2022
   - label: ":package: DRA Publish"
     command: ".buildkite/scripts/dra-publish.sh"
-    # if: "branch = main || branch =~ /^[0-9]+\.[0-9]+$/"
+    if: 'build.branch == "main" || build.branch =~ /^[0-9]\.[0-9]/'
     key: "publish-dra"
     depends_on: "build"
     agents:
       provider: gcp
-# notify:
-#   - slack: "#release-eng-alerts"
-#     if: 'build.pull_request.id == null && build.state != "passed"'
+notify:
+  - slack: "#release-eng-alerts"
+    if: 'build.pull_request.id == null && build.state != "passed"'
