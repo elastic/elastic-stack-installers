@@ -41,15 +41,25 @@ function run_release_manager() {
         --commit "${BUILDKITE_COMMIT}" \
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
-        --artifact-set main
+        --artifact-set main \
+        ${BUILDKITE_PULL_REQUEST:+--dry-run} \
+        #
 }
 
-if [[ $BUILDKITE_BRANCH == "main" ]]; then
+case "$BUILDKITE_BRANCH" in
+main)
     WORKFLOW="snapshot"
     run_release_manager
-else
+    ;;
+[0-9].*)
     WORKFLOW="staging"
     run_release_manager
     WORKFLOW="snapshot"
     run_release_manager
-fi
+    ;;
+*) 
+    echo "Running in dry-run mode for $BUILDKITE_BRANCH"
+    WORKFLOW="snapshot"
+    run_release_manager
+    ;;   
+esac
