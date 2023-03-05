@@ -6,7 +6,6 @@ set +x
 
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
-mkdir -p "$PWD"/bin/out
 buildkite-agent artifact download 'bin\out\**\*.msi' "$PWD"/bin/out/ --step build
 ls -laR "$PWD"/bin/out
 # mv bin/out/*/*.msi bin/out/.
