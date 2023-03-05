@@ -13,6 +13,6 @@ steps:
     depends_on: "build"
     agents:
       provider: gcp
-notify:
-  - slack: "#release-eng-alerts"
-    if: 'build.pull_request.id == null && build.state != "passed"'
+# notify:
+#   - slack: "#release-eng-alerts"
+#     if: 'build.pull_request.id == null && build.state != "passed"'

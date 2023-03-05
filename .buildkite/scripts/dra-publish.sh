@@ -6,8 +6,9 @@ set +x
 
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
-mkdir -p bin/out
-buildkite-agent artifact download 'bin\out\**\*.msi' bin/out/ --step build
+mkdir -p "$PWD"/bin/out
+buildkite-agent artifact download 'bin\out\**\*.msi' "$PWD"/bin/out/ --step build
+ls -laR "$PWD"/bin/out
 # mv bin/out/*/*.msi bin/out/.
 
 echo "+++ Setting DRA params" 
