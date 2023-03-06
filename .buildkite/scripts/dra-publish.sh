@@ -8,8 +8,6 @@ set +x
 echo "+++ Downloading artifacts..."
 buildkite-agent artifact download 'bin\out\**\*.msi' . --step build
 chmod -R 777 bin/out
-ls -laR "$PWD"/bin/out
-
 
 echo "+++ Setting DRA params" 
 
