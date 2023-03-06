@@ -1,4 +1,4 @@
-$stack_version="8.8.0"
+$stack_version = (Get-Content Directory.Build.props | Select-String -Pattern '<StackVersion>' -CaseSensitive).Line.Split('>')[2].Split('<')[0].Trim()
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
