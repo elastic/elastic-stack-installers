@@ -26,6 +26,11 @@ export VERSION
 
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
+    set -x # Enable command tracing
+    dry_run=""
+    if [ "$BUILDKITE_PULL_REQUEST" != "false" ]; then
+        dry_run="--dry-run"
+    fi
     docker run --rm \
         --name release-manager \
         -e VAULT_ADDR="${VAULT_ADDR}" \
@@ -40,8 +45,9 @@ function run_release_manager() {
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
         --artifact-set main \
-        ${BUILDKITE_PULL_REQUEST:+--dry-run} \
+        $dry_run \
         #
+    set +x # Disable command tracing
 }
 
 case "$BUILDKITE_BRANCH" in
