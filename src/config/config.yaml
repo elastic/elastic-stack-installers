@@ -1,22 +1,10 @@
 ---
 timestamp_urls:
   - http://timestamp.digicert.com
-  - http://timestamp.globalsign.com/tsa/r6advanced1
   - http://rfc3161timestamp.globalsign.com/advanced
-  - http://timestamp.sectigo.com
-  - http://timestamp.apple.com/ts01
-  - http://tsa.mesign.com
-  - http://time.certum.pl
-  - https://freetsa.org
-  - http://tsa.startssl.com/rfc3161
-  - http://dse200.ncipher.com/TSS/HttpTspServer
-  - http://zeitstempel.dfn.de
-  - https://ca.signfiles.com/tsa/get.aspx
-  - http://services.globaltrustfinder.com/adss/tsa
-  - https://tsp.iaik.tugraz.at/tsp/TspRequest
-  - http://timestamp.entrust.net/TSS/RFC3161sha2TS
   - http://tsa.starfieldtech.com
   - http://timestamp.comodoca.com
+  - http://tsp.iaik.tugraz.at/tsp/TspRequest
 
 products:
   auditbeat:
