@@ -21,10 +21,6 @@
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <PackageReference Include="WixSharp.bin" Version="1.14.2" />
     <PackageReference Include="WixSharp.wix.bin" Version="3.11.2" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
