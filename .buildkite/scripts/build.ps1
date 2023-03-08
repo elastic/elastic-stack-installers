@@ -1,4 +1,4 @@
-$stack_version="8.8.0"
+$stack_version="8.7.0"
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
@@ -60,7 +60,7 @@ foreach ($beat in ($beats + $ossBeats)) {
     }
 }
 
-echo "--- Building msi$workflow"
+echo "--- Building $workflow msi"
 $args = @(
     "run",
     "--project",
