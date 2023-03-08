@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Threading;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
 using SimpleExec;
-
 
 namespace ElastiBuild.BullseyeTargets
 {
@@ -14,15 +12,6 @@ namespace ElastiBuild.BullseyeTargets
         public static async Task RunAsync(BuildContext ctx)
         {
             var ap = ctx.GetArtifactPackage();
-
-            string filePath = Path.Combine(
-                 ctx.OutDir,
-                 ap.CanonicalTargetName,
-                 Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
-            );
-
-            await Command.RunAsync("icacls", ctx.OutDir + " /grant Users:(OI)(CI)F /T", noEcho: false);
-            Console.WriteLine("Access control set on " + ctx.OutDir);
 
             var SignToolExePath = Path.Combine(
                 ctx.ToolsDir,
@@ -37,7 +26,10 @@ namespace ElastiBuild.BullseyeTargets
                 var timestampUrl = ctx.Config.TimestampUrls[tryNr];
                 var (certPass, SignToolArgs) = MakeSignToolArgs(ctx, timestampUrl);
 
-                SignToolArgs += filePath.Quote();
+                SignToolArgs += Path
+                    .Combine(ctx.OutDir, ap.CanonicalTargetName,
+                        Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi)
+                    .Quote();
 
                 Console.WriteLine(SignToolExePath + " ");
                 Console.WriteLine(SignToolArgs.Replace(certPass, "[redacted]"));
@@ -48,16 +40,16 @@ namespace ElastiBuild.BullseyeTargets
                     signed = true;
                     break;
                 }
-                catch (Exception ex)
+                catch (Exception /*ex*/)
                 {
                     Console.WriteLine(
-                        $"Error: SigTool failed, check it's output: {ex.Message}\n" +
+                        $"Error: timestap server {timestampUrl} is unavailable, " +
                         $"{tryCount - tryNr - 1} server(s) left to try.");
                 }
             }
 
             if (!signed)
-                throw new Exception("Error: Failed to sign msi after all retries.");
+                throw new Exception("Error: None of the timestamp servers available.");
         }
     }
 }
