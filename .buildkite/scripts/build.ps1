@@ -31,14 +31,14 @@ if ($workflow -eq "snapshot") {
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
     $hostname = "snapshots.elastic.co"
-    $prefix = "https://$hostname/$buildId"
+    $prefix = "$hostname/$buildId"
 } else {
     $version = $stack_version
     $hostname = "artifacts-staging.elastic.co"
     $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build_id
-    $prefix = "https://$hostname/beats/$buildId"
+    $prefix = "$hostname/beats/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
