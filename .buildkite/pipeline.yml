@@ -1,17 +1,26 @@
 steps:
-  - label: ":hammer: Build stack installers"
-    command: ".buildkite/scripts/build.ps1"
-    key: "build"
-    artifact_paths: "bin/out/**/*.msi"
-    agents:
-      provider: gcp
-      image: family/ci-windows-2022
-  - label: ":package: DRA Publish"
-    command: ".buildkite/scripts/dra-publish.sh"
-    key: "publish-dra"
-    depends_on: "build"
-    agents:
-      provider: gcp
-notify:
-  - slack: "#release-eng-alerts"
-    if: 'build.pull_request.id == null && build.state != "passed"'
+  - group: ":beats: Stack installers Snapshot"
+    key: "dra-snapshot"
+    steps:
+    - label: ":hammer: Build stack installers"
+      command: ".buildkite/scripts/build.ps1"
+      key: "build-snapshot"
+      artifact_paths: "bin/out/**/*.msi"
+      agents:
+        provider: gcp
+        image: family/ci-windows-2022
+      env: 
+        WORKFLOW: "snapshot"
+    - label: ":package: DRA Publish"
+      command: ".buildkite/scripts/dra-publish.sh"
+      key: "publish-snapshot"
+      depends_on: "build-snapshot"
+      agents:
+        provider: gcp
+      env: 
+        WORKFLOW: "snapshot"
+        # BRANCH: "${BUILDKITE_BRANCH}"
+        BRANCH: "main"
+# notify:
+#   - slack: "#release-eng-alerts"
+#     if: 'build.pull_request.id == null && build.state != "passed"'
