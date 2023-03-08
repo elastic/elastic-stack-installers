@@ -1,7 +1,5 @@
 # Welcome to the Elastic Stack Installers!
 
-[![Build status](https://badge.buildkite.com/5e93d7c12dcedbceb8cb3e7935f17f94e9803543aa1d464e26.svg)](https://buildkite.com/elastic/elastic-stack-installers)
-
 This repository contains [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/ElastiBuild) and [Beat Package Compiler](https://github.com/elastic/elastic-stack-installers/wiki/Beat-Package-Compiler). See [Wiki](https://github.com/elastic/elastic-stack-installers/wiki) for more information.
 
 ## Reporting Problems

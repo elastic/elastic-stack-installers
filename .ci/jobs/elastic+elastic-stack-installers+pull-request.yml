@@ -1,0 +1,26 @@
+---
+
+- job:
+    name: elastic+elastic-stack-installers+pull-request
+    display-name: 'elastic / elastic-stack-installers - pull request'
+    description: Pull request tests.
+    scm:
+      - git:
+          branches:
+            - $ghprbActualCommit
+          refspec: +refs/pull/*:refs/remotes/origin/pr/*
+    triggers:
+      - github-pull-request:
+          github-hooks: true
+          org-list:
+            - elastic
+          allow-whitelist-orgs-as-admin: true
+          cancel-builds-on-update: true
+          status-context: devops-ci
+    builders:
+      - powershell: |
+          echo "-- PULL REQUEST 8< ----------------------------"
+          & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
+          ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
+          ./build show
+          echo "-- PULL REQUEST 8< ----------------------------"
