@@ -30,7 +30,7 @@ if ($workflow -eq "snapshot") {
     $response = Invoke-WebRequest -UseBasicParsing -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
-    $hostname = "artifacts-snapshots.elastic.co"
+    $hostname = "artifacts-snapshot.elastic.co"
 } else {
     $version = $stack_version
     $hostname = "artifactrs-staging.elastic.co"

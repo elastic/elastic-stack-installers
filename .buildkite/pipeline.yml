@@ -2,7 +2,7 @@ steps:
   - group: ":beats: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
-    - label: ":hammer: Build stack installers"
+    - label: ":hammer: Build stack installers Snapshot"
       command: ".buildkite/scripts/build.ps1"
       key: "build-snapshot"
       artifact_paths: "bin/out/**/*.msi"
@@ -11,7 +11,7 @@ steps:
         image: family/ci-windows-2022
       env: 
         WORKFLOW: "snapshot"
-    - label: ":package: DRA Publish"
+    - label: ":package: DRA Publish Snapshot"
       command: ".buildkite/scripts/dra-publish.sh"
       key: "publish-snapshot"
       depends_on: "build-snapshot"
