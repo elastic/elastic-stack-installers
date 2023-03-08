@@ -20,7 +20,7 @@ steps:
       env: 
         WORKFLOW: "snapshot"
         # BRANCH: "${BUILDKITE_BRANCH}"
-        BRANCH: "main"
+        BRANCH: "8.7"
   - group: ":beats: Stack installers Staging :beats:"
     key: "dra-staging"
     steps:
@@ -44,7 +44,7 @@ steps:
       env: 
         WORKFLOW: "staging"
         # BRANCH: "${BUILDKITE_BRANCH}"
-        BRANCH: "main"
+        BRANCH: "8.7"
 # notify:
 #   - slack: "#release-eng-alerts"
 #     if: 'build.pull_request.id == null && build.state != "passed"'
