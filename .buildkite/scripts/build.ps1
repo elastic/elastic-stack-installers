@@ -31,17 +31,18 @@ if ($workflow -eq "snapshot") {
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
     $hostname = "snapshots.elastic.co"
-    $url = "https://$hostname/$buildId/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
+    $prefix = "https://$hostname/$buildId"
 } else {
     $version = $stack_version
     $hostname = "artifacts-staging.elastic.co"
     $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build_id
-    $url = "https://$hostname/beats/$buildId/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
+    $prefix = "https://$hostname/beats/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
+        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
         $beatName = $beat.Replace("-oss", "")
         echo "Downloading from $url"
         $client.DownloadFile(
