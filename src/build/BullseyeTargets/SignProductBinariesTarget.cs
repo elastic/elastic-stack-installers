@@ -41,16 +41,16 @@ namespace ElastiBuild.BullseyeTargets
                         signed = true;
                         break;
                     }
-                    catch (Exception ex)
+                    catch (Exception /*ex*/)
                     {
                         Console.WriteLine(
-                            $"Error: SigTool failed, check it's output: {ex.Message}" +
-                            $"{tryCount - tryNr - 1} server(s) timestamp servers left to try.");
+                            $"Error: timestap server {timestampUrl} is unavailable, " +
+                            $"{tryCount - tryNr - 1} server(s) left to try.");
                     }
                 }
 
                 if (!signed)
-                    throw new Exception("Error: Failed to sign msi after all retries.");
+                    throw new Exception("Error: None of the timestamp servers available.");
             }
         }
     }
