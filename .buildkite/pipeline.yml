@@ -21,6 +21,30 @@ steps:
         WORKFLOW: "snapshot"
         # BRANCH: "${BUILDKITE_BRANCH}"
         BRANCH: "main"
+  - group: ":beats: Stack installers Staging :beats:"
+    key: "dra-staging"
+    steps:
+    - label: ":hammer: Build stack installers staging"
+      # if: "build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/"
+      command: ".buildkite/scripts/build.ps1"
+      key: "build-staging"
+      artifact_paths: "bin/out/**/*.msi"
+      agents:
+        provider: gcp
+        image: family/ci-windows-2022
+      env: 
+        WORKFLOW: "staging"
+    - label: ":package: DRA Publish staging"
+      # if: "build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/"
+      command: ".buildkite/scripts/dra-publish.sh"
+      key: "publish-staging"
+      depends_on: "build-staging"
+      agents:
+        provider: gcp
+      env: 
+        WORKFLOW: "staging"
+        # BRANCH: "${BUILDKITE_BRANCH}"
+        BRANCH: "main"
 # notify:
 #   - slack: "#release-eng-alerts"
 #     if: 'build.pull_request.id == null && build.state != "passed"'
