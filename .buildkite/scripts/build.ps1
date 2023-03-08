@@ -42,8 +42,8 @@ if ($workflow -eq "snapshot") {
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
-        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
         $beatName = $beat.Replace("-oss", "")
+        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
         echo "Downloading from $url"
         $client.DownloadFile(
             $url,
