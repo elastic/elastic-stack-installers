@@ -22,8 +22,12 @@ export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
 export VERSION
 
+if [ "$WORKFLOW" == "staging" ]; then
+    MANIFEST_URL=$(curl https://artifacts-staging.elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
+else
+    MANIFEST_URL=$(curl https://artifacts-api.elastic.co/v1/versions/"$VERSION"-SNAPSHOT/builds/latest/projects/beats | jq -r '.project.external_artifacts_manifest_url')
+fi
 # Publish DRA artifacts
-
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
     set -x # Enable command tracing
@@ -45,9 +49,13 @@ function run_release_manager() {
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
         --artifact-set main \
+        --dependency beats:"${MANIFEST_URL}" \
         $dry_run \
         #
     set +x # Disable command tracing
 }
 
 run_release_manager
+
+# stacking manifest https://artifacts-staging.elastic.co/beats/latest/8.6.3.json manifest_url
+# snapshot manifest https://artifacts-api.elastic.co/v1/versions/8.6.3-SNAPSHOT/builds/latest/projects/beats external_artifacts_manifest_url
