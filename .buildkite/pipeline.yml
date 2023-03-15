@@ -51,4 +51,4 @@ steps:
 
 notify:
   - slack: "#release-eng-alerts"
-    if: 'build.pull_request.id == null'
+    if: "build.branch == 'main' || build.branch =~ /^\\d+\\.\\d+$/" # only notify on main and release branches
