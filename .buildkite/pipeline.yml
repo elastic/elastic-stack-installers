@@ -52,4 +52,4 @@ steps:
 notify:
   - slack: "#release-eng-alerts"
     # only notify on main and release branches
-    if: "!build.pull_request"
+    if: build.pull_request.id == 'null'
