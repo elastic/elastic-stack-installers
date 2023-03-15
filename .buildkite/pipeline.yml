@@ -52,4 +52,4 @@ steps:
 notify:
   - slack: "#release-eng-alerts"
     # only notify on main and release branches
-    if: 'build.branch =~ ^(main|8\\..*|7\\..*)$'
+    if: "build.branch =~ ^(main|9\\..*|8\\..*|7\\..*)$"
