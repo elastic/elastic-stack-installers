@@ -1,7 +1,7 @@
-# env: 
-# # This is set by .buildkite/hooks/pre-command
-#   BRANCH: "${DRA_BRANCH}"
-#   RUN_AS_MAIN: "FALSE"
+env: 
+# This is set by .buildkite/hooks/pre-command
+  BRANCH: "main"
+  RUN_AS_MAIN: "FALSE"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
