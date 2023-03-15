@@ -1,14 +1,13 @@
 env: 
 # This is set by .buildkite/hooks/pre-command
-  BRANCH: "main"
-  RUN_AS_MAIN: "FALSE"
+  BRANCH: "${BUILDKITE_BRANCH}"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
     - label: ":hammer: Build stack installers Snapshot"
-      # if: "build.branch == 'main' || build.pull_request.base_branch == 'main' || build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/ || RUN_AS_MAIN == 'TRUE'"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/
       command: ".buildkite/scripts/build.ps1"
       key: "build-snapshot"
       artifact_paths: "bin/out/**/*.msi"
