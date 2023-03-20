@@ -1,13 +1,14 @@
 env: 
-# This is set by .buildkite/hooks/pre-command
-  BRANCH: "${BUILDKITE_BRANCH}"
+  # BRANCH: "${BUILDKITE_BRANCH}"
+  BRANCH: "main"
+  RUN_RELEASE: "false"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
     - label: ":hammer: Build stack installers Snapshot"
-      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/build.ps1"
       key: "build-snapshot"
       artifact_paths: "bin/out/**/*.msi"
@@ -17,7 +18,7 @@ steps:
       env: 
         WORKFLOW: "snapshot"
     - label: ":package: DRA Publish Snapshot"
-      # if: "build.branch == 'main' || build.pull_request.base_branch == 'main' || build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/ || RUN_AS_MAIN == 'TRUE'"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/dra-publish.sh"
       key: "publish-snapshot"
       depends_on: "build-snapshot"
@@ -29,7 +30,7 @@ steps:
     key: "dra-staging"
     steps:
     - label: ":hammer: Build stack installers staging"
-      # if: "build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/ || RUN_AS_MAIN == 'TRUE'"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/build.ps1"
       key: "build-staging"
       artifact_paths: "bin/out/**/*.msi"
@@ -39,7 +40,7 @@ steps:
       env: 
         WORKFLOW: "staging"
     - label: ":package: DRA Publish staging"
-      # if: "build.branch =~ /^\\d\\d\\.\\d\\d$/ || build.pull_request.base_branch =~ /^\\d\\d\\.\\d\\d$/ || RUN_AS_MAIN == 'TRUE'"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/dra-publish.sh"
       key: "publish-staging"
       depends_on: "build-staging"
