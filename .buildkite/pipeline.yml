@@ -1,7 +1,7 @@
 env: 
   # BRANCH: "${BUILDKITE_BRANCH}"
   BRANCH: "main"
-  RUN_RELEASE: "false"
+  RUN_RELEASE: "true"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
