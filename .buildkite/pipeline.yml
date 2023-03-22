@@ -1,6 +1,5 @@
 env: 
-  # BRANCH: "${BUILDKITE_BRANCH}"
-  BRANCH: "8.7"
+  BRANCH: "${BUILDKITE_BRANCH}"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
