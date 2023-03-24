@@ -6,7 +6,7 @@ set +x
 
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
-buildkite-agent artifact download 'bin\out\**\*.msi' . --step build
+buildkite-agent artifact download 'bin\out\**\*.msi' . --step build-"${WORKFLOW}"
 chmod -R 777 bin/out
 
 echo "+++ Setting DRA params" 
@@ -22,8 +22,12 @@ export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
 export VERSION
 
-# Publish DRA artifacts for both snapshot and staging
-
+if [ "$WORKFLOW" == "staging" ]; then
+    MANIFEST_URL=$(curl https://artifacts-staging.elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
+else
+    MANIFEST_URL=$(curl https://artifacts-api.elastic.co/v1/versions/"$VERSION"-SNAPSHOT/builds/latest/projects/beats | jq -r '.project.external_artifacts_manifest_url')
+fi
+# Publish DRA artifacts
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
     set -x # Enable command tracing
@@ -45,28 +49,10 @@ function run_release_manager() {
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
         --artifact-set main \
+        --dependency beats:"${MANIFEST_URL}" \
         $dry_run \
         #
     set +x # Disable command tracing
 }
 
-case "$BUILDKITE_BRANCH" in
-main)
-    WORKFLOW="snapshot"
-    BRANCH="main"
-    run_release_manager
-    ;;
-^[0-9]+\.[0-9]+$)
-    BRANCH="$BUILDKITE_BRANCH"
-    WORKFLOW="staging"
-    run_release_manager
-    WORKFLOW="snapshot"
-    run_release_manager
-    ;;
-*) 
-    echo "Running in dry-run mode for $BUILDKITE_BRANCH"
-    BRANCH="main"
-    WORKFLOW="snapshot"
-    run_release_manager
-    ;;   
-esac
+run_release_manager
