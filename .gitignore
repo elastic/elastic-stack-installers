@@ -34,6 +34,7 @@ x86/
 
 # Roslyn cache directories
 *.ide/
+*vscode
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
