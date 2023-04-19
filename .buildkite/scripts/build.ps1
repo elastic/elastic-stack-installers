@@ -36,7 +36,7 @@ if ($workflow -eq "snapshot") {
     $version = $stack_version
     $hostname = "staging.elastic.co"
     $buildId = "7.17.10-7d41b4c8"
-    $prefix = "$hostname/$buildId/downloads/beats"
+    $prefix = "$hostname/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
