@@ -39,7 +39,7 @@ function run_release_manager() {
         docker.elastic.co/infra/release-manager:latest \
         cli collect \
         --project elastic-stack-installers \
-        --branch "${BRANCH}" \
+        --branch "7.17" \
         --commit "${BUILDKITE_COMMIT}" \
         --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
