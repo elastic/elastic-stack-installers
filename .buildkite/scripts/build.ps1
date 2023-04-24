@@ -35,13 +35,13 @@ if ($workflow -eq "snapshot") {
 } else {
     $version = $stack_version
     $hostname = "staging.elastic.co"
-    $buildId = "7.17.10-7d41b4c8"
+    $buildId = "7.17.10-e7809e80"
     $prefix = "$hostname/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
         $beatName = $beat.Replace("-oss", "")
-        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
+        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86.zip"
         echo "Downloading from $url"
         $client.DownloadFile(
             $url,
@@ -69,6 +69,8 @@ $args = @(
     "build",
     "--cid",
     $version,
+    "--bitness"
+    "x86",
     "--cert-file",
     "$cert_home/msi_certificate.p12",
     "--cert-pass",
