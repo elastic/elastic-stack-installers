@@ -41,12 +41,14 @@ if ($workflow -eq "snapshot") {
 foreach ($beat in ($beats + $ossBeats)) {
     try {
         $beatName = $beat.Replace("-oss", "")
-        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86.zip"
-        echo "Downloading from $url"
-        $client.DownloadFile(
-            $url,
-            "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
-        )
+        forceach ($bitsuffix in ("","_64")) {
+            $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86$bitsuffix.zip"
+            echo "Downloading from $url"
+            $client.DownloadFile(
+                $url,
+                "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
+            )
+        }
     }
     catch [System.Net.WebException] {
         if ($_.Exception.InnerException) {
