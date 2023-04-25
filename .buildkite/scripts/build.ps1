@@ -60,31 +60,35 @@ foreach ($beat in ($beats + $ossBeats)) {
     }
 }
 
-echo "--- Building $workflow msi"
-$args = @(
-    "run",
-    "--project",
-    "src\build\ElastiBuild.csproj",
-    "-c",
-    "Release",
-    "--",
-    "build",
-    "--cid",
-    $version,
-    "--bitness"
-    "both",
-    "--cert-file",
-    "$cert_home/msi_certificate.p12",
-    "--cert-pass",
-    "$cert_home/msi_password.txt"
-)
-$args += ($beats + $ossBeats)
-&dotnet $args
-if ($LastExitcode -ne 0) {
-    Write-Error "Build$workflow failed with exit code $LastExitcode"
-    exit $LastExitcode
-} else {
-    echo "Build$workflow completed with exit code $LastExitcode"
+
+archs = @("x64", "x86")
+foreach ($arch in $archs) {
+    echo "--- Building $workflow $arch msi"
+    $args = @(
+        "run",
+        "--project",
+        "src\build\ElastiBuild.csproj",
+        "-c",
+        "Release",
+        "--",
+        "build",
+        "--cid",
+        $version,
+        "--bitness"
+        "$arch",
+        "--cert-file",
+        "$cert_home/msi_certificate.p12",
+        "--cert-pass",
+        "$cert_home/msi_password.txt"
+    )
+    $args += ($beats + $ossBeats)
+    &dotnet $args
+    if ($LastExitcode -ne 0) {
+        Write-Error "Build$workflow failed with exit code $LastExitcode"
+        exit $LastExitcode
+    } else {
+        echo "Build$workflow completed with exit code $LastExitcode"
+    }
 }
 
 echo "--- Checking that all artefacts are there"
