@@ -42,7 +42,7 @@ foreach ($beat in ($beats + $ossBeats)) {
     try {
         $bitsuffix = @("", "_64")
         $beatName = $beat.Replace("-oss", "")
-        forceach ($suffix in $bitsuffix) {
+        foreach ($suffix in $bitsuffix) {
             $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86$suffix.zip"
             echo "Downloading from $url"
             $client.DownloadFile(
