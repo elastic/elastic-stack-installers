@@ -6,24 +6,20 @@ steps:
     key: "dra-snapshot"
     steps:
     - label: ":hammer: Build stack installers "
-      # if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+      if: build.branch == '7.17' || build.env("RUN_FULL") == "true"
       command: ".buildkite/scripts/build.ps1"
-      key: "build-snapshot"
+      key: "build"
       artifact_paths: "bin/out/**/*.msi"
       agents:
         provider: gcp
         image: family/ci-windows-2022
-      env: 
-        WORKFLOW: "snapshot"
-    - label: ":package: DRA Publish Snapshot"
-      # if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    - label: ":package: DRA Publish"
+      if: build.branch == '7.17' || build.env("RUN_FULL") == "true"
       command: ".buildkite/scripts/dra-publish.sh"
-      key: "publish-snapshot"
-      depends_on: "build-snapshot"
+      key: "publish"
+      depends_on: "build"
       agents:
         provider: gcp
-      env: 
-        WORKFLOW: "snapshot"
 
 notify:
   - slack: "#release-eng-alerts"
