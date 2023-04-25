@@ -73,7 +73,7 @@ $args = @(
     "--cid",
     $version,
     "--bitness"
-    "x86",
+    "both",
     "--cert-file",
     "$cert_home/msi_certificate.p12",
     "--cert-pass",
