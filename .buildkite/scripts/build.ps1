@@ -21,6 +21,7 @@ $currentDir = $(Get-Location).Path
 $beats = @('auditbeat', 'filebeat', 'heartbeat', 'metricbeat', 'packetbeat', 'winlogbeat')
 $ossBeats = $beats | ForEach-Object { $_ + "-oss" }
 $workflow = ${env:WORKFLOW}
+$buildId = ${env:BUILDID}
 
 echo "~~~ downloading beat $workflow dependencies"
 Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
@@ -29,13 +30,11 @@ if ($workflow -eq "snapshot") {
     $version = $stack_version + "-" + $workflow.ToUpper()
     $response = Invoke-WebRequest -UseBasicParsing -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
     $json = $response.Content | ConvertFrom-Json
-    $buildId = $json.build.build_id
     $hostname = "snapshots.elastic.co"
     $prefix = "$hostname/$buildId"
 } else {
     $version = $stack_version
     $hostname = "staging.elastic.co"
-    $buildId = "7.17.10-e7809e80"
     $prefix = "$hostname/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
@@ -90,7 +89,7 @@ if ($LastExitcode -ne 0) {
 
 echo "--- Checking that all artefacts are there"
 $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
-$expected = 2 * $beats.Length
+$expected = 4 * $beats.Length
 if ($msiCount -ne $expected) {
     Write-Error "Expected $expected msi executable to be produced, but $msiCount were"
     exit 1
