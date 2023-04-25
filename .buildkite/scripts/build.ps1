@@ -61,7 +61,7 @@ foreach ($beat in ($beats + $ossBeats)) {
 }
 
 
-archs = @("x64", "x86")
+$archs = @("x64", "x86")
 foreach ($arch in $archs) {
     echo "--- Building $workflow $arch msi"
     $args = @(
