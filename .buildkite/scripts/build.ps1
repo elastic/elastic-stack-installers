@@ -27,7 +27,7 @@ Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
 New-Item bin/in -Type Directory -Force
 if ($workflow -eq "snapshot") {
     $version = $stack_version + "-" + $workflow.ToUpper()
-    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://artifacts-api.elastic.co/v1/versions/$version/builds/latest"
+    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://artifacts-snapshot.elastic.co/beats/latest/$version.json"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build.build_id
     $hostname = "snapshots.elastic.co"
