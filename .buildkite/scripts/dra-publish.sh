@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -uox pipefail
+set -uo pipefail
 
 
 # Download artifacts from Buildkite "Build stack installers" step
@@ -10,12 +10,11 @@ chmod -R 777 bin/out
 
 echo "+++ Setting DRA params" 
 # Shared secret path containing the dra creds for project teams
-set +x
 DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
 VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr')
 VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
 VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
-set -x
+BRANCH="${BUILDKITE_BRANCH}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 # Retrieve version value
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
@@ -26,6 +25,11 @@ if [ "$WORKFLOW" == "staging" ]; then
 else
     MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-"$WORKFLOW".json | jq -r '.manifest_url')
 fi
+
+if [ -n "$DBRANCH" ]; then
+export BRANCH="$DBRANCH"
+fi
+
 # Publish DRA artifacts
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
@@ -33,7 +37,6 @@ function run_release_manager() {
     if [ "$BUILDKITE_PULL_REQUEST" != "false" ]; then
         dry_run="--dry-run"
     fi
-    set +x # Disbable command tracing
     docker run --rm \
         --name release-manager \
         -e VAULT_ADDR="${VAULT_ADDR}" \
@@ -51,10 +54,11 @@ function run_release_manager() {
         --dependency beats:"${MANIFEST_URL}" \
         $dry_run \
         #
-    set -x # Disable command tracing
 }
 
 run_release_manager
+RM_EXIT_CODE=$?
 
+exit $RM_EXIT_CODE
 # stacking manifest https://artifacts-staging.elastic.co/beats/latest/8.6.3.json manifest_url
 # snapshot manifest https://artifacts-api.elastic.co/v1/versions/8.6.3-SNAPSHOT/builds/latest/projects/beats external_artifacts_manifest_url
