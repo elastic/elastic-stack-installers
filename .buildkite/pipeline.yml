@@ -1,5 +1,5 @@
 env: 
-  # BRANCH: "${BUILDKITE_BRANCH}"
+  BRANCH: ""
 
 steps:
   - group: ":beats: Stack installers Snapshot"
