@@ -23,9 +23,9 @@ VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' 
 export VERSION
 
 if [ "$WORKFLOW" == "staging" ]; then
-    MANIFEST_URL=$(curl https://artifacts-staging.elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
+    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 else
-    MANIFEST_URL=$(curl https://artifacts-api.elastic.co/v1/versions/"$VERSION"-SNAPSHOT/builds/latest/projects/beats | jq -r '.project.external_artifacts_manifest_url')
+    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 fi
 # Publish DRA artifacts
 function run_release_manager() {

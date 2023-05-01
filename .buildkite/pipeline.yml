@@ -1,5 +1,5 @@
-env: 
-  BRANCH: ""
+# env: 
+#   BRANCH: "main"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
