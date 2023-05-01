@@ -20,15 +20,12 @@ export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
 export VERSION
 
-set -x
 if [ "$WORKFLOW" == "staging" ]; then
     MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 else
     MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
 fi
-EXPORT MANIFEST_URL
-echo "$MANIFEST_URL"
-set +x
+
 if [ -n "$DBRANCH" ]; then
 export BRANCH="$DBRANCH"
 fi
