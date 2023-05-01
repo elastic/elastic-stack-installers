@@ -60,5 +60,3 @@ run_release_manager
 RM_EXIT_CODE=$?
 
 exit $RM_EXIT_CODE
-# stacking manifest https://artifacts-staging.elastic.co/beats/latest/8.6.3.json manifest_url
-# snapshot manifest https://artifacts-api.elastic.co/v1/versions/8.6.3-SNAPSHOT/builds/latest/projects/beats external_artifacts_manifest_url
