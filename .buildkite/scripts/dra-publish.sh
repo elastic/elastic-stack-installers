@@ -23,7 +23,7 @@ export VERSION
 if [ "$WORKFLOW" == "staging" ]; then
     MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 else
-    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-"$WORKFLOW".json | jq -r '.manifest_url')
+    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
 fi
 
 if [ -n "$DBRANCH" ]; then
