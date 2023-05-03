@@ -1,15 +1,12 @@
-###
-### The following environment variables can be set for testing purposes via the buildkite UI or CLI
-###  RUN_SNAPSHOT: "true" - will run the snapshot workflow
-###  RUN_STAGING: "true" - will run the staging workflow
-###  DBRANCH: "main" - will override the dra branch param. Default is $BUILDKITE_BRANCH
-###
+env: 
+  BRANCH: "${BUILDKITE_BRANCH}"
 
 steps:
   - group: ":beats: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
     - label: ":hammer: Build stack installers Snapshot"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/build.ps1"
       key: "build-snapshot"
       artifact_paths: "bin/out/**/*.msi"
@@ -19,7 +16,7 @@ steps:
       env: 
         WORKFLOW: "snapshot"
     - label: ":package: DRA Publish Snapshot"
-      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_SNAPSHOT") == "true"
+      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/dra-publish.sh"
       key: "publish-snapshot"
       depends_on: "build-snapshot"
@@ -31,7 +28,7 @@ steps:
     key: "dra-staging"
     steps:
     - label: ":hammer: Build stack installers staging"
-      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/build.ps1"
       key: "build-staging"
       artifact_paths: "bin/out/**/*.msi"
@@ -41,7 +38,7 @@ steps:
       env: 
         WORKFLOW: "staging"
     - label: ":package: DRA Publish staging"
-      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
       command: ".buildkite/scripts/dra-publish.sh"
       key: "publish-staging"
       depends_on: "build-staging"
