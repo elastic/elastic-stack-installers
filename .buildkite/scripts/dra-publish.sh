@@ -26,10 +26,6 @@ else
     MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
 fi
 
-if [ -n "$DBRANCH" ]; then
-export BRANCH="$DBRANCH"
-fi
-
 # Publish DRA artifacts
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
