@@ -63,7 +63,7 @@ spec:
           cronline: '@daily'
           message: Builds daily `main` stack-installers dra
         Weekly main:
-          branch: 7.17
+          branch: '7.17'
           cronline: '@weekly'
           message: Builds weekly  `7.17` stack-installers dra
       teams:
