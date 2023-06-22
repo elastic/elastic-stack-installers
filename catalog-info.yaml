@@ -54,6 +54,10 @@ spec:
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
       schedules:
+        Daily 8_9:
+          branch: '8.9'
+          cronline: '@daily'
+          message: Builds daily `8.9` stack-installers dra
         Daily 8_8:
           branch: '8.8'
           cronline: '@daily'
