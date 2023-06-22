@@ -34,11 +34,9 @@ if ($workflow -eq "snapshot") {
     $prefix = "$hostname/$buildId"
 } else {
     $version = $stack_version
-    $hostname = "artifacts-staging.elastic.co"
-    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
-    $json = $response.Content | ConvertFrom-Json
-    $buildId = $json.build_id
-    $prefix = "$hostname/beats/$buildId"
+    $hostname = "staging.elastic.co"
+    $buildId = "7.17.11-23f9a819"
+    $prefix = "$hostname/$buildId"
 }
 foreach ($beat in ($beats + $ossBeats)) {
     try {
