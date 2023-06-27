@@ -9,48 +9,47 @@ steps:
   - group: ":beats: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
-    - label: ":hammer: Build stack installers Snapshot"
-      command: ".buildkite/scripts/build.ps1"
-      key: "build-snapshot"
-      artifact_paths: "bin/out/**/*.msi"
-      agents:
-        provider: gcp
-        image: family/ci-windows-2022
-      env: 
-        WORKFLOW: "snapshot"
-    - label: ":package: DRA Publish Snapshot"
-      if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_SNAPSHOT") == "true"
-      command: ".buildkite/scripts/dra-publish.sh"
-      key: "publish-snapshot"
-      depends_on: "build-snapshot"
-      agents:
-        provider: gcp
-      env: 
-        WORKFLOW: "snapshot"
+      - label: ":hammer: Build stack installers Snapshot"
+        command: ".buildkite/scripts/build.ps1"
+        key: "build-snapshot"
+        artifact_paths: "bin/out/**/*.msi"
+        agents:
+          provider: gcp
+          image: family/ci-windows-2022
+        env:
+          WORKFLOW: "snapshot"
+      - label: ":package: DRA Publish Snapshot"
+        if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_SNAPSHOT") == "true"
+        command: ".buildkite/scripts/dra-publish.sh"
+        key: "publish-snapshot"
+        depends_on: "build-snapshot"
+        agents:
+          provider: gcp
+        env:
+          WORKFLOW: "snapshot"
   - group: ":beats: Stack installers Staging :beats:"
     key: "dra-staging"
     steps:
-    - label: ":hammer: Build stack installers staging"
-      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
-      command: ".buildkite/scripts/build.ps1"
-      key: "build-staging"
-      artifact_paths: "bin/out/**/*.msi"
-      agents:
-        provider: gcp
-        image: family/ci-windows-2022
-      env: 
-        WORKFLOW: "staging"
-    - label: ":package: DRA Publish staging"
-      if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
-      command: ".buildkite/scripts/dra-publish.sh"
-      key: "publish-staging"
-      depends_on: "build-staging"
-      agents:
-        provider: gcp
-      env: 
-        WORKFLOW: "staging"
+      - label: ":hammer: Build stack installers staging"
+        if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+        command: ".buildkite/scripts/build.ps1"
+        key: "build-staging"
+        artifact_paths: "bin/out/**/*.msi"
+        agents:
+          provider: gcp
+          image: family/ci-windows-2022
+        env:
+          WORKFLOW: "staging"
+      - label: ":package: DRA Publish staging"
+        if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+        command: ".buildkite/scripts/dra-publish.sh"
+        key: "publish-staging"
+        depends_on: "build-staging"
+        agents:
+          provider: gcp
+        env:
+          WORKFLOW: "staging"
 
 notify:
   - slack: "#release-eng-alerts"
-    # only notify on main and release branches
-    if: build.pull_request.id == 'null'
+    if: build.branch == '8.9'
