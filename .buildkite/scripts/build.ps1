@@ -1,4 +1,4 @@
-$stack_version="7.17.11"
+$stack_version="7.17.12"
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
