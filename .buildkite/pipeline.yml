@@ -26,8 +26,7 @@ steps:
   - group: ":beats: Stack installers Staging :beats:"
     key: "dra-staging"
     steps:
-      - label: ":hammer: Build stack installers staging"
-        if: build.env("RUN_STAGING") == "true"
+      - label: ":hammer: Build stack installers staging"        
         command: ".buildkite/scripts/build.ps1"
         key: "build-staging"
         artifact_paths: "bin/out/**/*.msi"
@@ -36,8 +35,7 @@ steps:
           image: family/ci-windows-2022
         env:
           WORKFLOW: "staging"
-      - label: ":package: DRA Publish staging"
-        if: build.env("RUN_STAGING") == "true"
+      - label: ":package: DRA Publish staging"        
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-staging"
         depends_on: "build-staging"
