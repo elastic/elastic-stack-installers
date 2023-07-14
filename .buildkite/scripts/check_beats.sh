@@ -9,8 +9,9 @@ INSTALLERS_BEATS_DEPENDENCY=$(curl $INSTALLERS_MANIFEST | jq -r '.projects.elast
 if [ "$BEATS_MANIFEST" = "$INSTALLERS_BEATS_DEPENDENCY" ]
 then
    echo "We have the latest beats! Nothing to do" >&2
+   echo "steps: []"
 else
-   echo "Need to trigger a build, $BEATS_MANIFEST available but ES has $INSTALLERS_BEATS_DEPENDENCY" > &2
+   echo "Need to trigger a build, $BEATS_MANIFEST available but ES has $INSTALLERS_BEATS_DEPENDENCY" >&2
+   echo "steps: []"
 fi
 
-echo "steps:"
