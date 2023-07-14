@@ -1,5 +1,5 @@
 - label: "Trigger a DRA build"
-  trigger: deliverybot-automerge
+  trigger: elastic-stack-installers
   async: true
   build:
     message: "Pick up newly available beats build"
