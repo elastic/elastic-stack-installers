@@ -1,0 +1,7 @@
+- label: "Trigger a DRA build"
+  trigger: elastic-stack-installers
+  async: true
+  build:
+    message: "Pick up newly available beats build"
+    commit: "${BUILDKITE_COMMIT}"
+    branch: "${BUILDKITE_BRANCH}"
