@@ -96,10 +96,6 @@ spec:
           branch: '8.10'
           cronline: '*/10 * * * *'
           message: Checking for new beats artefacts for `8.10`
-        Daily 8_9:
-          branch: '8.9'
-          cronline: '*/10 * * * *'
-          message: Checking for new beats artefacts for `8.9`
         Weekly main:
           branch: '7.17'
           cronline: '*/10 * * * *'
