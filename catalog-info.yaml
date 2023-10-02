@@ -9,7 +9,7 @@ metadata:
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/elastic-stack-installers/
     github.com/project-slug: elastic/elastic-stack-installers
-    github.com/team-slug: elastic/release-eng
+    github.com/team-slug: elastic/ingest-fp
 
   tags:
     - buildkite
