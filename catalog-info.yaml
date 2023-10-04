@@ -4,12 +4,12 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: elastic-stack-installers
-  description: Windows MSI packages for Elastic stack 
+  description: Windows MSI packages for Elastic stack
 
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/elastic-stack-installers/
     github.com/project-slug: elastic/elastic-stack-installers
-    github.com/team-slug: elastic/release-eng
+    github.com/team-slug: elastic/ingest-fp
 
   tags:
     - buildkite
@@ -19,7 +19,7 @@ metadata:
 
 spec:
   type: tool
-  owner: group:release-eng
+  owner: group:ingest-fp
   lifecycle: beta
   dependsOn:
     - resource:github-repository-elastic-stack-installers
@@ -36,7 +36,7 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:release-eng
+  owner: group:ingest-fp
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -60,7 +60,7 @@ spec:
           message: Builds daily `8.9` stack-installers dra
         Daily main:
           branch: main
-          cronline: '@daily'
+          cronline: "@daily"
           message: Builds daily `main` stack-installers dra
         Weekly main:
           branch: '7.17'
@@ -69,6 +69,7 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
+        ingest-fp: {}
         release-eng: {}
 ---
 # yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/e57ee3bed7a6f73077a3f55a38e76e40ec87a7cf/rre.schema.json
@@ -82,7 +83,7 @@ metadata:
       url: https://buildkite.com/elastic/elastic-stack-installers-trigger
 spec:
   type: buildkite-pipeline
-  owner: group:release-eng
+  owner: group:ingest-fp
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -100,15 +101,16 @@ spec:
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
       schedules:
-        Daily 8_9:
-          branch: '8.9'
-          cronline: '*/10 * * * *'
-          message: Checking for new beats artefacts for `8.9`
+        Daily 8_10:
+          branch: "8.10"
+          cronline: "*/10 * * * *"
+          message: Checking for new beats artefacts for `8.10`
         Weekly main:
-          branch: '7.17'
-          cronline: '*/10 * * * *'
+          branch: "7.17"
+          cronline: "*/10 * * * *"
           message: Checking for new beats artefacts for `7.17`
       teams:
         everyone:
           access_level: BUILD_AND_READ
+        ingest-fp: {}
         release-eng: {}
