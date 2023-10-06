@@ -6,8 +6,8 @@ ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
 echo "~~~ Reading msi certificate from vault"
-$MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
-$MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/msi
+$MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/signing_cert
+$MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/signing_cert
 Remove-Item Env:VAULT_TOKEN
 
 $cert_home="C:/.cert"
