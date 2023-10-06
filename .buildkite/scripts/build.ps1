@@ -3,6 +3,7 @@
 $ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
 $ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
 $stack_version = $xml.SelectSingleNode("//ns:PropertyGroup/ns:StackVersion", $ns).InnerText
+Write-Host "Building Stack version: $stack_version"
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
