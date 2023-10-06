@@ -1,4 +1,8 @@
-$stack_version="8.12.0"
+# Read the stack version from build properties
+[xml]$xml = Get-Content -Path "Directory.Build.props"
+$ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
+$ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+$stack_version = $xml.SelectSingleNode("//ns:PropertyGroup/ns:StackVersion", $ns).InnerText
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
