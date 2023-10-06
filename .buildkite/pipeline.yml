@@ -51,5 +51,5 @@ steps:
           WORKFLOW: "staging"
 
 notify:
-  - slack: "#release-eng-alerts"
+  - slack: "#ingest-notifications"
     if: build.branch == 'main'
