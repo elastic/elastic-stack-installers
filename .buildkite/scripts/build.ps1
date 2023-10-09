@@ -1,4 +1,9 @@
-$stack_version="7.17.14"
+# Read the stack version from build properties
+[xml]$xml = Get-Content -Path "Directory.Build.props"
+$ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
+$ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+$stack_version = $xml.SelectSingleNode("//ns:PropertyGroup/ns:StackVersion", $ns).InnerText
+Write-Host "Building Stack version: $stack_version"
 
 echo "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
@@ -6,8 +11,8 @@ ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
 Get-Command dotnet | Select-Object -ExpandProperty Definition
 
 echo "~~~ Reading msi certificate from vault"
-$MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/msi
-$MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/msi
+$MsiCertificate=& vault read -field=cert secret/ci/elastic-elastic-stack-installers/signing_cert
+$MsiPassword=& vault read -field=password secret/ci/elastic-elastic-stack-installers/signing_cert
 Remove-Item Env:VAULT_TOKEN
 
 $cert_home="C:/.cert"
