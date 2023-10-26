@@ -126,6 +126,29 @@ namespace Elastic.PackageCompiler.Beats
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
                 //                  WixUtilExtension ServiceConfig element.
 
+                string arguments;
+                if (pc.IsAgentCommandLine)
+                {
+                    // Agent
+                    arguments =
+   " run " +
+   " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
+   " --path.config " + beatConfigPath.Quote() +
+   " -c " + (beatConfigPath + "\\" + ap.CanonicalTargetName + MagicStrings.Ext.DotYml).Quote() +
+   " --path.logs " + beatLogsPath.Quote() +
+   " -e logging.files.redirect_stderr=true";
+                }
+                else
+                {
+                    // beats (-E instead of -e, includes --path.data)
+                    arguments =
+   " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
+   " --path.config " + beatConfigPath.Quote() +
+   " --path.data " + beatDataPath.Quote() +
+   " --path.logs " + beatLogsPath.Quote() +
+   " -E logging.files.redirect_stderr=true";
+                }
+
                 service.ServiceInstaller = new ServiceInstaller
                 {
                     Interactive = false,
@@ -140,12 +163,7 @@ namespace Elastic.PackageCompiler.Beats
                         new ServiceDependency(MagicStrings.Services.Dnscache),
                     },
 
-                    Arguments =
-                        " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
-                        " --path.config " + beatConfigPath.Quote() +
-                        " --path.data " + beatDataPath.Quote() +
-                        " --path.logs " + beatLogsPath.Quote() +
-                        " -E logging.files.redirect_stderr=true",
+                    Arguments = arguments,
 
                     DelayedAutoStart = false,
                     Start = SvcStartType.auto,
