@@ -22,9 +22,6 @@ namespace Elastic.Installer
 
         public ProductConfig GetProductConfig(string targetName)
         {
-            //if (targetName == "agent")
-            //    targetName = "elastic-agent";
-
             if (!Products.TryGetValue(targetName, out ProductConfig pc))
                 throw new ArgumentException($"Unable to find product '{targetName}'");
 

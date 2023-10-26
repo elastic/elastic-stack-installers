@@ -68,7 +68,7 @@ namespace Elastic.Installer
             Architecture = rxGroups["arch"].Value.ToLower();
             IsSnapshot = !rxGroups["snapshot"].Value.IsEmpty();
 
-            // HACK - kanfer TODO
+            // HACK
             if (TargetName == "agent")
             {
                 TargetName = "elastic-agent";

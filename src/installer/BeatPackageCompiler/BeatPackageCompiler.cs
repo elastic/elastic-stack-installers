@@ -30,6 +30,9 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
+
+            // A product can define a display name to be used.
+            // At the time of writing this line, elastic-agent is the only product that used it
             var displayName = !string.IsNullOrEmpty(pc.DisplayName) ? pc.DisplayName : MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
@@ -106,6 +109,8 @@ namespace Elastic.PackageCompiler.Beats
 
             var textInfo = new CultureInfo("en-US", false).TextInfo;
 
+            // We should not add {companyName} to the Elastic Agent service name (for example),
+            // otherwise it will be "Elastic Elastic Agent..."
             string serviceDisplayName;
             if (ap.TargetName.ToLower().StartsWith(companyName.ToLower()))
             {
@@ -129,7 +134,7 @@ namespace Elastic.PackageCompiler.Beats
                 string arguments;
                 if (pc.IsAgentCommandLine)
                 {
-                    // Agent
+                    // Agent must start with "run" and doesn't need --path.data
                     arguments =
    " run " +
    " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
@@ -215,6 +220,7 @@ namespace Elastic.PackageCompiler.Beats
             packageContents.Add(pc.IsWindowsService ? service : null);
 
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
+            // "-" is not a legal character in wxs component names, must replace with "_"
             var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
             var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
