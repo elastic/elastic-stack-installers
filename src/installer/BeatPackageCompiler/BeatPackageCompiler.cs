@@ -30,7 +30,7 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
-            var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
+            var displayName = !string.IsNullOrEmpty(pc.DisplayName) ? pc.DisplayName : MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
             // Generate UUID v5 from product properties.
@@ -105,7 +105,17 @@ namespace Elastic.PackageCompiler.Beats
             var beatLogsPath = Path.Combine(beatConfigPath, "logs");
 
             var textInfo = new CultureInfo("en-US", false).TextInfo;
-            var serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+
+            string serviceDisplayName;
+            if (ap.TargetName.ToLower().StartsWith(companyName.ToLower()))
+            {
+                serviceDisplayName = $"{textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+            }
+            else
+            {
+                serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+            }
+            
 
             WixSharp.File service = null;
             if (pc.IsWindowsService)
@@ -187,12 +197,12 @@ namespace Elastic.PackageCompiler.Beats
             packageContents.Add(pc.IsWindowsService ? service : null);
 
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
+            var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
             var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
                 $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                $"in the data directory caled {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
+                $"in the data directory named {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
                 $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
                 $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
                 $"and then start {serviceDisplayName} Windows service.\r\n"));

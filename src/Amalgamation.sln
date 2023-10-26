@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29209.62
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElastiBuild", "build\ElastiBuild.csproj", "{CDD2CCC6-3C0C-47CC-A7E5-93FC4BF2664A}"
 EndProject
@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "script", "script", "{6E880F
 	ProjectSection(SolutionItems) = preProject
 		..\build.bat = ..\build.bat
 		config\config.yaml = config\config.yaml
-		..\global.json = ..\global.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeatPackageCompiler", "installer\BeatPackageCompiler\BeatPackageCompiler.csproj", "{7F2BEAEF-4D6A-48D7-A5C5-B526C3984748}"
@@ -19,12 +18,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QA", "qa\QA.csproj", "{867FB7F5-92AD-4797-8403-8397B2B0B681}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		shared\shared.projitems*{6cd7786e-f7bc-41e7-998d-2845966fc460}*SharedItemsImports = 13
-		shared\shared.projitems*{7f2beaef-4d6a-48d7-a5c5-b526c3984748}*SharedItemsImports = 5
-		shared\shared.projitems*{867fb7f5-92ad-4797-8403-8397b2b0b681}*SharedItemsImports = 5
-		shared\shared.projitems*{cdd2ccc6-3c0c-47cc-a7e5-93fc4bf2664a}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug QA|Any CPU = Debug QA|Any CPU
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +53,11 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F8D3B98B-337D-4629-8754-18EC48761229}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		shared\shared.projitems*{6cd7786e-f7bc-41e7-998d-2845966fc460}*SharedItemsImports = 13
+		shared\shared.projitems*{7f2beaef-4d6a-48d7-a5c5-b526c3984748}*SharedItemsImports = 5
+		shared\shared.projitems*{867fb7f5-92ad-4797-8403-8397b2b0b681}*SharedItemsImports = 5
+		shared\shared.projitems*{cdd2ccc6-3c0c-47cc-a7e5-93fc4bf2664a}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

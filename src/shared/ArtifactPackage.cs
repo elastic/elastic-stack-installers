@@ -9,6 +9,7 @@ namespace Elastic.Installer
     public class ArtifactPackage
     {
         public string TargetName { get; }
+        public string DisplayName { get; }
         public string Version { get; }
         public string Qualifier { get; }
         public string Snapshot => IsSnapshot ? MagicStrings.Ver.Snapshot : string.Empty;
@@ -67,6 +68,12 @@ namespace Elastic.Installer
             Qualifier = rxGroups["qualifier"].Value.ToLower();
             Architecture = rxGroups["arch"].Value.ToLower();
             IsSnapshot = !rxGroups["snapshot"].Value.IsEmpty();
+
+            // HACK - kanfer TODO
+            if (TargetName == "agent")
+            {
+                TargetName = "elastic-agent";
+            }
 
             IsOss = TargetName.EndsWith(
                 MagicStrings.Files.DashOssSuffix,

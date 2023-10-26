@@ -114,3 +114,12 @@ products:
     published_binaries: [ winlogbeat.exe ]
     mutable_dirs: [ ]
     service: true
+
+  elastic-agent:
+    display_name: Elastic Agent
+    description: With Elastic Agent you can collect all forms of data from anywhere with a single unified agent per host
+    published_name: Elastic Agent
+    published_url: https://www.elastic.co/elastic-agent
+    published_binaries: [ elastic-agent.exe ]
+    mutable_dirs: [ ]
+    service: true

@@ -1,14 +1,18 @@
 {
   "profiles": {
-    "BeatsBuild": {
-      "commandName": "Project",
-      "commandLineArgs": "build --cid 7.5 winlogbeat --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
-      "workingDirectory": "$(SolutionDir)"
-    },
-
     "Winlogbeat 8.0": {
       "commandName": "Project",
       "commandLineArgs": "build --cid 8.0-SNAPSHOT winlogbeat",
+      "workingDirectory": "$(SolutionDir)"
+    },
+    "BeatsBuild (agent)": {
+      "commandName": "Project",
+      "commandLineArgs": "build --cid 8.10.4 elastic-agent --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
+      "workingDirectory": "$(SolutionDir)"
+    },
+    "BeatsBuild (winlogbeat)": {
+      "commandName": "Project",
+      "commandLineArgs": "build --cid 8.10.4 winlogbeat --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
       "workingDirectory": "$(SolutionDir)"
     }
   }
