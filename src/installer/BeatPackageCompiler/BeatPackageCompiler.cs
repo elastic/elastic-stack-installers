@@ -134,14 +134,7 @@ namespace Elastic.PackageCompiler.Beats
                 string arguments;
                 if (pc.IsAgentCommandLine)
                 {
-                    // Agent must start with "run" and doesn't need --path.data
-                    arguments =
-   " run " +
-   " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
-   " --path.config " + beatConfigPath.Quote() +
-   " -c " + (beatConfigPath + "\\" + ap.CanonicalTargetName + MagicStrings.Ext.DotYml).Quote() +
-   " --path.logs " + beatLogsPath.Quote() +
-   " -e logging.files.redirect_stderr=true";
+                    arguments = " install [AGENTARGS]";
                 }
                 else
                 {
@@ -224,12 +217,15 @@ namespace Elastic.PackageCompiler.Beats
             var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
             var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                $"in the data directory named {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
-                $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
-                $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
-                $"and then start {serviceDisplayName} Windows service.\r\n"));
+            if (!pc.IsAgentCommandLine)
+            {
+                project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
+                    $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
+                    $"in the data directory named {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
+                    $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
+                    $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
+                    $"and then start {serviceDisplayName} Windows service.\r\n"));
+            }
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
