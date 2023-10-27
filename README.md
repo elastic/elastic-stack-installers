@@ -43,3 +43,4 @@ Update version in `Directory.Build.props` in the branch for the related minor ve
       - Add a new daily schedule for the new minor branch
       - Remove the daily schedule for the previous minor branch
     ex: https://github.com/elastic/elastic-stack-installers/pull/156 and https://github.com/elastic/elastic-stack-installers/pull/172
+
