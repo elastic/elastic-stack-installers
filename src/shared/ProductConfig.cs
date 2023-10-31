@@ -11,8 +11,8 @@ namespace Elastic.Installer
         [YamlMember("display_name")]
         public string DisplayName { get; set; } = "";
 
-        [YamlMember("is_agent_command_line")]
-        public bool IsAgentCommandLine { get; set; } = false;
+        [YamlMember("is_agent")]
+        public bool IsAgent { get; set; } = false;
 
         [YamlMember("published_name")]
         public string PublishedName { get; set; } = "Elastic Beats";

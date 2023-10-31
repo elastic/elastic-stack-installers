@@ -4,9 +4,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using BeatPackageCompiler;
 using BeatPackageCompiler.Properties;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
+using Microsoft.Deployment.WindowsInstaller;
 using WixSharp;
 using WixSharp.CommonTasks;
 
@@ -103,99 +105,53 @@ namespace Elastic.PackageCompiler.Beats
                     System.IO.File.ReadAllText(
                         Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))));
 
-            var beatConfigPath = "[CommonAppDataFolder]" + Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
-            var beatDataPath = Path.Combine(beatConfigPath, "data");
-            var beatLogsPath = Path.Combine(beatConfigPath, "logs");
+            // Add a note to the final screen and a checkbox to open the directory of .example.yml file
+            // "-" is not a legal character in wxs component names, must replace with "_"
+            var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
+            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
-            var textInfo = new CultureInfo("en-US", false).TextInfo;
+            var beatsInstallPath =
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
+                Path.Combine(companyName, productSetName);
 
-            // We should not add {companyName} to the Elastic Agent service name (for example),
-            // otherwise it will be "Elastic Elastic Agent..."
-            string serviceDisplayName;
-            if (ap.TargetName.ToLower().StartsWith(companyName.ToLower()))
+            if (pc.IsAgent)
             {
-                serviceDisplayName = $"{textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+                project.Dirs = new[]
+                {
+                new InstallDir(
+                     // Wix# directory parsing needs forward slash
+                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
+                    new Dir(
+                        ap.Version,
+                        new Dir(ap.CanonicalTargetName, new Files(Path.Combine(opts.PackageInDir, MagicStrings.Files.All)))))
+                };
+
+                // Passing the agent executable path to the action handler which will run it post installation
+                project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName )));
+                project.AddAction(new ManagedAction(AgentCustomAction.MyAction, Return.check, When.After, Step.InstallFinalize, Condition.NOT_Installed));
             }
             else
             {
-                serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
-            }
-            
-
-            WixSharp.File service = null;
-            if (pc.IsWindowsService)
-            {
-                service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
-
-                // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
-                //                  "not [work] as expected." Consider replacing ServiceConfig with the 
-                //                  WixUtilExtension ServiceConfig element.
-
-                string arguments;
-                if (pc.IsAgentCommandLine)
+                var packageContents = new List<WixEntity>
                 {
-                    arguments = " install [AGENTARGS]";
-                }
-                else
-                {
-                    // beats (-E instead of -e, includes --path.data)
-                    arguments =
-   " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
-   " --path.config " + beatConfigPath.Quote() +
-   " --path.data " + beatDataPath.Quote() +
-   " --path.logs " + beatLogsPath.Quote() +
-   " -E logging.files.redirect_stderr=true";
-                }
-
-                service.ServiceInstaller = new ServiceInstaller
-                {
-                    Interactive = false,
-
-                    Name = ap.CanonicalTargetName,
-                    DisplayName = serviceDisplayName,
-                    Description = pc.Description,
-
-                    DependsOn = new[]
+                    new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                     {
-                        new ServiceDependency(MagicStrings.Services.Tcpip),
-                        new ServiceDependency(MagicStrings.Services.Dnscache),
-                    },
+                        var itm = path.ToLower();
+                        bool exclude = 
+                            // configuration will go into mutable location
+                            itm.EndsWith(MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase) ||
 
-                    Arguments = arguments,
+                            // we install/remove service ourselves
+                            itm.EndsWith(MagicStrings.Ext.DotPs1, StringComparison.OrdinalIgnoreCase) ||
 
-                    DelayedAutoStart = false,
-                    Start = SvcStartType.auto,
+                            // .exe must be excluded for service configuration to work
+                            (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
+                        ;
 
-                    // Don't start on install, config file is likely not ready yet
-                    //StartOn = SvcEvent.Install,
-
-                    StopOn = SvcEvent.InstallUninstall_Wait,
-                    RemoveOn = SvcEvent.InstallUninstall_Wait,
+                        // this is an "include" filter
+                        return ! exclude;
+                    })
                 };
-            }
-
-            var packageContents = new List<WixEntity>
-            {
-                new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
-                {
-                    var itm = path.ToLower();
-
-                    bool exclude = 
-
-                        // configuration will go into mutable location
-                        itm.EndsWith(MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase) ||
-
-                        // we install/remove service ourselves
-                        itm.EndsWith(MagicStrings.Ext.DotPs1, StringComparison.OrdinalIgnoreCase) ||
-
-                        // .exe must be excluded for service configuration to work
-                        (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
-                    ;
-
-                    // this is an "include" filter
-                    return ! exclude;
-                })
-            };
 
             packageContents.AddRange(
                 new DirectoryInfo(opts.PackageInDir)
@@ -210,50 +166,17 @@ namespace Elastic.PackageCompiler.Beats
                                 dirName,
                                 MagicStrings.Files.All)))));
 
+            WixSharp.File service = HandleWindowsService(opts, ap, pc, companyName, productSetName, exeName);
             packageContents.Add(pc.IsWindowsService ? service : null);
 
-            // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            // "-" is not a legal character in wxs component names, must replace with "_"
-            var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
-            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
+    $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
+    $"in the data directory named {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
+    $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
+    $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
+    $"and then start the Windows service.\r\n"));
 
-            if (!pc.IsAgentCommandLine)
-            {
-                project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                    $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                    $"in the data directory named {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
-                    $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
-                    $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
-                    $"and then start {serviceDisplayName} Windows service.\r\n"));
-            }
-
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
-                $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
-
-            // We'll open the folder for now
-            // TODO: select file in explorer window
-            project.AddProperty(new Property(
-                "WixShellExecTarget",
-                $"[$Component.{beatConfigExampleFileId}]"));
-
-            project.AddWixFragment("Wix/Product",
-                XElement.Parse(@"
-<CustomAction
-    Id=""CA_SelectExampleYamlInExplorer""
-    BinaryKey = ""WixCA""
-    DllEntry = ""WixShellExec""
-    Impersonate = ""yes""
-/>"),
-                XElement.Parse(@"
-<UI>
-    <Publish
-        Dialog=""ExitDialog""
-        Control=""Finish""
-        Event=""DoAction"" 
-        Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
-    </Publish>
-</UI>"));
+            HandleExplorerDialogPostInstall(ap, project, beatConfigExampleFileId);
 
             var dataContents = new DirectoryInfo(opts.PackageInDir)
                 .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
@@ -294,54 +217,50 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            var beatsInstallPath =
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
-                Path.Combine(companyName, productSetName);
-
             project.Dirs = new[]
             {
-                // Binaries
-                new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
-                        new WixSharp.File(cliShimScriptPath))),
+            // Binaries
+            new InstallDir(
+                    // Wix# directory parsing needs forward slash
+                beatsInstallPath.Replace("Folder]", "Folder]\\"),
+                new Dir(
+                    ap.Version,
+                    new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
+                    new WixSharp.File(cliShimScriptPath))),
 
-                // Configration and logs
-                new Dir("[CommonAppDataFolder]",
-                    new Dir(companyName,
-                        new Dir(productSetName,
-                            new Dir(ap.CanonicalTargetName, dataContents.ToArray())
+            // Configration and logs
+            new Dir("[CommonAppDataFolder]",
+                new Dir(companyName,
+                    new Dir(productSetName,
+                        new Dir(ap.CanonicalTargetName, dataContents.ToArray())
+                        {
+                            GenericItems = new []
                             {
-                                GenericItems = new []
-                                {
-                                    /*
-                                    This will *replace* ACL on the {beatname} directory:
+                                /*
+                                This will *replace* ACL on the {beatname} directory:
 
-                                    Directory tree:
-                                        NT AUTHORITY\SYSTEM:(OI)(CI)F
-                                        BUILTIN\Administrators:(OI)(CI)F
-                                        BUILTIN\Users:(CI)R
+                                Directory tree:
+                                    NT AUTHORITY\SYSTEM:(OI)(CI)F
+                                    BUILTIN\Administrators:(OI)(CI)F
+                                    BUILTIN\Users:(CI)R
 
-                                    Files:
-                                        NT AUTHORITY\SYSTEM:(ID)F
-                                        BUILTIN\Administrators:(ID)F
-                                    */
+                                Files:
+                                    NT AUTHORITY\SYSTEM:(ID)F
+                                    BUILTIN\Administrators:(ID)F
+                                */
 
-                                    new MsiLockPermissionEx(
-                                        "D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;CI;0x1200a9;;;BU)",
-                                        ap.Is64Bit)
-                                }
-                            })))
-            };
-
-            // CLI Shim path
-            project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
-            {
-                Part = EnvVarPart.last
-            });
+                                new MsiLockPermissionEx(
+                                    "D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;CI;0x1200a9;;;BU)",
+                                    ap.Is64Bit)
+                            }
+                        })))
+                };
+                // CLI Shim path
+                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                {
+                    Part = EnvVarPart.last
+                });
+            }
 
             // We hard-link Wix Toolset to a known location
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
@@ -367,6 +286,102 @@ namespace Elastic.PackageCompiler.Beats
                 Compiler.BuildMsiCmd(project, Path.Combine(opts.SrcDir, opts.PackageName) + ".cmd");
             else
                 Compiler.BuildMsi(project);
+        }
+
+        private static void HandleExplorerDialogPostInstall(ArtifactPackage ap, Project project, string beatConfigExampleFileId)
+        {
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
+                $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
+
+            // We'll open the folder for now
+            // TODO: select file in explorer window
+            project.AddProperty(new Property(
+                "WixShellExecTarget",
+                $"[$Component.{beatConfigExampleFileId}]"));
+
+            project.AddWixFragment("Wix/Product",
+                XElement.Parse(@"
+<CustomAction
+    Id=""CA_SelectExampleYamlInExplorer""
+    BinaryKey = ""WixCA""
+    DllEntry = ""WixShellExec""
+    Impersonate = ""yes""
+/>"),
+                XElement.Parse(@"
+<UI>
+    <Publish
+        Dialog=""ExitDialog""
+        Control=""Finish""
+        Event=""DoAction"" 
+        Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
+    </Publish>
+</UI>"));
+        }
+
+        private static WixSharp.File HandleWindowsService(CmdLineOptions opts, ArtifactPackage ap, ProductConfig pc, string companyName, string productSetName, string exeName)
+        {
+            if (!pc.IsWindowsService)
+                return null;
+
+            var beatConfigPath = "[CommonAppDataFolder]" + Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
+            var beatDataPath = Path.Combine(beatConfigPath, "data");
+            var beatLogsPath = Path.Combine(beatConfigPath, "logs");
+
+            var textInfo = new CultureInfo("en-US", false).TextInfo;
+
+            // We should not add {companyName} to the Elastic Agent service name (for example),
+            // otherwise it will be "Elastic Elastic Agent..."
+            string serviceDisplayName;
+            if (ap.TargetName.ToLower().StartsWith(companyName.ToLower()))
+            {
+                serviceDisplayName = $"{textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+            }
+            else
+            {
+                serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+            }
+
+            WixSharp.File service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
+
+            // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
+            //                  "not [work] as expected." Consider replacing ServiceConfig with the 
+            //                  WixUtilExtension ServiceConfig element.
+
+            string arguments =
+" --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
+" --path.config " + beatConfigPath.Quote() +
+" --path.data " + beatDataPath.Quote() +
+" --path.logs " + beatLogsPath.Quote() +
+" -E logging.files.redirect_stderr=true";
+
+            service.ServiceInstaller = new ServiceInstaller
+            {
+                Interactive = false,
+
+                Name = ap.CanonicalTargetName,
+                DisplayName = serviceDisplayName,
+                Description = pc.Description,
+
+                DependsOn = new[]
+                {
+                    new ServiceDependency(MagicStrings.Services.Tcpip),
+                    new ServiceDependency(MagicStrings.Services.Dnscache),
+                },
+
+                Arguments = arguments,
+
+                DelayedAutoStart = false,
+                Start = SvcStartType.auto,
+
+                // On beats, don't start on install, config file is likely not ready yet
+                // StartOn = startOn,
+
+                StopOn = SvcEvent.InstallUninstall_Wait,
+                RemoveOn = SvcEvent.InstallUninstall_Wait,
+            };
+
+            return service;
         }
     }
 }

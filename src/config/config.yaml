@@ -122,5 +122,5 @@ products:
     published_url: https://www.elastic.co/elastic-agent
     published_binaries: [ elastic-agent.exe ]
     mutable_dirs: [ ]
-    is_agent_command_line: true
-    service: true
+    is_agent: true
+    service: false
