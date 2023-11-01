@@ -131,7 +131,7 @@ namespace Elastic.PackageCompiler.Beats
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallFinalize, Condition.NOT_Installed));
 
                 // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-                // project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.After, Step.InstallFinalize, Condition.BeingUninstalledAndNotBeingUpgraded));
+                project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.After, Step.InstallFinalize, Condition.BeingUninstalledAndNotBeingUpgraded));
             }
             else
             {
