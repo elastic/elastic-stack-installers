@@ -17,8 +17,9 @@ namespace Elastic.PackageCompiler.Beats
             try
             {
                 string install_args = !string.IsNullOrEmpty(session["INSTALLARGS"]) ? session["INSTALLARGS"] : "";
+                string install_folder = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo.WorkingDirectory = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
+                process.StartInfo.WorkingDirectory = install_folder;
                 process.StartInfo.FileName = "elastic-agent.exe";
                 process.StartInfo.Arguments = "install -f " + install_args;
                 process.StartInfo.CreateNoWindow = true;
@@ -26,6 +27,12 @@ namespace Elastic.PackageCompiler.Beats
                 process.WaitForExit();
 
                 session.Log("Agent install return code:" + process.ExitCode);
+
+                if (process.ExitCode == 0 )
+                {
+                    // If agent got installed properly, we can go ahead and remove all the files installed by the MSI (best effort)
+                    new DirectoryInfo(install_folder).Delete(true);
+                }
 
                 return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
             }
