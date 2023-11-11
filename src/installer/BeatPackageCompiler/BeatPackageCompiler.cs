@@ -103,17 +103,6 @@ namespace Elastic.PackageCompiler.Beats
             var textInfo = new CultureInfo("en-US", false).TextInfo;
             var serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
 
-            /*
-             * 
-             *   new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, new Files(Path.Combine(opts.PackageInDir, MagicStrings.Files.All)))))
-                };
-            */
-
             WixSharp.File service = null;
             if (pc.IsWindowsService)
             {
