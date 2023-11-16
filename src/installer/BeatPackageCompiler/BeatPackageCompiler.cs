@@ -146,15 +146,12 @@ namespace Elastic.PackageCompiler.Beats
                 };
             }
 
-            string configFileName = ap.CanonicalTargetName + MagicStrings.Ext.DotYml;
-            string configFileFullPath = string.Empty;
-
             var packageContents = new List<WixEntity>
             {
                 new Files(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                 {
                     var itm = path.ToLower();
-                    bool isConfigFile = itm.EndsWith(configFileName, StringComparison.OrdinalIgnoreCase);
+                    bool isConfigFile = itm.EndsWith(ap.CanonicalTargetName + MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase);
 
                     bool exclude = 
                         // .exe must be excluded for service configuration to work
