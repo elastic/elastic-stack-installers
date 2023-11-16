@@ -8,6 +8,7 @@ using BeatPackageCompiler.Properties;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
 using WixSharp;
+using WixSharp.Bootstrapper;
 using WixSharp.CommonTasks;
 
 namespace Elastic.PackageCompiler.Beats
@@ -145,15 +146,20 @@ namespace Elastic.PackageCompiler.Beats
                 };
             }
 
+            string configFileName = ap.CanonicalTargetName + MagicStrings.Ext.DotYml;
+            string configFileFullPath = string.Empty;
+
             var packageContents = new List<WixEntity>
             {
                 new Files(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                 {
                     var itm = path.ToLower();
+                    bool isConfigFile = itm.EndsWith(configFileName, StringComparison.OrdinalIgnoreCase);
 
                     bool exclude = 
                         // .exe must be excluded for service configuration to work
-                        (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase));
+                        (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
+                        || (isConfigFile);
 
                     // this is an "include" filter
                     return ! exclude;
@@ -200,6 +206,27 @@ namespace Elastic.PackageCompiler.Beats
         Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
     </Publish>
 </UI>"));
+
+            var dataContents = new DirectoryInfo(opts.PackageInDir)
+                .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
+                .Select(fi =>
+                {
+                    // rename main config file to hide it from MSI engine and keep customizations
+                    if (string.Compare(
+                        fi.Name,
+                        ap.CanonicalTargetName + MagicStrings.Ext.DotYml,
+                        StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        var wf = new WixSharp.File(fi.FullName);
+                        wf.Attributes.Add("Name", beatConfigExampleFileName);
+                        wf.Id = new Id(beatConfigExampleFileId);
+                        return wf;
+                    }
+                    return null;
+                })
+                .ToList<WixEntity>();
+
+            packageContents.AddRange(dataContents);
 
             // Drop CLI shim on disk
             var cliShimScriptPath = Path.Combine(
