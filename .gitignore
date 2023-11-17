@@ -59,3 +59,8 @@ src/.idea/
 
 # Test cmd files
 src/*.cmd
+
+# Executable Artifacts
+src/*.exe
+src/*.pdb
+src/*.dll

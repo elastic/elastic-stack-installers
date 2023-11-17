@@ -8,6 +8,7 @@ using BeatPackageCompiler.Properties;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
 using WixSharp;
+using WixSharp.Bootstrapper;
 using WixSharp.CommonTasks;
 
 namespace Elastic.PackageCompiler.Beats
@@ -100,10 +101,6 @@ namespace Elastic.PackageCompiler.Beats
                     System.IO.File.ReadAllText(
                         Path.Combine(opts.PackageInDir, MagicStrings.Files.LicenseTxt))));
 
-            var beatConfigPath = "[CommonAppDataFolder]" + Path.Combine(companyName, productSetName, ap.CanonicalTargetName);
-            var beatDataPath = Path.Combine(beatConfigPath, "data");
-            var beatLogsPath = Path.Combine(beatConfigPath, "logs");
-
             var textInfo = new CultureInfo("en-US", false).TextInfo;
             var serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
 
@@ -111,6 +108,7 @@ namespace Elastic.PackageCompiler.Beats
             if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
+                string installedPath = ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName));
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -131,10 +129,10 @@ namespace Elastic.PackageCompiler.Beats
                     },
 
                     Arguments =
-                        " --path.home " + ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName)).Quote() +
-                        " --path.config " + beatConfigPath.Quote() +
-                        " --path.data " + beatDataPath.Quote() +
-                        " --path.logs " + beatLogsPath.Quote() +
+                        " --path.home " + installedPath.Quote() +
+                        " --path.config " + installedPath.Quote() +
+                        " --path.data " + installedPath.Quote() +
+                        " --path.logs " + installedPath.Quote() +
                         " -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = false,
@@ -150,39 +148,20 @@ namespace Elastic.PackageCompiler.Beats
 
             var packageContents = new List<WixEntity>
             {
-                new DirFiles(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
+                new Files(Path.Combine(opts.PackageInDir, MagicStrings.Files.All), path =>
                 {
                     var itm = path.ToLower();
+                    bool isConfigFile = itm.EndsWith(ap.CanonicalTargetName + MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase);
 
                     bool exclude = 
-
-                        // configuration will go into mutable location
-                        itm.EndsWith(MagicStrings.Ext.DotYml, StringComparison.OrdinalIgnoreCase) ||
-
-                        // we install/remove service ourselves
-                        itm.EndsWith(MagicStrings.Ext.DotPs1, StringComparison.OrdinalIgnoreCase) ||
-
                         // .exe must be excluded for service configuration to work
                         (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
-                    ;
+                        || (isConfigFile);
 
                     // this is an "include" filter
                     return ! exclude;
                 })
             };
-
-            packageContents.AddRange(
-                new DirectoryInfo(opts.PackageInDir)
-                    .GetDirectories()
-                    .Select(dir => dir.Name)
-                    .Except(pc.MutableDirs)
-                    .Select(dirName =>
-                        new Dir(
-                            dirName,
-                            new Files(Path.Combine(
-                                opts.PackageInDir,
-                                dirName,
-                                MagicStrings.Files.All)))));
 
             packageContents.Add(pc.IsWindowsService ? service : null);
 
@@ -229,33 +208,22 @@ namespace Elastic.PackageCompiler.Beats
                 .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
                 .Select(fi =>
                 {
-                    var wf = new WixSharp.File(fi.FullName);
-
                     // rename main config file to hide it from MSI engine and keep customizations
                     if (string.Compare(
                         fi.Name,
                         ap.CanonicalTargetName + MagicStrings.Ext.DotYml,
                         StringComparison.OrdinalIgnoreCase) == 0)
                     {
+                        var wf = new WixSharp.File(fi.FullName);
                         wf.Attributes.Add("Name", beatConfigExampleFileName);
                         wf.Id = new Id(beatConfigExampleFileId);
+                        return wf;
                     }
-
-                    return wf;
+                    return null;
                 })
                 .ToList<WixEntity>();
 
-            dataContents.AddRange(
-                pc.MutableDirs
-                    .Select(dirName =>
-                    {
-                        var dirPath = Path.Combine(opts.PackageInDir, dirName);
-
-                        return Directory.Exists(dirPath)
-                            ? new Dir(dirName, new Files(Path.Combine(dirPath, MagicStrings.Files.All)))
-                            : null;
-                    })
-                    .Where(dir => dir != null));
+            packageContents.AddRange(dataContents);
 
             // Drop CLI shim on disk
             var cliShimScriptPath = Path.Combine(
@@ -279,32 +247,6 @@ namespace Elastic.PackageCompiler.Beats
                         new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
                         new WixSharp.File(cliShimScriptPath))),
 
-                // Configration and logs
-                new Dir("[CommonAppDataFolder]",
-                    new Dir(companyName,
-                        new Dir(productSetName,
-                            new Dir(ap.CanonicalTargetName, dataContents.ToArray())
-                            {
-                                GenericItems = new []
-                                {
-                                    /*
-                                    This will *replace* ACL on the {beatname} directory:
-
-                                    Directory tree:
-                                        NT AUTHORITY\SYSTEM:(OI)(CI)F
-                                        BUILTIN\Administrators:(OI)(CI)F
-                                        BUILTIN\Users:(CI)R
-
-                                    Files:
-                                        NT AUTHORITY\SYSTEM:(ID)F
-                                        BUILTIN\Administrators:(ID)F
-                                    */
-
-                                    new MsiLockPermissionEx(
-                                        "D:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)(A;CI;0x1200a9;;;BU)",
-                                        ap.Is64Bit)
-                                }
-                            })))
             };
 
             // CLI Shim path
