@@ -31,7 +31,10 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
-            var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
+
+            // A product can define a display name to be used.
+            // At the time of writing this line, elastic-agent is the only product that used it
+            var displayName = !string.IsNullOrEmpty(pc.DisplayName) ? pc.DisplayName : MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
             // Generate UUID v5 from product properties.
@@ -165,13 +168,26 @@ namespace Elastic.PackageCompiler.Beats
 
             packageContents.Add(pc.IsWindowsService ? service : null);
 
+            // For agent, the MSI installer copies the contents of the MSI to a temp folder
+            // and then shall call the 'elastic-agent install' command.
+            // When installing, the 'elastic-agent uninstall' command.
+            if (pc.IsAgent)
+            {
+                // Passing the agent executable path to the action handler which will run it post installation
+                project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
+                project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallFinalize, Condition.NOT_Installed));
+
+                // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
+                project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.After, Step.InstallFinalize, Condition.BeingUninstalledAndNotBeingUpgraded));
+            }
+
             // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
+            var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
             var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
 
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
                 $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                $"in the data directory caled {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
+                $"in the data directory named {beatConfigExampleFileName}. Please copy this example file to " +
                 $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
                 $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
                 $"and then start {serviceDisplayName} Windows service.\r\n"));
