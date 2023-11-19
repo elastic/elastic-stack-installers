@@ -183,47 +183,22 @@ namespace Elastic.PackageCompiler.Beats
                 project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.After, Step.InstallFinalize, Condition.BeingUninstalledAndNotBeingUpgraded));
             }
 
-            // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
-            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
-
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                $"in the data directory named {beatConfigExampleFileName}. Please copy this example file to " +
-                $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
-                $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
-                $"and then start {serviceDisplayName} Windows service.\r\n"));
-
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
-                $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
-
-            // We'll open the folder for now
-            // TODO: select file in explorer window
-            project.AddProperty(new Property(
-                "WixShellExecTarget",
-                $"[$Component.{beatConfigExampleFileId}]"));
-
-            project.AddWixFragment("Wix/Product",
-                XElement.Parse(@"
-<CustomAction
-    Id=""CA_SelectExampleYamlInExplorer""
-    BinaryKey = ""WixCA""
-    DllEntry = ""WixShellExec""
-    Impersonate = ""yes""
-/>"),
-                XElement.Parse(@"
-<UI>
-    <Publish
-        Dialog=""ExitDialog""
-        Control=""Finish""
-        Event=""DoAction"" 
-        Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
-    </Publish>
-</UI>"));
-            
             if (!pc.IsAgent)
+            {
+                // Add a note to the final screen and a checkbox to open the directory of .example.yml file
+                var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
+                var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
+
+                project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
+                    $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
+                    $"in the data directory named {beatConfigExampleFileName}. Please copy this example file to " +
+                    $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
+                    $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
+                    $"and then start {serviceDisplayName} Windows service.\r\n"));
+
+                HandleOpenExplorer(ap, project, beatConfigExampleFileId);
                 RenameConfigFile(opts, ap, packageContents, beatConfigExampleFileName, beatConfigExampleFileId);
+            }
 
             // Drop CLI shim on disk
             var cliShimScriptPath = Path.Combine(
@@ -279,6 +254,37 @@ namespace Elastic.PackageCompiler.Beats
                 Compiler.BuildMsiCmd(project, Path.Combine(opts.SrcDir, opts.PackageName) + ".cmd");
             else
                 Compiler.BuildMsi(project);
+        }
+
+        private static void HandleOpenExplorer(ArtifactPackage ap, Project project, string beatConfigExampleFileId)
+        {
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
+            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
+                $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
+
+            // We'll open the folder for now
+            // TODO: select file in explorer window
+            project.AddProperty(new Property(
+                "WixShellExecTarget",
+                $"[$Component.{beatConfigExampleFileId}]"));
+
+            project.AddWixFragment("Wix/Product",
+                XElement.Parse(@"
+<CustomAction
+    Id=""CA_SelectExampleYamlInExplorer""
+    BinaryKey = ""WixCA""
+    DllEntry = ""WixShellExec""
+    Impersonate = ""yes""
+/>"),
+                XElement.Parse(@"
+<UI>
+    <Publish
+        Dialog=""ExitDialog""
+        Control=""Finish""
+        Event=""DoAction"" 
+        Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
+    </Publish>
+</UI>"));
         }
 
         private static void RenameConfigFile(CmdLineOptions opts, ArtifactPackage ap, List<WixEntity> packageContents, string beatConfigExampleFileName, string beatConfigExampleFileId)

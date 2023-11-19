@@ -11,7 +11,7 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                // If there are no install args, let's top here
+                // If there are no install args, we stop here
                 // // (the MSI just copied the files, there will be no agent-install)
                 if (string.IsNullOrEmpty(session["INSTALLARGS"]))
                     return ActionResult.Success;
@@ -47,7 +47,11 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                string install_args = !string.IsNullOrEmpty(session["INSTALLARGS"]) ? session["INSTALLARGS"] : "";
+                // If there are no (un)install args, we stop here
+                if (string.IsNullOrEmpty(session["INSTALLARGS"]))
+                    return ActionResult.Success;
+
+                string install_args = session["INSTALLARGS"];
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
                 process.StartInfo.Arguments = "uninstall -f " + install_args;
