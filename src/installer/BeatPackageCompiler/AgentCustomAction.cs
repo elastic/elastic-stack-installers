@@ -11,7 +11,12 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                string install_args = !string.IsNullOrEmpty(session["INSTALLARGS"]) ? session["INSTALLARGS"] : "";
+                // If there are no install args, let's top here
+                // // (the MSI just copied the files, there will be no agent-install)
+                if (string.IsNullOrEmpty(session["INSTALLARGS"]))
+                    return ActionResult.Success;
+
+                string install_args = session["INSTALLARGS"];
                 string install_folder = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.WorkingDirectory = install_folder;
