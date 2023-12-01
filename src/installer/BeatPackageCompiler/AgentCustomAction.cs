@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Deployment.WindowsInstaller;
 
@@ -40,6 +41,13 @@ namespace Elastic.PackageCompiler.Beats
             {
                 return ActionResult.Failure;
             }
+        }
+
+        [CustomAction]
+        public static ActionResult UpgradeAction(Session session)
+        {
+            session.Log("Detected an agent upgrade via MSI, which is not supported. Aborting.");
+            return ActionResult.Failure;
         }
 
         [CustomAction]
