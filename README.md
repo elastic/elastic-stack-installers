@@ -47,6 +47,8 @@ Update version in `Directory.Build.props` in the branch for the related minor ve
 ---
 ## Agent
 
+In case of problems during install / uninstall of agent, please refer to the [Capturing Logs](https://github.com/elastic/elastic-stack-installers/blob/agent_support/README.md#capturing-logs) section which will enable troubleshooting.
+
 ### Install
 During the install flow, The MSI installer will unpack the contents of the MSI to a temp folder and then will call the `elastic-agent install` in order to:
 1. copy the files to the final destination at `c:\Program Files\Elastic\Agent`
