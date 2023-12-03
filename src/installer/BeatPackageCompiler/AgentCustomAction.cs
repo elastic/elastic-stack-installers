@@ -15,14 +15,19 @@ namespace Elastic.PackageCompiler.Beats
                 // If there are no install args, we stop here
                 // // (the MSI just copied the files, there will be no agent-install)
                 if (string.IsNullOrEmpty(session["INSTALLARGS"]))
+                {
+                    session.Log("No INSTALLARGS provided, skipping agent install");
                     return ActionResult.Success;
+                }
 
                 string install_args = session["INSTALLARGS"];
                 string install_folder = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
+
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.WorkingDirectory = install_folder;
                 process.StartInfo.FileName = "elastic-agent.exe";
                 process.StartInfo.Arguments = "install -f " + install_args;
+                session.Log("Running command in folder: " + install_folder + ": " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
                 process.StartInfo.CreateNoWindow = true;
                 process.Start();
                 process.WaitForExit();
@@ -32,14 +37,27 @@ namespace Elastic.PackageCompiler.Beats
                 if (process.ExitCode == 0)
                 {
                     // If agent got installed properly, we can go ahead and remove all the files installed by the MSI (best effort)
-                    new DirectoryInfo(install_folder).Delete(true);
+                    RemoveFolder(session, install_folder);
                 }
 
                 return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
             }
-            catch
+            catch (Exception ex)
             {
+                session.Log("Exception: " + ex.ToString());
                 return ActionResult.Failure;
+            }
+        }
+
+        private static void RemoveFolder(Session session, string folder)
+        {
+            try
+            {
+                new DirectoryInfo(folder).Delete(true);
+            }
+            catch (Exception ex)
+            {
+                session.Log("Failed to remove folder: " + folder + ", exception: " + ex.ToString());
             }
         }
 
@@ -55,14 +73,11 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                // If there are no (un)install args, we stop here
-                if (string.IsNullOrEmpty(session["INSTALLARGS"]))
-                    return ActionResult.Success;
-
-                string install_args = session["INSTALLARGS"];
+                string install_args = string.IsNullOrEmpty(session["INSTALLARGS"]) ? "" : session["INSTALLARGS"];
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
                 process.StartInfo.Arguments = "uninstall -f " + install_args;
+                session.Log("Running command: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
                 process.StartInfo.CreateNoWindow = true;
                 process.Start();
                 process.WaitForExit();
