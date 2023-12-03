@@ -172,7 +172,7 @@ namespace Elastic.PackageCompiler.Beats
 
             // For agent, the MSI installer copies the contents of the MSI to a temp folder
             // and then shall call the 'elastic-agent install' command.
-            // When installing, the 'elastic-agent uninstall' command.
+            // When uninstalling, the 'elastic-agent uninstall' command.
             if (pc.IsAgent)
             {
                 // Passing the agent executable path to the action handler which will run it post installation
