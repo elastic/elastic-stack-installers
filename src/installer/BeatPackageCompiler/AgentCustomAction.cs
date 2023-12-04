@@ -25,12 +25,9 @@ namespace Elastic.PackageCompiler.Beats
 
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.WorkingDirectory = install_folder;
-                process.StartInfo.FileName = "elastic-agent.exe";
+                process.StartInfo.FileName = Path.Combine(install_folder, "elastic-agent.exe");
                 process.StartInfo.Arguments = "install -f " + install_args;
-                session.Log("Running command in folder: " + install_folder + ": " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-                process.WaitForExit();
+                StartProcess(session, process);
 
                 session.Log("Agent install return code:" + process.ExitCode);
 
@@ -47,6 +44,18 @@ namespace Elastic.PackageCompiler.Beats
                 session.Log("Exception: " + ex.ToString());
                 return ActionResult.Failure;
             }
+        }
+
+        private static void StartProcess(Session session, Process process)
+        {
+            // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-8.0
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.CreateNoWindow = true;
+            session.Log("Running command: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
+            process.Start();
+            session.Log(process.StandardOutput.ReadToEnd());
+            process.WaitForExit();
         }
 
         private static void RemoveFolder(Session session, string folder)
@@ -77,10 +86,7 @@ namespace Elastic.PackageCompiler.Beats
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
                 process.StartInfo.Arguments = "uninstall -f " + install_args;
-                session.Log("Running command: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-                process.WaitForExit();
+                StartProcess(session, process);
 
                 session.Log("Agent uninstall return code:" + process.ExitCode);
             }
