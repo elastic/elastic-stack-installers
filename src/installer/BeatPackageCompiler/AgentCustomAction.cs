@@ -82,9 +82,16 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
+                string binary_path = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
+                if (!File.Exists(binary_path))
+                {
+                    session.Log("Canont find file: " + binary_path + ", skipping uninstall action");
+                    return ActionResult.Success;
+                }
+
                 string install_args = string.IsNullOrEmpty(session["INSTALLARGS"]) ? "" : session["INSTALLARGS"];
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo.FileName = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
+                process.StartInfo.FileName = binary_path;
                 process.StartInfo.Arguments = "uninstall -f " + install_args;
                 StartProcess(session, process);
 
