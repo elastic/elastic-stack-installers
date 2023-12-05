@@ -89,15 +89,13 @@ namespace Elastic.PackageCompiler.Beats
                 StartProcess(session, process);
 
                 session.Log("Agent uninstall return code:" + process.ExitCode);
+                return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
             }
             catch (Exception ex)
             {
-                // IMPORTANT! Uninstall will be done as best effort..
-                // We don't want to fail the MSI uninstall in case there is an issue with the agent uninstall command.
                 session.Log(ex.ToString());
+                return ActionResult.Failure;
             }
-
-            return ActionResult.Success;
         }
     }
 }

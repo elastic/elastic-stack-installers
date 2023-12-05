@@ -180,7 +180,8 @@ namespace Elastic.PackageCompiler.Beats
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
 
                 // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-                project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.After, Step.InstallFinalize, Condition.BeingUninstalledAndNotBeingUpgraded));
+                // We invoke the custom action before the "RemoveFiles" step so in case the action fails we can fail the whole MSI uninstall flow
+                project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.Before, Step.RemoveFiles, Condition.BeingUninstalledAndNotBeingUpgraded));
 
                 // Upgrade custom action. Found that "AppSearch" is the first step after WIX_UPGRADE_DETECTED is set
                 project.AddAction(new ManagedAction(AgentCustomAction.UpgradeAction, Return.check, When.Before, Step.AppSearch, "WIX_UPGRADE_DETECTED AND NOT (REMOVE=\"ALL\")"));
