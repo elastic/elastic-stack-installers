@@ -26,6 +26,13 @@ $currentDir = $(Get-Location).Path
 $beats = @('auditbeat', 'filebeat', 'heartbeat', 'metricbeat', 'packetbeat', 'winlogbeat')
 $ossBeats = $beats | ForEach-Object { $_ + "-oss" }
 $workflow = ${env:WORKFLOW}
+$agent = ${env.AGENT}
+
+if ($agent -eq "true") {
+    echo "Agent is true"
+} else {
+    echo "Agnt is false"
+}
 
 echo "~~~ downloading beat $workflow dependencies"
 Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
