@@ -125,10 +125,12 @@ if ($LastExitcode -ne 0) {
     echo "Build$workflow completed with exit code $LastExitcode"
 }
 
-echo "--- Checking that all artefacts are there"
+echo "--- Checking that all artifacts are there"
 $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
 $expected = if ($agent -eq "true") {1} Else {2 * $beats.Length}
 if ($msiCount -ne $expected) {
     Write-Error "Expected $expected msi executable to be produced, but $msiCount were"
     exit 1
+} else {
+    echo "found $msiCount artifacts in bin/out"
 }
