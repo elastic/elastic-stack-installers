@@ -1,3 +1,12 @@
+# Attempting something :)
+cd c:\users\buildkite
+git clone  -v -- git@github.com:elastic/elastic-stack-installers.git esi
+cd esi
+git clean -ffxdq
+git fetch -v --prune -- origin refs/pull/${env:BUILDKITE_PULL_REQUEST}/head
+git checkout -f ${env:BUILDKITE_COMMIT}
+git clean -ffxdq
+
 # Read the stack version from build properties
 [xml]$xml = Get-Content -Path "Directory.Build.props"
 $ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
@@ -26,50 +35,64 @@ $currentDir = $(Get-Location).Path
 $beats = @('auditbeat', 'filebeat', 'heartbeat', 'metricbeat', 'packetbeat', 'winlogbeat')
 $ossBeats = $beats | ForEach-Object { $_ + "-oss" }
 $workflow = ${env:WORKFLOW}
-$agent = ${env.AGENT}
+$agent = ${env:AGENT}
 
-if ($agent -eq "true") {
-    echo "Agent is true"
-} else {
-    echo "Agnt is false"
-}
-
-echo "~~~ downloading beat $workflow dependencies"
 Remove-Item bin/in -Recurse -Force -ErrorAction Ignore
 New-Item bin/in -Type Directory -Force
-if ($workflow -eq "snapshot") {
+
+echo "~~~ downloading $workflow dependencies"
+
+$uri = ""
+
+if ($agent -eq "true") {
+    echo "Agent is true, running Elastic agent MSI builder"
+    $version = $stack_version + "-" + $workflow.ToUpper()
+    $hostname = if ($workflow -eq "snapshot") {"artifacts-snapshot.elastic.co"} Else {"artifacts-staging.elastic.co"}
+    $uri = "https://$hostname/elastic-agent-package/latest/$version.json"
+} elseif ($workflow -eq "snapshot") {
     $version = $stack_version + "-" + $workflow.ToUpper()
     $hostname = "artifacts-snapshot.elastic.co"
-    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
-    $json = $response.Content | ConvertFrom-Json
-    $buildId = $json.build_id
-    $prefix = "$hostname/beats/$buildId"
+    $uri = "https://$hostname/beats/latest/$version.json"
 } else {
     $version = $stack_version
     $hostname = "artifacts-staging.elastic.co"
-    $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
-    $json = $response.Content | ConvertFrom-Json
-    $buildId = $json.build_id
-    $prefix = "$hostname/beats/$buildId"
+    $uri = "https://$hostname/beats/latest/$version.json"
 }
-foreach ($beat in ($beats + $ossBeats)) {
-    try {
-        $beatName = $beat.Replace("-oss", "")
-        $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
+
+echo "uri: $uri"
+$response = Invoke-WebRequest -UseBasicParsing -Uri $uri
+$json = $response.Content | ConvertFrom-Json
+$buildId = $json.build_id
+$prefix = if ($agent -eq "true") {"$hostname/elastic-agent-package/$buildId"} Else {"$hostname/beats/$buildId"}
+echo "prefix $prefix"
+
+try {
+    if ($agent -eq "true") {
+        $beatName = "elastic-agent"
+        $url = "https://$prefix/downloads/beats/$beatName/$beatName-$version-windows-x86_64.zip"
         echo "Downloading from $url"
         $client.DownloadFile(
             $url,
-            "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
+            "$currentDir/bin/in/$beatName-$version-windows-x86_64.zip"
         )
-    }
-    catch [System.Net.WebException] {
-        if ($_.Exception.InnerException) {
-            Write-Error $_.Exception.InnerException.Message
-        } else {
-            Write-Error $_.Exception.Message
+    } else {
+        foreach ($beat in ($beats + $ossBeats)) {
+            $beatName = $beat.Replace("-oss", "")
+            $url = "https://$prefix/downloads/beats/$beatName/$beat-$version-windows-x86_64.zip"
+            echo "Downloading from $url"
+            $client.DownloadFile(
+                $url,
+                "$currentDir/bin/in/$beat-$version-windows-x86_64.zip"
+            )
         }
-        throw "An error was encountered while downloading dependencies, aborting."
     }
+} catch [System.Net.WebException] {
+    if ($_.Exception.InnerException) {
+        Write-Error $_.Exception.InnerException.Message
+    } else {
+        Write-Error $_.Exception.Message
+    }
+    throw "An error was encountered while downloading dependencies, aborting."
 }
 
 echo "--- Building $workflow msi"
@@ -88,7 +111,12 @@ $args = @(
     "--cert-pass",
     "$cert_home/msi_password.txt"
 )
-$args += ($beats + $ossBeats)
+if ($agent -eq "true") {
+    $args += "elastic-agent"
+} else {
+    $args += ($beats + $ossBeats)
+}
+
 &dotnet $args
 if ($LastExitcode -ne 0) {
     Write-Error "Build$workflow failed with exit code $LastExitcode"
@@ -99,7 +127,7 @@ if ($LastExitcode -ne 0) {
 
 echo "--- Checking that all artefacts are there"
 $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
-$expected = 2 * $beats.Length
+$expected = if ($agent -eq "true") {1} Else {2 * $beats.Length}
 if ($msiCount -ne $expected) {
     Write-Error "Expected $expected msi executable to be produced, but $msiCount were"
     exit 1

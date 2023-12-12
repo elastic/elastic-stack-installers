@@ -23,11 +23,15 @@ namespace Elastic.PackageCompiler
         [Option("keep-temp-files", Default = false, HelpText = "Preserve (do not delete) temporary files")]
         public bool KeepTempFiles { get; set; }
 
-        public string ShortPackageName =>
-            PackageName?.Substring(0, PackageName.IndexOf('-')) ?? string.Empty;
+        public string ShortPackageName => MakePackageNameShort(PackageName);
 
         public string PackageInDir => Path.Combine(InDir, PackageName);
         public string PackageOutDir => Path.Combine(OutDir, ShortPackageName);
+
+        public static string MakePackageNameShort(string packageName)
+        {
+            return packageName?.Substring(0, packageName.IndexOf('-')) ?? string.Empty;
+        }
 
         public static CmdLineOptions Parse(string[] args)
         {

@@ -20,7 +20,7 @@ steps:
           WORKFLOW: "snapshot"
       - label: ":hammer: Build stack installers Snapshot for Elastic Agent"
         command: ".buildkite/scripts/build.ps1"
-        key: "build-snapshot"
+        key: "build-snapshot-for-agent"
         artifact_paths: "bin/out/**/*.msi"
         agents:
           provider: gcp
