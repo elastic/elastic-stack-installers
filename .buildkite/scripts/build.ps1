@@ -1,4 +1,3 @@
-# Attempting something :)
 cd c:\users\buildkite
 git clone  -v -- git@github.com:elastic/elastic-stack-installers.git esi
 cd esi
