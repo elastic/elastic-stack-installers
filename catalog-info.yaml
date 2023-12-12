@@ -93,14 +93,14 @@ spec:
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
       schedules:
+        Daily 8_12:
+          branch: "8.12"
+          cronline: "*/10 * * * *"
+          message: Checking for new beats artefacts for `8.12`
         Daily 8_11:
           branch: "8.11"
           cronline: "*/10 * * * *"
           message: Checking for new beats artefacts for `8.11`
-        Daily 8_10:
-          branch: "8.10"
-          cronline: "*/10 * * * *"
-          message: Checking for new beats artefacts for `8.10`
         Weekly main:
           branch: "7.17"
           cronline: "*/10 * * * *"
