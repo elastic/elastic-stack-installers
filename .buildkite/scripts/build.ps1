@@ -133,3 +133,5 @@ if ($msiCount -ne $expected) {
 } else {
     echo "found $msiCount artifacts in bin/out"
 }
+
+& (Join-Path $PSScriptRoot "test.ps1")
