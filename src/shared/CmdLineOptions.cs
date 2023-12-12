@@ -30,7 +30,10 @@ namespace Elastic.PackageCompiler
 
         public static string MakePackageNameShort(string packageName)
         {
-            return packageName?.Substring(0, packageName.IndexOf('-')) ?? string.Empty;
+            if (packageName.IndexOf('-') > 0)
+                return packageName.Substring(0, packageName.IndexOf('-'));
+            else
+                 return packageName;
         }
 
         public static CmdLineOptions Parse(string[] args)
