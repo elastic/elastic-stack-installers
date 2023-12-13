@@ -385,7 +385,7 @@ Function Invoke-MSIExec {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
         try {
             if ($LogToDir -and $Action -eq "x") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Exclude -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,30
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,30
                 write-warning "Elastic Agent uninstall returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             } elseif ($LogToDir -and $Action -eq "i") {
@@ -437,7 +437,7 @@ Function Uninstall-MSI {
     }
     catch {
         # Find open files in the Elastic\Agent directory
-        $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*"})
+        $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*" -or $_.Name -like "*Elastic\Beats*"})
         foreach ($OpenFile in $OpenFiles) {
             write-warning "Found open file $($OpenFile.Name) with PID $($OpenFile.ProcessID) opened by $((Get-Process -ID $OpenFile.ProcessID).ProcessName)"
         }
