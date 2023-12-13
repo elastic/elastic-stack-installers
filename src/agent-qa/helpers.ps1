@@ -382,16 +382,17 @@ Function Invoke-MSIExec {
     
     if ($process.ExitCode -ne 0) {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
-
-        if ($LogToDir -and $Action -eq "x") {
-            $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,15
-            write-warning "Elastic Agent uninstall returned:"
-            write-warning ($CustomActionLog?.Context.PostContext -join "`n")
-        } elseif ($LogToDir -and $Action -eq "i") {
-            $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,15
-            write-warning "Elastic Agent uninstall returned:"
-            write-warning ($CustomActionLog?.Context.PostContext -join "`n")
-        }
+        try {
+            if ($LogToDir -and $Action -eq "x") {
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,15
+                write-warning "Elastic Agent uninstall returned:"
+                write-warning ($CustomActionLog.Context.PostContext -join "`n")
+            } elseif ($LogToDir -and $Action -eq "i") {
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,15
+                write-warning "Elastic Agent uninstall returned:"
+                write-warning ($CustomActionLog.Context.PostContext -join "`n")
+            }
+        } catch{}
 
         write-verbose $Message
 
@@ -434,7 +435,8 @@ Function Uninstall-MSI {
         Invoke-MSIExec -Action x -Arguments $msiArgs -LogToDir $LogToDir
     }
     catch {
-        $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*elastic*"})
+        # Find open files in the Elastic\Agent directory
+        $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*"})
         foreach ($OpenFile in $OpenFiles) {
             write-warning "Found open file $($OpenFile.Name) with PID $($OpenFile.ProcessID) opened by $((Get-Process -ID $OpenFile.ProcessID).ProcessName)"
         }
