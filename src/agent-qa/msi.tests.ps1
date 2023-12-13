@@ -309,7 +309,7 @@ Describe 'Elastic Agent MSI Installer' {
 
             # Start the MSI in a background job so that we can kill a child process and measure success
             $Job = Start-Job -WorkingDirectory $PSScriptRoot -ScriptBlock {
-                $arglist = "/x $using:PathToLatestMSI /qb"
+                $arglist = "/x $using:PathToLatestMSI /qn"
 
                 write-information "msiexec $arglist"
                 $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
@@ -340,7 +340,7 @@ Describe 'Elastic Agent MSI Installer' {
         It 'Rollback install when elastic-agent install crashes' {
             # Start the MSI in a background job so that we can kill a child process and measure success
             $Job = Start-Job -WorkingDirectory $PSScriptRoot -ScriptBlock {
-                $arglist = "/i $using:PathToLatestMSI /qb INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
+                $arglist = "/i $using:PathToLatestMSI /qn INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
                 write-information "msiexec $arglist "
                 $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
 

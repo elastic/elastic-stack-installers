@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
 write-host (ConvertTo-Json $PSVersiontable -Compress)
+write-host "Running as: $([Environment]::UserName)"
 
 write-host "`$env:AGENT = $($Env:AGENT)"
 
