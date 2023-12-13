@@ -13,7 +13,7 @@ if ($psversiontable.psversion -lt "7.4.0") {
     Write-host "Invoking from Powershell Core"
     & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1")
     
-    exit
+    return
 }
 
 $AgentMSI = Get-ChildItem bin/out -Include "elastic-agent*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
