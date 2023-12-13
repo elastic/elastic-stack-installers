@@ -1,3 +1,21 @@
+$ErrorActionPreference = "Stop"
+Set-Strictmode -version 3
+
+if ($psversiontable.psversion -lt "7.4.0") {
+    # Download Powershell Core, and rerun this script using Powershell Core
+    
+    write-host "Downloading Powershell Core"
+    invoke-webrequest -uri https://github.com/PowerShell/PowerShell/releases/download/v7.4.0/PowerShell-7.4.0-win-x64.zip -outfile pwsh.zip
+    
+    write-host "Expanding Powershell Core"
+    Expand-Archive pwsh.zip -destinationpath (Join-Path $PSScriptRoot "pwsh")
+    
+    Write-host "Invoking from Powershell Core"
+    & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1")
+    
+    exit
+}
+
 $AgentMSI = Get-ChildItem bin/out -Include "elastic-agent*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
 
 if ($AgentMSI -eq $null) {
