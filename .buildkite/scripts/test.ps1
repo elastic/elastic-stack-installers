@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-write-host (ConvertTo-Json $PSVersiontable)
+write-host (ConvertTo-Json $PSVersiontable -Compress)
 
 if ($psversiontable.psversion -lt "7.4.0") {
     # Download Powershell Core, and rerun this script using Powershell Core
@@ -18,7 +18,7 @@ if ($psversiontable.psversion -lt "7.4.0") {
     return
 }
 
-$AgentMSI = Get-ChildItem bin/out -Include "elastic-agent*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+$AgentMSI = Get-ChildItem bin/out -Include "elastic-agent*.msi" -Recurse
 
 if ($AgentMSI -eq $null) {
     write-error "No agent MSI found to test"
