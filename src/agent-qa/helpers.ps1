@@ -296,7 +296,8 @@ Function Get-AgentLogFile {
 
 
 Function Clean-ElasticAgent {
-    Clean-ElasticAgentInstaller
+
+    try { Clean-ElasticAgentInstaller } catch { }
 
     Clean-ElasticAgentUninstallKeys
 
@@ -384,15 +385,15 @@ Function Invoke-MSIExec {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
         try {
             if ($LogToDir -and $Action -eq "x") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,15
+                $CustomActionLog = Select-String -Path $LoggingDestination -Exclude -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,30
                 write-warning "Elastic Agent uninstall returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             } elseif ($LogToDir -and $Action -eq "i") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,15
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,30
                 write-warning "Elastic Agent uninstall returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             }
-        } catch{}
+        } catch {write-warning "Failed to parse msi log for errors"}
 
         write-verbose $Message
 

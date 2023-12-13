@@ -324,6 +324,9 @@ Describe 'Elastic Agent MSI Installer' {
             # The interrupted uninstall should fail with a 1603
             $Result | Should -Be 1603
 
+            # QUIRK: Clean-up the leftovers as elastic-agent uninstall does not fully rollback during failure
+            Clean-ElasticAgent
+            
             Check-AgentRemnants
         }
 
