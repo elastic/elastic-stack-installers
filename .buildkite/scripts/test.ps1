@@ -1,6 +1,8 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
+write-host (ConvertTo-Json $PSVersiontable)
+
 if ($psversiontable.psversion -lt "7.4.0") {
     # Download Powershell Core, and rerun this script using Powershell Core
     

@@ -13,7 +13,7 @@ try {
     Import-Module Pester -MinimumVersion 5.1.0 
 } catch {
     Write-warning "Pester 5.1.0 or later is required. Installing now."
-    Install-Module -Name Pester -Force -Scope CurrentUser
+    Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
 }
 
 # Clean-up our environment
