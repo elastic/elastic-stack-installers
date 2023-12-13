@@ -14,29 +14,8 @@ BeforeDiscovery {
 
     $Testcases = @(
         @{ 
-            # Agent mode
-            Mode              = "Default"; 
-
-            # The checks to run to assertain whether an agent running under this mode is healthy
-            HealthFunction    = {
-                Is-AgentInstallCachePresent | Should -BeTrue
-                Is-AgentUninstallKeyPresent | Should -BeTrue
-                Is-AgentBinaryPresent | Should -BeFalse
-                Is-AgentServicePresent | Should -BeFalse
-            }
-
-            # The parameters to use to get a agent into this mode
-            MSIInstallParameters = @{
-                Flags    = '/norestart'
-                LogToDir = Get-LogDir
-            }
-            MSIUninstallParameters = @{
-                LogToDir = Get-LogDir
-            }
-        }
-        @{ 
-            Mode              = "Standalone"; 
-            HealthFunction    = {
+            Mode                   = "Standalone"; 
+            HealthFunction         = {
                 if (Is-AgentInstallCachePresent) {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
@@ -48,7 +27,7 @@ BeforeDiscovery {
                 Has-AgentLogged | Should -BeTrue
                 Has-AgentStandaloneLog | Should -BeTrue
             }
-            MSIInstallParameters = @{
+            MSIInstallParameters   = @{
                 Flags    = '/norestart INSTALLARGS="-v"'
                 LogToDir = Get-LogDir
             }
@@ -57,8 +36,8 @@ BeforeDiscovery {
             }
         } 
         @{ 
-            Mode              = "Fleet"; 
-            HealthFunction    = {
+            Mode                   = "Fleet"; 
+            HealthFunction         = {
                 if (Is-AgentInstallCachePresent) {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
@@ -73,8 +52,28 @@ BeforeDiscovery {
                 Has-AgentLogged | Should -BeTrue
                 Has-AgentFleetEnrollmentAttempt | Should -BeTrue
             }
-            MSIInstallParameters = @{
+            MSIInstallParameters   = @{
                 Flags    = '/norestart INSTALLARGS="--delay-enroll --url=https://placeholder:443 --enrollment-token=token"'
+                LogToDir = Get-LogDir
+            }
+            MSIUninstallParameters = @{
+                LogToDir = Get-LogDir
+            }
+        }, @{ 
+            # Agent mode
+            Mode                   = "Default"; 
+
+            # The checks to run to assertain whether an agent running under this mode is healthy
+            HealthFunction         = {
+                Is-AgentInstallCachePresent | Should -BeTrue
+                Is-AgentUninstallKeyPresent | Should -BeTrue
+                Is-AgentBinaryPresent | Should -BeFalse
+                Is-AgentServicePresent | Should -BeFalse
+            }
+
+            # The parameters to use to get a agent into this mode
+            MSIInstallParameters   = @{
+                Flags    = '/norestart'
                 LogToDir = Get-LogDir
             }
             MSIUninstallParameters = @{
@@ -246,16 +245,7 @@ Describe 'Elastic Agent MSI Installer' {
         }
     }
 
-    Context "Specific tests for Default Mode (Without InstallArgS)" -Foreach $Testcases[0] {
-        BeforeAll {
-            Function Assert-AgentHealthy {
-                & $HealthFunction
-            }
-        }
-
-    }
-    
-    Context "Specific tests for Standalone Mode (with installargS=-v)" -Foreach $Testcases[1] {
+    Context "Specific tests for Standalone Mode (with installargS=-v)" -Foreach $Testcases[0] {
         BeforeAll {
             Function Assert-AgentHealthy {
                 & $HealthFunction
@@ -297,7 +287,7 @@ Describe 'Elastic Agent MSI Installer' {
         }
     }
 
-    Context "Specific tests for Fleet Mode with delayed enroll" -Foreach $Testcases[2] {
+    Context "Specific tests for Fleet Mode with delayed enroll" -Foreach $Testcases[1] {
         BeforeAll {
             Function Assert-AgentHealthy {
                 & $HealthFunction
@@ -408,4 +398,14 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
     }
+    
+    Context "Specific tests for Default Mode (Without InstallArgS)" -Foreach $Testcases[2] {
+        BeforeAll {
+            Function Assert-AgentHealthy {
+                & $HealthFunction
+            }
+        }
+
+    }
+    
 }

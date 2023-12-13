@@ -16,6 +16,13 @@ try {
     Write-warning "Pester 5.1.0 or later is required. Installing now."
     Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
 }
+# Passing data to pester requires version 5.1.0
+try {
+    Import-Module FindOpenFile
+} catch {
+    Write-warning "FindOpenFile is required. Installing now."
+    Install-Module -Name FindOpenFile -Force -Scope CurrentUser -SkipPublisherCheck
+}
 
 # Clean-up our environment
 $testsdir = $PSScriptRoot
