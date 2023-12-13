@@ -1,5 +1,6 @@
 param (
-    $PathToLatestMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.11.1-windows-x86_64.msi")
+    $PathToLatestMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.11.1-windows-x86_64.msi"),
+    $PathToEarlyMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.10.4-windows-x86_64.msi")
 )
 #Requires -RunAsAdministrator
 
@@ -25,7 +26,7 @@ new-item $logsdir -ItemType directory -ErrorAction SilentlyContinue
 
 # Data to pass to tests
 $data =  @{
-    PathToEarlyMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.10.4-windows-x86_64.msi")
+    PathToEarlyMSI = $PathToEarlyMSI
     PathToLatestMSI = $PathToLatestMSI
     LogsDir = $logsdir
     VerbosePreference = "continue" # Comment out to disable verbose logging during test runs

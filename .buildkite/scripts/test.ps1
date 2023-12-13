@@ -3,6 +3,13 @@ Set-Strictmode -version 3
 
 write-host (ConvertTo-Json $PSVersiontable -Compress)
 
+write-host "`$env:AGENT = $($Env:AGENT)"
+
+if ($env:AGENT -ne "true") {
+    write-host "Not expecting to test an Agent build in this configuration."
+    return
+}
+
 if ($psversiontable.psversion -lt "7.4.0") {
     # Download Powershell Core, and rerun this script using Powershell Core
     
@@ -24,4 +31,11 @@ if ($AgentMSI -eq $null) {
     write-error "No agent MSI found to test"
 }
 
-& (Join-Path $PSScriptRoot "../../src/agent-qa/Invoke-Pester.ps1") -PathToLatestMSI $AgentMSI.Fullname
+
+$OldAgentMSI = (Join-Path $PSScriptRoot "elastic-agent-8.10.4-windows-x86_64.msi")
+if (-not (test-path $OldAgentMSI)) {
+    Write-Host "Downloading older MSI for upgrade tests"
+    invoke-webrequest -uri https://storage.googleapis.com/agent-msi-testing/elastic-agent-8.10.4-windows-x86_64.msi -outfile $OldAgentMSI
+}
+
+& (Join-Path $PSScriptRoot "../../src/agent-qa/Invoke-Pester.ps1") -PathToLatestMSI $AgentMSI.Fullname -PathToEarlyMSI $OldAgentMSI
