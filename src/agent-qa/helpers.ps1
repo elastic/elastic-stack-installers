@@ -312,7 +312,7 @@ Function Clean-ElasticAgentInstaller {
     $UninstallGuid = Get-AgentUninstallGUID
     if (-not $UninstallGuid) { return }
 
-    Uninstall-MSI -Guid $UninstallGuid -LogToDir $Script:LogDir
+    Uninstall-MSI -Guid $UninstallGuid -LogToDir (Get-LogDir)
 }
 
 Function Clean-ElasticAgentService {
@@ -372,8 +372,8 @@ Function Invoke-MSIExec {
 
     $arglist = "/$Action $($Arguments -join " ")"
 
-    $LoggingDestination = (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix $Action)
     if ($LogToDir) {
+        $LoggingDestination = (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix $Action)
         $arglist += " /l*v " + $LoggingDestination
     }
 
@@ -383,11 +383,11 @@ Function Invoke-MSIExec {
     if ($process.ExitCode -ne 0) {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
 
-        if ($Action -eq "x") {
+        if ($LogToDir -and $Action -eq "x") {
             $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,15
             write-warning "Elastic Agent uninstall returned:"
             write-warning ($CustomActionLog.Context.PostContext -join "`n")
-        } elseif ($Action -eq "i") {
+        } elseif ($LogToDir -and $Action -eq "i") {
             $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,15
             write-warning "Elastic Agent uninstall returned:"
             write-warning ($CustomActionLog.Context.PostContext -join "`n")
@@ -411,9 +411,7 @@ Function Install-MSI {
 
     $msiArgs = @(@($Path) + $Interactive + $Flags)
 
-    if ($LogToDir) { $msiArgs +=  "/l*v " + (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix "install") }
-
-    Invoke-MSIExec -Action i -Arguments $msiArgs
+    Invoke-MSIExec -Action i -Arguments $msiArgs -LogToDir $LogToDir
 }
 
 # Uninstall MSI based on path to MSI or GUID
@@ -432,9 +430,7 @@ Function Uninstall-MSI {
 
     $msiArgs = @($Path,$Guid).Where{$_} + $Interactive + $Flags
 
-    if ($LogToDir) { $msiArgs += "/l*v " + (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix "uninstall") }
-    
-    Invoke-MSIExec -Action x -Arguments $msiArgs
+    Invoke-MSIExec -Action x -Arguments $msiArgs -LogToDir $LogToDir
 }
 
 
