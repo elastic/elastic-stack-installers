@@ -431,6 +431,11 @@ Function Uninstall-MSI {
     }
 
     $msiArgs = @($Path,$Guid).Where{$_} + $Interactive + $Flags
+    
+    $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*" -or $_.Name -like "*Elastic\Beats*"})
+    foreach ($OpenFile in $OpenFiles) {
+        write-host "Open file may block uninstall $($OpenFile.Name) with PID $($OpenFile.ProcessID) opened by $((Get-Process -ID $OpenFile.ProcessID).ProcessName)"
+    }
 
     try {
         Invoke-MSIExec -Action x -Arguments $msiArgs -LogToDir $LogToDir
