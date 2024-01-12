@@ -48,6 +48,12 @@ if (-not (test-path ($Data.PathToLatestMSI))) {
 
 $container = New-PesterContainer -Path $testsdir\*.tests.ps1 -Data $data
 
-Invoke-Pester -Container $container -Output Detailed
+$config = [PesterConfiguration]@{
+    Run = @{
+        Throw = $True
+    }
+}
+
+Invoke-Pester -Container $container -Output Detailed  -Configuration $config
 
 Stop-Transcript
