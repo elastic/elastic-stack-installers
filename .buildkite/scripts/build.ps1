@@ -139,7 +139,9 @@ if ($msiCount -ne $expected) {
 
 try {
     & (Join-Path $PSScriptRoot "test.ps1")
+    write-host "Testing Completed"
 } catch {
+    write-host "Testing Failed"
     write-error $_
     exit 1
 }

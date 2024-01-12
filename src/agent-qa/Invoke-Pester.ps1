@@ -46,14 +46,15 @@ if (-not (test-path ($Data.PathToLatestMSI))) {
     throw "Missing latest MSI version for upgrade testing"
 }
 
-$container = New-PesterContainer -Path $testsdir\*.tests.ps1 -Data $data
+$container = New-PesterContainer -Path $testsdir\*.tests.ps1 -Data $data -Configuration $Config
 
 $config = [PesterConfiguration]@{
     Run = @{
         Throw = $True
+        Container = $container
     }
 }
 
-Invoke-Pester -Container $container -Output Detailed  -Configuration $config
+Invoke-Pester -Output Detailed  -Configuration $config
 
 Stop-Transcript

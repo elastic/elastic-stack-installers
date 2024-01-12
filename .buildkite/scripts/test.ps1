@@ -40,3 +40,5 @@ if (-not (test-path $OldAgentMSI)) {
 }
 
 & (Join-Path $PSScriptRoot "../../src/agent-qa/Invoke-Pester.ps1") -PathToLatestMSI $AgentMSI.Fullname -PathToEarlyMSI $OldAgentMSI
+
+write-host "Returned from Pester Test"
