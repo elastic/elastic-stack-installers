@@ -1,10 +1,8 @@
-cd c:\users\buildkite
-git clone  -v -- git@github.com:elastic/elastic-stack-installers.git esi
+# workaround path limitation for max 248 characters
+# example: https://buildkite.com/elastic/elastic-stack-installers/builds/3104#018c5e1b-23a7-4330-ad5d-4acc69157822/74-180
+cd ..
+Rename-Item -Path .\elastic-stack-installers -NewName esi
 cd esi
-git clean -ffxdq
-git fetch -v --prune -- origin refs/pull/${env:BUILDKITE_PULL_REQUEST}/head
-git checkout -f ${env:BUILDKITE_COMMIT}
-git clean -ffxdq
 
 # Read the stack version from build properties
 [xml]$xml = Get-Content -Path "Directory.Build.props"
