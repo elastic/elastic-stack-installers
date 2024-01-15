@@ -3,7 +3,7 @@
 cd ..
 # we can't use Rename-Item because this script runs from within the existing checkout resulting in
 # Rename-Item : The process cannot access the file because it is being used by another process.
-Copy-Item -Path .\elastic-stack-installers -Destionation esi -Recurse
+Copy-Item -Path .\elastic-stack-installers -Destination esi -Recurse
 cd esi
 
 # Read the stack version from build properties
