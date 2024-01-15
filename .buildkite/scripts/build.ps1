@@ -1,7 +1,9 @@
 # workaround path limitation for max 248 characters
 # example: https://buildkite.com/elastic/elastic-stack-installers/builds/3104#018c5e1b-23a7-4330-ad5d-4acc69157822/74-180
 cd ..
-Rename-Item -Path .\elastic-stack-installers -NewName esi
+# we can't use Rename-Item because this script runs from within the existing checkout resulting in
+# Rename-Item : The process cannot access the file because it is being used by another process.
+Copy-Item -Path .\elastic-stack-installers -Destionation esi -Recurse
 cd esi
 
 # Read the stack version from build properties
