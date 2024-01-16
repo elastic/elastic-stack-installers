@@ -1,8 +1,9 @@
+#Requires -RunAsAdministrator
 param (
     $PathToLatestMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.11.1-windows-x86_64.msi"),
     $PathToEarlyMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.10.4-windows-x86_64.msi")
 )
-#Requires -RunAsAdministrator
+
 
 Set-Strictmode -version 3
 $ErrorActionPreference = "Stop"
@@ -46,15 +47,15 @@ if (-not (test-path ($Data.PathToLatestMSI))) {
     throw "Missing latest MSI version for upgrade testing"
 }
 
-$container = New-PesterContainer -Path $testsdir\*.tests.ps1 -Data $data -Configuration $Config
+$container = New-PesterContainer -Path $testsdir\*.tests.ps1 -Data $data
 
-$config = [PesterConfiguration]@{
+$config = [PesterConfiguration] @{
     Run = @{
         Throw = $True
         Container = $container
     }
 }
 
-Invoke-Pester -Output Detailed  -Configuration $config
+Invoke-Pester -Output Detailed -Configuration $config
 
 Stop-Transcript

@@ -21,8 +21,15 @@ if ($psversiontable.psversion -lt "7.4.0") {
     Expand-Archive pwsh.zip -destinationpath (Join-Path $PSScriptRoot "pwsh")
     
     Write-host "Invoking from Powershell Core"
-    & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1")
-    
+    $errOutput = $( $output = & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1") ) 2>&1
+
+    if ([string]::IsNullOrWhiteSpace($errOutput)) {
+        write-host "Child pwsh process exited successfully"
+        return
+    } else {
+        write-host "Child pwsh process wrote an error to stderr"
+        throw $errOutput
+    }
     return
 }
 
