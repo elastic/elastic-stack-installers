@@ -54,8 +54,9 @@ $config = [PesterConfiguration] @{
         Throw = $True
         Container = $container
     }
+    Output = "Detailed"
 }
 
-Invoke-Pester -Output Detailed -Configuration $config
+Invoke-Pester -Configuration $config
 
 Stop-Transcript
