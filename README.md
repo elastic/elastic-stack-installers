@@ -66,5 +66,5 @@ Note that the MSI will call the `elastic-agent install` command with `-f` (force
 Similarly to the install flow (described above), the MSI will call the `elastic-agent uninstall` command, and it's possible to pass arguements using `AGENTARGS`. One common use case is uninstalling an agent which has tamper protection enabled.
 
 ### Upgrade
-The Agnet MSI doesn't support upgrade. Since the agents are fleet managed, upgrades shall be done using fleet (UI / API).
+The Agent MSI doesn't support upgrade. Since the agents are fleet managed, upgrades shall be done using fleet (UI / API).
 
