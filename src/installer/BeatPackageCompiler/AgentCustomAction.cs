@@ -12,15 +12,13 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                // If there are no install args, we stop here
-                // // (the MSI just copied the files, there will be no agent-install)
-                if (string.IsNullOrEmpty(session["INSTALLARGS"]))
-                {
-                    session.Log("No INSTALLARGS provided, skipping agent install");
-                    return ActionResult.Success;
-                }
+                string install_args = string.Empty;
 
-                string install_args = session["INSTALLARGS"];
+                if (!string.IsNullOrEmpty(session["INSTALLARGS"]))
+                    install_args = session["INSTALLARGS"];
+                else
+                    session.Log("No INSTALLARGS detected");
+
                 string install_folder = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
 
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
@@ -50,11 +48,12 @@ namespace Elastic.PackageCompiler.Beats
         {
             // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.standardoutput?view=net-8.0
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
             session.Log("Running command: " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
             process.Start();
-            session.Log(process.StandardOutput.ReadToEnd());
+            session.Log("stderr of the process:");
+            session.Log(process.StandardError.ReadToEnd());
             process.WaitForExit();
         }
 

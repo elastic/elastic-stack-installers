@@ -228,11 +228,14 @@ namespace Elastic.PackageCompiler.Beats
 
             };
 
-            // CLI Shim path
-            project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+            if (!pc.IsAgent)
             {
-                Part = EnvVarPart.last
-            });
+                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
+                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                {
+                    Part = EnvVarPart.last
+                });
+            }
 
             // We hard-link Wix Toolset to a known location
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
