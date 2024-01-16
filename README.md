@@ -63,7 +63,7 @@ elastic-agent.msi AGENTARGS="--url=<fleet_url_with_port> --enrollment-token=<tok
 Note that the MSI will call the `elastic-agent install` command with `-f` (force) to avoid user interaction.
 
 ### Uninstall
-Similarly to the install flow (described above), the MSI will call the `elastic-agent uninstall` command, and it's possible to pass arguements using `AGENTARGS`. One common use case is uninstalling an agent which has tamper protection enabled.
+Similarly to the install flow (described above), the MSI will call the `elastic-agent uninstall` command, and it's possible to pass arguments using `INSTALLARGS`. One common use case is uninstalling an agent which has tamper protection enabled.
 
 ### Upgrade
 The Agent MSI doesn't support upgrade. Since the agents are fleet managed, upgrades shall be done using fleet (UI / API).
