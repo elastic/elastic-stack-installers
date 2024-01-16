@@ -57,7 +57,7 @@ During the install flow, The MSI installer will unpack the contents of the MSI t
 
 In order to complete step 3 above, the MSI installer shall receive command line arguments, passed with INSTALLARGS command line switch followed by `"`, for example:
 ```
-elastic-agent.msi AGENTARGS="--url=<fleet_url_with_port> --enrollment-token=<token>"
+elastic-agent.msi INSTALLARGS="--url=<fleet_url_with_port> --enrollment-token=<token>"
 ```
 
 Note that the MSI will call the `elastic-agent install` command with `-f` (force) to avoid user interaction.
