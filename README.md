@@ -55,7 +55,7 @@ During the install flow, The MSI installer will unpack the contents of the MSI t
 2. register the agent as a windows service
 3. enroll the agent into fleet
 
-In order to complete step 3 above, the MSI installer shall receive command line arguments, passed with AGENTARGS command line switch followed by `"`, for example:
+In order to complete step 3 above, the MSI installer shall receive command line arguments, passed with INSTALLARGS command line switch followed by `"`, for example:
 ```
 elastic-agent.msi AGENTARGS="--url=<fleet_url_with_port> --enrollment-token=<token>"
 ```
