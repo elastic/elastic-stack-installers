@@ -21,16 +21,15 @@ if ($psversiontable.psversion -lt "7.4.0") {
     Expand-Archive pwsh.zip -destinationpath (Join-Path $PSScriptRoot "pwsh")
     
     Write-host "Invoking from Powershell Core"
-    $errOutput = $( $output = & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1") ) 2>&1
+    & (Join-Path $PSScriptRoot "pwsh/pwsh.exe") -file (Join-Path $PSScriptRoot "test.ps1")
 
-    if ([string]::IsNullOrWhiteSpace($errOutput)) {
+    if ($LASTEXITCODE -eq 0) {
         write-host "Child pwsh process exited successfully"
-        return
+        exit 0
     } else {
-        write-host "Child pwsh process wrote an error to stderr"
-        throw $errOutput
+        write-host "Child pwsh process returned $LASTEXITCODE, a non zero exit code"
+        exit 100
     }
-    return
 }
 
 $AgentMSI = Get-ChildItem bin/out -Include "elastic-agent*.msi" -Recurse
