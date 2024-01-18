@@ -175,6 +175,10 @@ namespace Elastic.PackageCompiler.Beats
             // When uninstalling, the 'elastic-agent uninstall' command.
             if (pc.IsAgent)
             {
+                // https://stackoverflow.com/a/311837
+                project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
+                project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
+
                 // Passing the agent executable path to the action handler which will run it post installation
                 project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));

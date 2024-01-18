@@ -22,7 +22,6 @@ namespace Elastic.PackageCompiler.Beats
                 string install_folder = Path.Combine(session["INSTALLDIR"], session["exe_folder"]);
 
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo.WorkingDirectory = install_folder;
                 process.StartInfo.FileName = Path.Combine(install_folder, "elastic-agent.exe");
                 process.StartInfo.Arguments = "install -f " + install_args;
                 StartProcess(session, process);
@@ -62,6 +61,7 @@ namespace Elastic.PackageCompiler.Beats
             try
             {
                 new DirectoryInfo(folder).Delete(true);
+                session.Log("Successfully removed foler: " + folder);
             }
             catch (Exception ex)
             {
