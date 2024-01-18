@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 param (
-    $PathToLatestMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.11.1-windows-x86_64.msi"),
-    $PathToEarlyMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.10.4-windows-x86_64.msi")
+    $PathToLatestMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.13.0-windows-x86_64.msi"),
+    $PathToEarlyMSI = (Join-Path $PSScriptRoot "bin/elastic-agent-8.11.4-windows-x86_64.msi")
 )
 
 

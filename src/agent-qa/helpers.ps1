@@ -379,8 +379,18 @@ Function Invoke-MSIExec {
     }
 
     write-verbose "Invoking msiexec.exe $arglist"
-    $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist  -PassThru -Wait
-    
+    $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -PassThru
+    $thisPid = $Process.id
+
+    # Wait for the process to exit but only for 10 minutes and then terminate it
+    Wait-Process -id $thisPid -Timeout 600 -ErrorVariable timeouted
+    if ($timeouted)
+    {
+        # terminate the process
+        write-warning "Killing process $thisPid as it reached timeout ($timeouted)"
+        stop-process -id $thisPid
+    }
+
     if ($process.ExitCode -ne 0) {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
         try {
@@ -393,7 +403,11 @@ Function Invoke-MSIExec {
                 write-warning "Elastic Agent uninstall returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             }
-        } catch {write-warning "Failed to parse msi log for errors"}
+        } catch {
+            write-warning "Failed to parse msi log for errors"
+            write-warning "Dumping full MSI Log"
+            write-host (Get-Content $LoggingDestination -raw)
+        }
 
         write-verbose $Message
 

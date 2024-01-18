@@ -39,10 +39,10 @@ if ($AgentMSI -eq $null) {
 }
 
 
-$OldAgentMSI = (Join-Path $PSScriptRoot "elastic-agent-8.10.4-windows-x86_64.msi")
+$OldAgentMSI = (Join-Path $PSScriptRoot "elastic-agent-8.11.4-windows-x86_64.msi")
 if (-not (test-path $OldAgentMSI)) {
     Write-Host "Downloading older MSI for upgrade tests"
-    invoke-webrequest -uri https://storage.googleapis.com/agent-msi-testing/elastic-agent-8.10.4-windows-x86_64.msi -outfile $OldAgentMSI
+    invoke-webrequest -uri https://storage.googleapis.com/agent-msi-testing/elastic-agent-8.11.4-windows-x86_64.msi -outfile $OldAgentMSI
 }
 
 & (Join-Path $PSScriptRoot "../../src/agent-qa/Invoke-Pester.ps1") -PathToLatestMSI $AgentMSI.Fullname -PathToEarlyMSI $OldAgentMSI
