@@ -28,7 +28,7 @@ if ($psversiontable.psversion -lt "7.4.0") {
         exit 0
     } else {
         write-host "Child pwsh process returned $LASTEXITCODE, a non zero exit code"
-        exit 100
+        throw "Tests failed."
     }
 }
 
