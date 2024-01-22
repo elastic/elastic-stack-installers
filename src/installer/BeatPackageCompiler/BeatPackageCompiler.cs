@@ -175,6 +175,10 @@ namespace Elastic.PackageCompiler.Beats
             // When uninstalling, the 'elastic-agent uninstall' command.
             if (pc.IsAgent)
             {
+                // https://stackoverflow.com/a/311837
+                project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
+                project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
+
                 // Passing the agent executable path to the action handler which will run it post installation
                 project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
@@ -228,11 +232,14 @@ namespace Elastic.PackageCompiler.Beats
 
             };
 
-            // CLI Shim path
-            project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+            if (!pc.IsAgent)
             {
-                Part = EnvVarPart.last
-            });
+                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
+                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                {
+                    Part = EnvVarPart.last
+                });
+            }
 
             // We hard-link Wix Toolset to a known location
             Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
