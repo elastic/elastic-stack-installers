@@ -1,3 +1,6 @@
+$ErrorActionPreference = "Stop"
+Set-Strictmode -version 3
+
 if (-not (Test-Path env:MANIFEST_URL)) {
     $errorMessage = "Error: Required environment variable [MANIFEST_URL] is missing."
     Write-Host $errorMessage
@@ -121,4 +124,13 @@ if ($msiCount -ne $expected) {
     exit 1
 } else {
     Write-Output "Success, found $msiCount artifacts in bin/out."
+}
+
+try {
+    & (Join-Path $PSScriptRoot "test.ps1")
+    write-host "Testing Completed"
+} catch {
+    write-host "Testing Failed"
+    write-error $_
+    exit 1
 }
