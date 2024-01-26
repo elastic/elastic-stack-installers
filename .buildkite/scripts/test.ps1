@@ -6,11 +6,6 @@ write-host "Running as: $([Environment]::UserName)"
 
 write-host "`$env:AGENT = $($Env:AGENT)"
 
-if ($env:AGENT -ne "true") {
-    write-host "Not expecting to test an Agent build in this configuration."
-    return
-}
-
 if ($psversiontable.psversion -lt "7.4.0") {
     # Download Powershell Core, and rerun this script using Powershell Core
     
