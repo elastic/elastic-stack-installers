@@ -59,7 +59,9 @@ BeforeDiscovery {
             MSIUninstallParameters = @{
                 LogToDir = Get-LogDir
             }
-        }, @{ 
+        },
+        <#
+        @{ 
             # Agent mode
             Mode                   = "Default"; 
 
@@ -80,6 +82,7 @@ BeforeDiscovery {
                 LogToDir = Get-LogDir
             }
         }
+        #>
     )
 }
 
