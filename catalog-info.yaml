@@ -53,11 +53,6 @@ spec:
         publish_commit_status: true
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
-      schedules:
-        Daily main:
-          branch: main
-          cronline: "@daily"
-          message: Builds daily `main` stack-installers dra
       teams:
         everyone:
           access_level: BUILD_AND_READ

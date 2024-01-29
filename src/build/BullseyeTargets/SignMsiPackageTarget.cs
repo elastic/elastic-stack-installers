@@ -5,7 +5,7 @@ using System.Threading;
 using ElastiBuild.Extensions;
 using Elastic.Installer;
 using SimpleExec;
-
+using Elastic.PackageCompiler;
 
 namespace ElastiBuild.BullseyeTargets
 {
@@ -15,9 +15,13 @@ namespace ElastiBuild.BullseyeTargets
         {
             var ap = ctx.GetArtifactPackage();
 
+            // This package name should be aligned with the "out" directory created by
+            // the BeatPackageCompiler module (as it is the one generating the MSIs to be signed)
+            string shortPackageName = CmdLineOptions.MakePackageNameShort(ap.CanonicalTargetName);
+
             string filePath = Path.Combine(
                  ctx.OutDir,
-                 ap.CanonicalTargetName,
+                 shortPackageName,
                  Path.GetFileNameWithoutExtension(ap.FileName) + MagicStrings.Ext.DotMsi
             );
 
