@@ -2,22 +2,22 @@
 ### The following environment variables can be set for testing purposes via the buildkite UI or CLI
 ###  RUN_SNAPSHOT: "true" - will run the snapshot workflow
 ###  RUN_STAGING: "true" - will run the staging workflow
-###  DBRANCH: "main" - will override the dra branch param. Default is $BUILDKITE_BRANCH
+###  ONLY_AGENT: "true" - will build only the elastic-agent msi artifact
 ###
 
 steps:
-  - group: ":beats: Stack installers Snapshot"
+  - group: ":package: Stack installers Snapshot"
     key: "dra-snapshot"
     steps:
-      - label: ":hammer: Build stack installers Snapshot"
+      - label: ":construction_worker: Build stack installers / Snapshot"
         command: ".buildkite/scripts/build.ps1"
         key: "build-snapshot"
-        artifact_paths: "bin/out/**/*.msi"
+        artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
         agents:
           provider: gcp
           image: family/ci-windows-2022
         env:
-          WORKFLOW: "snapshot"
+          DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
         if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_SNAPSHOT") == "true"
         command: ".buildkite/scripts/dra-publish.sh"
@@ -26,20 +26,20 @@ steps:
         agents:
           provider: gcp
         env:
-          WORKFLOW: "snapshot"
-  - group: ":beats: Stack installers Staging :beats:"
+          DRA_WORKFLOW: "snapshot"
+  - group: ":package: Stack installers Staging"
     key: "dra-staging"
     steps:
-      - label: ":hammer: Build stack installers staging"
+      - label: ":construction_worker: Build stack installers / Staging"
         if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
         command: ".buildkite/scripts/build.ps1"
         key: "build-staging"
-        artifact_paths: "bin/out/**/*.msi"
+        artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
         agents:
           provider: gcp
           image: family/ci-windows-2022
         env:
-          WORKFLOW: "staging"
+          DRA_WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
         if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
         command: ".buildkite/scripts/dra-publish.sh"
@@ -48,7 +48,7 @@ steps:
         agents:
           provider: gcp
         env:
-          WORKFLOW: "staging"
+          DRA_WORKFLOW: "staging"
 
 notify:
   - slack: "#ingest-notifications"

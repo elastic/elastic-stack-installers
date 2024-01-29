@@ -31,7 +31,10 @@ namespace Elastic.PackageCompiler.Beats
 
             var companyName = MagicStrings.Elastic;
             var productSetName = MagicStrings.Beats.Name;
-            var displayName = MagicStrings.Beats.Name + " " + ap.TargetName;
+
+            // A product can define a display name to be used.
+            // At the time of writing this line, elastic-agent is the only product that used it
+            var displayName = !string.IsNullOrEmpty(pc.DisplayName) ? pc.DisplayName : MagicStrings.Beats.Name + " " + ap.TargetName;
             var exeName = ap.CanonicalTargetName + MagicStrings.Ext.DotExe;
 
             // Generate UUID v5 from product properties.
@@ -156,7 +159,9 @@ namespace Elastic.PackageCompiler.Beats
                     bool exclude = 
                         // .exe must be excluded for service configuration to work
                         (pc.IsWindowsService && itm.EndsWith(exeName, StringComparison.OrdinalIgnoreCase))
-                        || (isConfigFile);
+
+                        // beats config file is handled further down
+                        || (!pc.IsAgent && isConfigFile);
 
                     // this is an "include" filter
                     return ! exclude;
@@ -165,17 +170,105 @@ namespace Elastic.PackageCompiler.Beats
 
             packageContents.Add(pc.IsWindowsService ? service : null);
 
-            // Add a note to the final screen and a checkbox to open the directory of .example.yml file
-            var beatConfigExampleFileName = ap.CanonicalTargetName + ".example" + MagicStrings.Ext.DotYml;
-            var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
+            // For agent, the MSI installer copies the contents of the MSI to a temp folder
+            // and then shall call the 'elastic-agent install' command.
+            // When uninstalling, the 'elastic-agent uninstall' command.
+            if (pc.IsAgent)
+            {
+                // https://stackoverflow.com/a/311837
+                project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
+                project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
 
-            project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
-                $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
-                $"in the data directory caled {ap.CanonicalTargetName}.example.yml. Please copy this example file to " +
-                $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
-                $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
-                $"and then start {serviceDisplayName} Windows service.\r\n"));
+                // Passing the agent executable path to the action handler which will run it post installation
+                project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
+                project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
 
+                // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
+                // We invoke the custom action before the "RemoveFiles" step so in case the action fails we can fail the whole MSI uninstall flow
+                project.AddAction(new ManagedAction(AgentCustomAction.UnInstallAction, Return.check, When.Before, Step.RemoveFiles, Condition.BeingUninstalledAndNotBeingUpgraded));
+
+                // Upgrade custom action. Found that "AppSearch" is the first step after WIX_UPGRADE_DETECTED is set
+                project.AddAction(new ManagedAction(AgentCustomAction.UpgradeAction, Return.check, When.Before, Step.AppSearch, "WIX_UPGRADE_DETECTED AND NOT (REMOVE=\"ALL\")"));
+            }
+
+            if (!pc.IsAgent)
+            {
+                // Add a note to the final screen and a checkbox to open the directory of .example.yml file
+                var beatConfigExampleFileName = ap.CanonicalTargetName.Replace("-", "_") + ".example" + MagicStrings.Ext.DotYml;
+                var beatConfigExampleFileId = beatConfigExampleFileName + "_" + (uint) beatConfigExampleFileName.GetHashCode32();
+
+                project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALTEXT",
+                    $"NOTE: Only Administrators can modify configuration files! We put an example configuration file " +
+                    $"in the data directory named {beatConfigExampleFileName}. Please copy this example file to " +
+                    $"{ap.CanonicalTargetName}.yml and make changes according to your environment. Once {ap.CanonicalTargetName}.yml " +
+                    $"is created, you can configure {ap.CanonicalTargetName} from your favorite shell (in an elevated prompt) " +
+                    $"and then start {serviceDisplayName} Windows service.\r\n"));
+
+                HandleOpenExplorer(ap, project, beatConfigExampleFileId);
+                RenameConfigFile(opts, ap, packageContents, beatConfigExampleFileName, beatConfigExampleFileId);
+            }
+
+            // Drop CLI shim on disk
+            var cliShimScriptPath = Path.Combine(
+                opts.PackageOutDir,
+                MagicStrings.Files.ProductCliShim(ap.CanonicalTargetName));
+
+            System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
+
+            var beatsInstallPath =
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
+                Path.Combine(companyName, productSetName);
+
+            project.Dirs = new[]
+            {
+                // Binaries
+                new InstallDir(
+                     // Wix# directory parsing needs forward slash
+                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
+                    new Dir(
+                        ap.Version,
+                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
+                        new WixSharp.File(cliShimScriptPath))),
+
+            };
+
+            if (!pc.IsAgent)
+            {
+                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
+                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                {
+                    Part = EnvVarPart.last
+                });
+            }
+
+            // We hard-link Wix Toolset to a known location
+            Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
+
+#if !DEBUG
+            if (opts.KeepTempFiles)
+#endif
+            {
+                Compiler.PreserveTempFiles = true;
+            }
+
+            if (opts.Verbose)
+            {
+                Compiler.CandleOptions += " -v";
+                Compiler.LightOptions += " -v";
+            }
+
+            project.ResolveWildCards();
+
+            if (opts.WxsOnly)
+                project.BuildWxs();
+            else if (opts.CmdOnly)
+                Compiler.BuildMsiCmd(project, Path.Combine(opts.SrcDir, opts.PackageName) + ".cmd");
+            else
+                Compiler.BuildMsi(project);
+        }
+
+        private static void HandleOpenExplorer(ArtifactPackage ap, Project project, string beatConfigExampleFileId)
+        {
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOX", "1"));
             project.AddProperty(new Property("WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT",
                 $"Open {ap.CanonicalTargetName} data directory in Windows Explorer"));
@@ -203,7 +296,10 @@ namespace Elastic.PackageCompiler.Beats
         Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
     </Publish>
 </UI>"));
+        }
 
+        private static void RenameConfigFile(CmdLineOptions opts, ArtifactPackage ap, List<WixEntity> packageContents, string beatConfigExampleFileName, string beatConfigExampleFileId)
+        {
             var dataContents = new DirectoryInfo(opts.PackageInDir)
                 .GetFiles(MagicStrings.Files.AllDotYml, SearchOption.TopDirectoryOnly)
                 .Select(fi =>
@@ -224,61 +320,6 @@ namespace Elastic.PackageCompiler.Beats
                 .ToList<WixEntity>();
 
             packageContents.AddRange(dataContents);
-
-            // Drop CLI shim on disk
-            var cliShimScriptPath = Path.Combine(
-                opts.PackageOutDir,
-                MagicStrings.Files.ProductCliShim(ap.CanonicalTargetName));
-
-            System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
-
-            var beatsInstallPath =
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
-                Path.Combine(companyName, productSetName);
-
-            project.Dirs = new[]
-            {
-                // Binaries
-                new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
-                        new WixSharp.File(cliShimScriptPath))),
-
-            };
-
-            // CLI Shim path
-            project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
-            {
-                Part = EnvVarPart.last
-            });
-
-            // We hard-link Wix Toolset to a known location
-            Compiler.WixLocation = Path.Combine(opts.BinDir, "WixToolset", "bin");
-
-#if !DEBUG
-            if (opts.KeepTempFiles)
-#endif
-            {
-                Compiler.PreserveTempFiles = true;
-            }
-
-            if (opts.Verbose)
-            {
-                Compiler.CandleOptions += " -v";
-                Compiler.LightOptions += " -v";
-            }
-
-            project.ResolveWildCards();
-
-            if (opts.WxsOnly)
-                project.BuildWxs();
-            else if (opts.CmdOnly)
-                Compiler.BuildMsiCmd(project, Path.Combine(opts.SrcDir, opts.PackageName) + ".cmd");
-            else
-                Compiler.BuildMsi(project);
         }
     }
 }
