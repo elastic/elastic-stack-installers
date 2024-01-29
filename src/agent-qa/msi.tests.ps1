@@ -4,7 +4,7 @@ param (
 )
 
 ###
-# The 3 agent modes (default, standalone, fleet) are each a test case for the tests
+# The 2 agent modes (standalone, fleet) are each a test case for the tests
 # The health function represents how we determine if the agent is healthy in that mode
 # and is frequently invoked after installing the agent.
 
@@ -59,30 +59,7 @@ BeforeDiscovery {
             MSIUninstallParameters = @{
                 LogToDir = Get-LogDir
             }
-        },
-        <#
-        @{ 
-            # Agent mode
-            Mode                   = "Default"; 
-
-            # The checks to run to assertain whether an agent running under this mode is healthy
-            HealthFunction         = {
-                Is-AgentInstallCachePresent | Should -BeTrue
-                Is-AgentUninstallKeyPresent | Should -BeTrue
-                Is-AgentBinaryPresent | Should -BeFalse
-                Is-AgentServicePresent | Should -BeFalse
-            }
-
-            # The parameters to use to get a agent into this mode
-            MSIInstallParameters   = @{
-                Flags    = '/norestart'
-                LogToDir = Get-LogDir
-            }
-            MSIUninstallParameters = @{
-                LogToDir = Get-LogDir
-            }
         }
-        #>
     )
 }
 
@@ -134,7 +111,7 @@ Describe 'Elastic Agent MSI Installer' {
         Has-AgentInstallerProcess | Should -BeFalse -Because "There should be no dangling installer processes after a test run"
     }
 
-    # Using the test cases defined up above we test the agent in Default, Standalone and Fleet modes
+    # Using the test cases defined up above we test the agent in Standalone and Fleet modes
     Context "Basic Tests for <Mode> mode" -ForEach $Testcases {
         
         BeforeAll {
@@ -142,31 +119,6 @@ Describe 'Elastic Agent MSI Installer' {
                 & $HealthFunction
             }
         }
-        <#
-        It 'Can be installed in <Mode> mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-            
-            # We clean-up with a clean-up script so that we can differentiate installer from uninstaller failures with the next test
-            Clean-ElasticAgent
-
-            Check-AgentRemnants
-        }
-
-        It 'Can be installed twice in <Mode> mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-            
-            { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Not -Throw
-
-            # We clean-up with a clean-up script so that we can differentiate installer from uninstaller failures with the next test
-            Clean-ElasticAgent
-
-            Check-AgentRemnants
-        }
-#>
 
         It 'Can be installed and uninstalled via MSI, with installargs, in <Mode> mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
@@ -404,14 +356,4 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
     }
-    
-    Context "Specific tests for Default Mode (Without InstallArgS)" -Foreach $Testcases[2] {
-        BeforeAll {
-            Function Assert-AgentHealthy {
-                & $HealthFunction
-            }
-        }
-
-    }
-    
 }
