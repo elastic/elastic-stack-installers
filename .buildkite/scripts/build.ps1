@@ -131,6 +131,6 @@ try {
     write-host "Testing Completed"
 } catch {
     write-host "Testing Failed"
-    #write-error $_
-    #exit 1
+    write-error $_
+    exit 1
 }
