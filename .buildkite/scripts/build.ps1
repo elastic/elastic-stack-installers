@@ -1,12 +1,14 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
+$eligibleReleaseBranchesMajor = "^[8]"
+
 if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST) -and ($env:BUILDKITE_PULL_REQUEST -ne "false")) {
     # we are called via a PR
     Write-Host "~~~ Running in pull request mode"
 
     $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
-    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like "8*")) {
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
         Write-Host "^^^ +++"
         $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` and `8.x` branches. Exiting."
         Write-Host $errorMessage
