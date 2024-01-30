@@ -1,7 +1,35 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-if (-not (Test-Path env:MANIFEST_URL)) {
+if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST) -and ($env:BUILDKITE_PULL_REQUEST -ne "false")) {
+    # we are called via a PR
+    Write-Host "~~~ Running in pull request mode"
+
+    $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like "8*")) {
+        Write-Host "^^^ +++"
+        $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` and `8.x` branches. Exiting."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    # the snapshot API url expects master where we normally use main
+    $snapshotsApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
+
+    $snapshotsUrl = "https://snapshots.elastic.co/latest/$snapshotsApiTargetBranch.json"
+    Write-Host "snapshots url is $snapshotsUrl"
+    try {
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $snapshotsUrl
+        $responseJson = $response.Content | ConvertFrom-Json
+        $env:MANIFEST_URL = $responseJson.manifest_url
+        Write-Host "Using MANIFEST_URL=$env:MANIFEST_URL"
+    } catch {
+        $errorMessage = "There was an error parsing manifest_url from $snapshotsUrl. Exiting."
+        throw $errorMessage
+    }
+}
+elseif (-not (Test-Path env:MANIFEST_URL)) {
+    # any other invocation of this script (e.g. from unified release) must supply MANIFEST_URL
     $errorMessage = "Error: Required environment variable [MANIFEST_URL] is missing."
     Write-Host $errorMessage
     throw $errorMessage
