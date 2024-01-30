@@ -1,7 +1,5 @@
 ###
 ### The following environment variables can be set for testing purposes via the buildkite UI or CLI
-###  RUN_SNAPSHOT: "true" - will run the snapshot workflow
-###  RUN_STAGING: "true" - will run the staging workflow
 ###  ONLY_AGENT: "true" - will build only the elastic-agent msi artifact
 ###
 
@@ -19,7 +17,10 @@ steps:
         env:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
-        if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_SNAPSHOT") == "true"
+        if: |
+          // Only run when triggered from Unified Release or via PRs. Note that PRs run it in dry-run mode (see dra-publish.sh)
+          build.env("BUILDKITE_PULL_REQUEST") != "false" ||
+            ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-snapshot"
         depends_on: "build-snapshot"
@@ -31,7 +32,10 @@ steps:
     key: "dra-staging"
     steps:
       - label: ":construction_worker: Build stack installers / Staging"
-        if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+        if: |
+          // Only run when triggered from Unified Release or via PRs targetting non-main, since there is no valid MANIFEST_URL for staging/main branch.
+          ( build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/ ) ||
+            ( build.branch =~ /^[0-9]+\.[0-9]+\$/ && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
         command: ".buildkite/scripts/build.ps1"
         key: "build-staging"
         artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
@@ -41,7 +45,11 @@ steps:
         env:
           DRA_WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
-        if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_STAGING") == "true"
+        if: |
+          // Only run when triggered from Unified Release or via PRs targetting non-main, since there is no valid MANIFEST_URL for staging/main branch.
+          // Note that PRs run it in dry-run mode (see dra-publish.sh)
+          ( build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/ ) ||
+            ( build.branch =~ /^[0-9]+\.[0-9]+\$/ && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-staging"
         depends_on: "build-staging"
@@ -49,7 +57,3 @@ steps:
           provider: gcp
         env:
           DRA_WORKFLOW: "staging"
-
-notify:
-  - slack: "#ingest-notifications"
-    if: build.branch == 'main'
