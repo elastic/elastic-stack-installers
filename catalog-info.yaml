@@ -47,9 +47,13 @@ spec:
     spec:
       pipeline_file: ".buildkite/pipeline.yml"
       provider_settings:
-        build_branches: true
         build_pull_request_forks: false
-        build_pull_requests: true
+        build_pull_requests: true # requires filter_enabled and filter_condition settings as below when used with buildkite-pr-bot
+        build_branches: false
+        build_tags: false
+        filter_enabled: true
+        filter_condition: >-
+          build.creator.name == 'elasticmachine' && build.pull_request.id != null
         publish_commit_status: true
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers

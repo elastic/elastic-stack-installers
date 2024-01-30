@@ -3,17 +3,10 @@ Set-Strictmode -version 3
 
 $eligibleReleaseBranchesMajor = "^[8]"
 
-if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST) -and ($env:BUILDKITE_PULL_REQUEST -ne "false")) {
-    # we are called via a PR
-    Write-Host "~~~ Running in pull request mode"
-
-    $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
-    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
-        Write-Host "^^^ +++"
-        $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` and `8.x` branches. Exiting."
-        Write-Host $errorMessage
-        throw $errorMessage
-    }
+function setManifestUrl {
+    param (
+        [string]$targetBranch
+    )
 
     # the snapshot API url expects master where we normally use main
     $snapshotsApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
@@ -30,11 +23,43 @@ if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST
         throw $errorMessage
     }
 }
+
+if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST) -and ($env:BUILDKITE_PULL_REQUEST -ne "false")) {
+    # we are called via a PR
+    Write-Host "~~~ Running in pull request mode"
+
+    $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+        Write-Host "^^^ +++"
+        $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    setManifestUrl -targetBranch $targetBranch
+}
+elseif (-not (Test-Path env:MANIFEST_URL) -and -not ($env:BUILDKITE_SOURCE -ne "trigger_job") -and ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -eq "")) {
+    # we got triggered by a branch push
+    Write-Host "~~~ Running in branch push mode"
+
+    $targetBranch = $env:BUILDKITE_PIPELINE_DEFAULT_BRANCH
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+        Write-Host "^^^ +++"
+        $errorMessage = "Tests triggered by branch pushes but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    setManifestUrl -targetBranch $targetBranch
+}
 elseif (-not (Test-Path env:MANIFEST_URL)) {
     # any other invocation of this script (e.g. from unified release) must supply MANIFEST_URL
     $errorMessage = "Error: Required environment variable [MANIFEST_URL] is missing."
     Write-Host $errorMessage
     throw $errorMessage
+}
+else {
+    Write-Host "~~~ Running via a Buildkite trigger: [$env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG], MANIFEST_URL=[$env:MANIFEST_URL]"
 }
 
 # workaround path limitation for max 248 characters
