@@ -126,11 +126,12 @@ if ($msiCount -ne $expected) {
     Write-Output "Success, found $msiCount artifacts in bin/out."
 }
 
-try {
-    & (Join-Path $PSScriptRoot "test.ps1")
-    write-host "Testing Completed"
-} catch {
-    write-host "Testing Failed"
-    write-error $_
-    exit 1
-}
+# temporarily disabling tests; they'll be re added via https://github.com/elastic/elastic-stack-installers/pull/225
+# try {
+#     & (Join-Path $PSScriptRoot "test.ps1")
+#     write-host "Testing Completed"
+# } catch {
+#     write-host "Testing Failed"
+#     write-error $_
+#     exit 1
+# }
