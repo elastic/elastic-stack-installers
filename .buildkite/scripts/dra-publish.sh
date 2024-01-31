@@ -5,7 +5,10 @@ set -uo pipefail
 
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
-buildkite-agent artifact download 'bin\out\**\*.msi' . --step build-"${DRA_WORKFLOW}"
+# it's possible to also use unix style paths for download (users/buildkites/...)
+# but it's an experimental feature that needs an agent flag set: https://buildkite.com/docs/agent/v3#experimental-features-normalised-upload-paths
+buildkite-agent artifact download 'users\buildkite\esi\bin\out\**\*.msi' . --step build-"${DRA_WORKFLOW}"
+mv users/buildkite/esi/bin bin
 chmod -R 777 bin/out
 
 echo "+++ Setting DRA params" 
