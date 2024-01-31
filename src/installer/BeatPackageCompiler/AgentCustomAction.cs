@@ -84,7 +84,7 @@ namespace Elastic.PackageCompiler.Beats
                 string binary_path = @"c:\\Program Files\\Elastic\\Agent\\elastic-agent.exe";
                 if (!File.Exists(binary_path))
                 {
-                    session.Log("Canont find file: " + binary_path + ", skipping uninstall action");
+                    session.Log("Cannot find file: " + binary_path + ", skipping uninstall action");
                     return ActionResult.Success;
                 }
 
