@@ -9,26 +9,6 @@
       "commandName": "Project",
       "commandLineArgs": "--package=filebeat-8.11.0-windows-x86_64 -v --keep-temp-files",
       "workingDirectory": "$(SolutionDir)"
-    },
-    "Agent 8.11.1": {
-      "commandName": "Project",
-      "commandLineArgs": "--package=elastic-agent-8.11.1-windows-x86_64 -v --keep-temp-files",
-      "workingDirectory": "$(SolutionDir)"
-    },
-    "Agent 8.10.4": {
-      "commandName": "Project",
-      "commandLineArgs": "--package=elastic-agent-8.10.4-windows-x86_64 -v --keep-temp-files",
-      "workingDirectory": "$(SolutionDir)"
-    },
-    "Agent 8.13.0-SNAPSHOT": {
-      "commandName": "Project",
-      "commandLineArgs": "--package=elastic-agent-8.13.0-SNAPSHOT-windows-x86_64 -v --keep-temp-files",
-      "workingDirectory": "$(SolutionDir)"
-    },
-    "Agent 8.11.4": {
-      "commandName": "Project",
-      "commandLineArgs": "--package=elastic-agent-8.11.4-windows-x86_64 -v --keep-temp-files",
-      "workingDirectory": "$(SolutionDir)"
     }
   }
 }

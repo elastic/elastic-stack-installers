@@ -64,5 +64,3 @@ src/*.cmd
 src/*.exe
 src/*.pdb
 src/*.dll
-pwsh
-pwsh.zip

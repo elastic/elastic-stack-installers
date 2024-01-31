@@ -68,12 +68,6 @@ namespace Elastic.Installer
             Architecture = rxGroups["arch"].Value.ToLower();
             IsSnapshot = !rxGroups["snapshot"].Value.IsEmpty();
 
-            // HACK
-            if (TargetName == "agent")
-            {
-                TargetName = "elastic-agent";
-            }
-
             IsOss = TargetName.EndsWith(
                 MagicStrings.Files.DashOssSuffix,
                 StringComparison.OrdinalIgnoreCase);

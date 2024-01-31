@@ -14,16 +14,6 @@
       "commandName": "Project",
       "commandLineArgs": "build --cid 8.11.0 filebeat",
       "workingDirectory": "$(SolutionDir)"
-    },
-    "Elastic Agent 8.13.0": {
-      "commandName": "Project",
-      "commandLineArgs": "build --cid 8.13.0-SNAPSHOT elastic-agent --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
-      "workingDirectory": "$(SolutionDir)"
-    },
-    "Elastic Agent 8.12.0": {
-      "commandName": "Project",
-      "commandLineArgs": "build --cid 8.12.0-SNAPSHOT elastic-agent --cert-file C:\\staging\\cert\\stack-elastic-installers-sha.pfx --cert-pass C:\\staging\\cert\\stack-elastic-installers-sha-password.txt",
-      "workingDirectory": "$(SolutionDir)"
     }
   }
 }
