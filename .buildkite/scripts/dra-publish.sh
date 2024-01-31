@@ -5,7 +5,7 @@ set -uo pipefail
 
 # Download artifacts from Buildkite "Build stack installers" step
 echo "+++ Downloading artifacts..."
-buildkite-agent artifact download 'bin\out\**\*.msi' . --step build-"${DRA_WORKFLOW}"
+buildkite-agent artifact download 'bin\out\**\*.msi' . --step build-"${WORKFLOW}"
 chmod -R 777 bin/out
 
 echo "+++ Setting DRA params" 
@@ -20,15 +20,15 @@ export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION=$(cat Directory.Build.props | awk -F'[><]' '/<StackVersion>/{print $3}' | tr -d '[:space:]')
 export VERSION
 
-if [ "$DRA_WORKFLOW" == "staging" ]; then
-    MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
+if [ "$WORKFLOW" == "staging" ]; then
+    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 else
-    MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
+    MANIFEST_URL=$(curl https://artifacts-"$WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
 fi
 
 # Publish DRA artifacts
 function run_release_manager() {
-    echo "+++ Publishing $BUILDKITE_BRANCH ${DRA_WORKFLOW} DRA artifacts..."
+    echo "+++ Publishing $BUILDKITE_BRANCH ${WORKFLOW} DRA artifacts..."
     dry_run=""
     if [ "$BUILDKITE_PULL_REQUEST" != "false" ]; then
         dry_run="--dry-run"
@@ -44,7 +44,7 @@ function run_release_manager() {
         --project elastic-stack-installers \
         --branch "${BRANCH}" \
         --commit "${BUILDKITE_COMMIT}" \
-        --workflow "${DRA_WORKFLOW}" \
+        --workflow "${WORKFLOW}" \
         --version "${VERSION}" \
         --artifact-set main \
         --dependency beats:"${MANIFEST_URL}" \
