@@ -45,9 +45,11 @@ namespace ElastiBuild.BullseyeTargets
                 }
                 else
                 {
-                    var path = Path.Combine(destDir, fname);
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                    using var fs = File.Open(path, FileMode.Create, FileAccess.Write);
+                    using var fs = File.Open(
+                        Path.Combine(destDir, fname),
+                        FileMode.Create,
+                        FileAccess.Write);
+
                     itm.Extract(fs);
                 }
 

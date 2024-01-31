@@ -8,12 +8,6 @@ namespace Elastic.Installer
         [YamlMember("description")]
         public string Description { get; set; } = "(add 'description' field to config.yaml)";
 
-        [YamlMember("display_name")]
-        public string DisplayName { get; set; } = "";
-
-        [YamlMember("is_agent")]
-        public bool IsAgent { get; set; } = false;
-
         [YamlMember("published_name")]
         public string PublishedName { get; set; } = "Elastic Beats";
 
