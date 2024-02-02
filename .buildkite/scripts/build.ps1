@@ -3,7 +3,7 @@ Set-Strictmode -version 3
 
 $eligibleReleaseBranchesMajor = "^[89]"
 $runTests = $true
-$draWorkflow = $env:DRA_WORKFLOW
+
 
 if (-not (Test-Path env:DRA_WORKFLOW)) {
     $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
@@ -19,7 +19,17 @@ function setManifestUrl {
     # the API url (snapshot or staging) expects master where we normally use main
     $ApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
 
-    $artifactsUrl = "https://${draWorkflow}.elastic.co/latest/${ApiTargetBranch}.json"
+    if ($env:DRA_WORKFLOW -like "*snapshot*") {
+       $artifactsUrl = "https://snapshots.elastic.co/latest/${ApiTargetBranch}.json"
+    } elseif ($env:DRA_WORKFLOW -like "*staging*") {
+       $artifactsUrl = "https://staging.elastic.co/latest/${ApiTargetBranch}.json"
+    } else {
+        $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] must be snapshot or staging but it was [${env:DRA_WORKFLOW}]."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    $artifactsUrl = "https://${urlPrefix}.elastic.co/latest/${ApiTargetBranch}.json"
     Write-Host "snapshots url is $artifactsUrl"
     try {
         $response = Invoke-WebRequest -UseBasicParsing -Uri $artifactsUrl
