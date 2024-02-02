@@ -1,26 +1,33 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-$eligibleReleaseBranchesMajor = "^[8]"
+$eligibleReleaseBranchesMajor = "^[89]"
 $runTests = $true
+$draWorkflow = $env:DRA_WORKFLOW
+
+if (-not (Test-Path env:DRA_WORKFLOW)) {
+    $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
+    Write-Host $errorMessage
+    throw $errorMessage
+}
 
 function setManifestUrl {
     param (
         [string]$targetBranch
     )
 
-    # the snapshot API url expects master where we normally use main
-    $snapshotsApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
+    # the API url (snapshot or staging) expects master where we normally use main
+    $ApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
 
-    $snapshotsUrl = "https://snapshots.elastic.co/latest/$snapshotsApiTargetBranch.json"
-    Write-Host "snapshots url is $snapshotsUrl"
+    $artifactsUrl = "https://${draWorkflow}.elastic.co/latest/${ApiTargetBranch}.json"
+    Write-Host "snapshots url is $artifactsUrl"
     try {
-        $response = Invoke-WebRequest -UseBasicParsing -Uri $snapshotsUrl
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $artifactsUrl
         $responseJson = $response.Content | ConvertFrom-Json
         $env:MANIFEST_URL = $responseJson.manifest_url
         Write-Host "Using MANIFEST_URL=$env:MANIFEST_URL"
     } catch {
-        $errorMessage = "There was an error parsing manifest_url from $snapshotsUrl. Exiting."
+        $errorMessage = "There was an error parsing manifest_url from $artifactsUrl. Exiting."
         throw $errorMessage
     }
 }
@@ -39,7 +46,7 @@ if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST
 
     setManifestUrl -targetBranch $targetBranch
 }
-elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigger_job") -and (-not $env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG)) {
+elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigger_job") -and ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -notlike "unified-release*")) {
     # we got triggered by a branch push
     Write-Host "~~~ Running in branch push mode"
 
