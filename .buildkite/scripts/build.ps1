@@ -29,8 +29,7 @@ function setManifestUrl {
         throw $errorMessage
     }
 
-    $artifactsUrl = "https://${urlPrefix}.elastic.co/latest/${ApiTargetBranch}.json"
-    Write-Host "snapshots url is $artifactsUrl"
+    Write-Host "Artifacts url is: $artifactsUrl"
     try {
         $response = Invoke-WebRequest -UseBasicParsing -Uri $artifactsUrl
         $responseJson = $response.Content | ConvertFrom-Json
