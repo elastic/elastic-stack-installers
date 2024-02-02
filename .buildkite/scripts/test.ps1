@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-Write-Host "--- Running Tests"
+Write-Host "~~~ Running Tests"
 write-host (ConvertTo-Json $PSVersiontable -Compress)
 write-host "Running as: $([Environment]::UserName)"
 
