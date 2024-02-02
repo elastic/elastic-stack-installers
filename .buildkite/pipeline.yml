@@ -34,7 +34,7 @@ steps:
       - label: ":construction_worker: Build stack installers / Staging"
         if: |
           // Only run when triggered from Unified Release or via PRs targetting non-main, since there is no valid MANIFEST_URL for staging/main branch.
-          (build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH" =~ /^[0-9]+\.[0-9]+\$/) ||
+          (build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/) ||
             ( build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
         command: ".buildkite/scripts/build.ps1"
         key: "build-staging"
@@ -47,7 +47,8 @@ steps:
       - label: ":package: DRA Publish staging"
         if: |
           // Only run when triggered from Unified Release or via PRs targetting non-main, since there is no valid MANIFEST_URL for staging/main branch.
-          (build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH" =~ /^[0-9]+\.[0-9]+\$/) ||
+          // Note that PRs run this step in dry-run mode (see dra-publish.sh)
+          (build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/) ||
             ( build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-staging"
