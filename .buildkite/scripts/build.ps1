@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
 $eligibleReleaseBranchesMajor = "^[8]"
+$runTests = $true
 
 function setManifestUrl {
     param (
@@ -60,6 +61,7 @@ elseif (-not (Test-Path env:MANIFEST_URL)) {
 }
 else {
     Write-Host "~~~ Running via a Buildkite trigger: [$env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG], MANIFEST_URL=[$env:MANIFEST_URL]"
+    $runTests = $false
 }
 
 # workaround path limitation for max 248 characters
@@ -181,12 +183,13 @@ if ($msiCount -ne $expected) {
     Write-Output "Success, found $msiCount artifacts in bin/out."
 }
 
-# temporarily disabling tests; they'll be re added via https://github.com/elastic/elastic-stack-installers/pull/225
-# try {
-#     & (Join-Path $PSScriptRoot "test.ps1")
-#     write-host "Testing Completed"
-# } catch {
-#     write-host "Testing Failed"
-#     write-error $_
-#     exit 1
-# }
+if ($runTests) {
+    try {
+        & (Join-Path $PSScriptRoot "test.ps1")
+        write-host "Testing Completed"
+    } catch {
+        write-host "Testing Failed"
+        write-error $_
+        exit 1
+    }
+}
