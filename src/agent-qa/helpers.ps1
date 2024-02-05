@@ -160,13 +160,19 @@ Function Has-AgentInstallerProcess {
 }
 
 Function Has-AgentLogged {
-    try {
-        $LogFile = Get-AgentLogFile -Latest $True
-        return $true
+
+    foreach ($i in 0..5) {
+
+        try {
+            $LogFile = Get-AgentLogFile -Latest $True
+            return $true
+        } catch {}
+        
+        write-host "Waiting for agent to log message"
+        start-sleep -seconds 3
     }
-    catch {
-        return $false
-    }
+    
+    return $false
 }
 
 Function Is-AgentLogGrowing {
@@ -205,8 +211,13 @@ Function Has-AgentStandaloneLog {
 
     $Content = Get-Content -raw $LogFile
 
-    if ($Content -like "*Parsed configuration and determined agent is managed locally*") {
-        return $True
+    foreach ($i in 0..5) {
+        if ($Content -like "*Parsed configuration and determined agent is managed locally*") {
+            return $True
+        }
+
+        write-host "Waiting for agent to log standalone message"
+        start-sleep -seconds 3
     }
 
     return $false
