@@ -18,9 +18,8 @@ steps:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
         if: |
-          // Only run when triggered from Unified Release or via PRs. Note that PRs run it in dry-run mode (see dra-publish.sh)
-          build.env("BUILDKITE_PULL_REQUEST") != "false" ||
-            ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
+          // Only run when triggered from Unified Release
+          ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-snapshot"
         depends_on: "build-snapshot"
@@ -46,9 +45,7 @@ steps:
           DRA_WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
         if: |
-          // Only run when triggered from Unified Release or via PRs targetting non-main, since there is no valid MANIFEST_URL for staging/main branch.
-          // Note that PRs run it in dry-run mode (see dra-publish.sh)
-          ( build.env("BUILDKITE_PULL_REQUEST") != "false" && build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/ ) ||
+          // Only run when triggered from Unified Release
             ( build.branch =~ /^[0-9]+\.[0-9]+\$/ && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-staging"
