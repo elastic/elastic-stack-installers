@@ -202,16 +202,13 @@ Function Is-AgentLogGrowing {
 }
 
 Function Has-AgentStandaloneLog {
-    try {
-        $LogFile = Get-AgentLogFile -Latest $True
-    }
-    catch {
-        return $false
-    }
-
-    $Content = Get-Content -raw $LogFile
+    if (-not (Has-AgentLogged)) { return $false }
 
     foreach ($i in 0..5) {
+        $LogFile = Get-AgentLogFile -Latest $True
+
+        $Content = Get-Content -raw $LogFile
+
         if ($Content -like "*Parsed configuration and determined agent is managed locally*") {
             return $True
         }
@@ -221,7 +218,7 @@ Function Has-AgentStandaloneLog {
     }
 
     write-host "Agent did not log standalone message"
-    write-host "Agent Logged:"
+    write-host "Agent Logged to $LogFile :"
     write-host $Content
     return $false
 }
@@ -359,7 +356,7 @@ Function Clean-ElasticAgentDirectory {
 Function Clean-ElasticAgentUninstallKeys {
     $Keys = Get-AgentUninstallRegistryKey -Passthru
     if ($Keys) {
-        Remove-Item -Path $Keys
+        $Keys | Remove-Item -force -verbose
     }
 }
 
