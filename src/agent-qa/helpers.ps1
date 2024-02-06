@@ -220,6 +220,9 @@ Function Has-AgentStandaloneLog {
         start-sleep -seconds 3
     }
 
+    write-host "Agent did not log standalone message"
+    write-host "Agent Logged:"
+    write-host $Content
     return $false
 }
 
@@ -386,7 +389,7 @@ Function Invoke-MSIExec {
 
     if ($LogToDir) {
         $LoggingDestination = (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix $Action)
-        $arglist += " /l*v " + $LoggingDestination
+        $arglist += " /l*v " + """" + $LoggingDestination + """"
     }
 
     write-verbose "Invoking msiexec.exe $arglist"
@@ -436,7 +439,7 @@ Function Install-MSI {
         $LogToDir
     )
 
-    $msiArgs = @(@($Path) + $Interactive + $Flags)
+    $msiArgs = @(@("""$Path""") + $Interactive + $Flags)
 
     Invoke-MSIExec -Action i -Arguments $msiArgs -LogToDir $LogToDir
 }
@@ -455,7 +458,7 @@ Function Uninstall-MSI {
         throw "Uninstall-msi called without path to an MSI or a GUID"
     }
 
-    $msiArgs = @($Path,$Guid).Where{$_} + $Interactive + $Flags
+    $msiArgs = @("""$Path""",$Guid).Where{$_} + $Interactive + $Flags
     
     $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*" -or $_.Name -like "*Elastic\Beats*"})
     foreach ($OpenFile in $OpenFiles) {
