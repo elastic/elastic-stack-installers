@@ -54,6 +54,7 @@ $config = [PesterConfiguration] @{
         Throw = $True
         Container = $container
     }
+    
     Output = @{
         Verbosity = "Detailed"
     }
