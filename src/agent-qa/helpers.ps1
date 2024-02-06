@@ -224,19 +224,24 @@ Function Has-AgentStandaloneLog {
 }
 
 Function Has-AgentFleetEnrollmentAttempt {
-    try {
+    if (-not (Has-AgentLogged)) { return $false }
+
+    foreach ($i in 0..5) {
         $LogFile = Get-AgentLogFile -Latest $True
-    }
-    catch {
-        return $false
+
+        $Content = Get-Content -raw $LogFile
+
+        if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
+            return $True
+        }
+
+        write-host "Waiting for agent to log fleet message"
+        start-sleep -seconds 3
     }
 
-    $Content = Get-Content -raw $LogFile
-
-    if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
-        return $True
-    }
-
+    write-host "Agent did not log fleet message"
+    write-host "Agent Logged to $LogFile :"
+    write-host $Content
     return $false
 }
 
