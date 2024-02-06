@@ -458,7 +458,17 @@ Function Uninstall-MSI {
         throw "Uninstall-msi called without path to an MSI or a GUID"
     }
 
-    $msiArgs = @("""$Path""",$Guid).Where{$_} + $Interactive + $Flags
+    $msiargs = @()
+    if (-not [string]::IsNullOrWhiteSpace($Path)) {
+        $msiargs += @("""$Path""")
+    }
+    
+    if (-not [string]::IsNullOrWhiteSpace($Guid)) {
+        $msiargs += @($Guid)
+    }
+
+    $msiArgs += $Interactive
+    $msiArgs += $Flags
     
     $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*" -or $_.Name -like "*Elastic\Beats*"})
     foreach ($OpenFile in $OpenFiles) {
