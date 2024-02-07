@@ -1,10 +1,83 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-if (-not (Test-Path env:MANIFEST_URL)) {
+$eligibleReleaseBranchesMajor = "^[89]"
+$runTests = $true
+
+
+if (-not (Test-Path env:DRA_WORKFLOW)) {
+    $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
+    Write-Host $errorMessage
+    throw $errorMessage
+}
+
+function setManifestUrl {
+    param (
+        [string]$targetBranch
+    )
+
+    # the API url (snapshot or staging) expects master where we normally use main
+    $ApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
+
+    if ($env:DRA_WORKFLOW -like "*snapshot*") {
+       $artifactsUrl = "https://snapshots.elastic.co/latest/${ApiTargetBranch}.json"
+    } elseif ($env:DRA_WORKFLOW -like "*staging*") {
+       $artifactsUrl = "https://staging.elastic.co/latest/${ApiTargetBranch}.json"
+    } else {
+        $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] must be snapshot or staging but it was [${env:DRA_WORKFLOW}]."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    Write-Host "Artifacts url is: $artifactsUrl"
+    try {
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $artifactsUrl
+        $responseJson = $response.Content | ConvertFrom-Json
+        $env:MANIFEST_URL = $responseJson.manifest_url
+        Write-Host "Using MANIFEST_URL=$env:MANIFEST_URL"
+    } catch {
+        $errorMessage = "There was an error parsing manifest_url from $artifactsUrl. Exiting."
+        throw $errorMessage
+    }
+}
+
+if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST) -and ($env:BUILDKITE_PULL_REQUEST -ne "false")) {
+    # we are called via a PR
+    Write-Host "~~~ Running in pull request mode"
+
+    $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+        Write-Host "^^^ +++"
+        $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    setManifestUrl -targetBranch $targetBranch
+}
+elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigger_job") -and ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -notlike "unified-release*")) {
+    # we got triggered by a branch push
+    Write-Host "~~~ Running in branch push mode"
+
+    $targetBranch = $env:BUILDKITE_PIPELINE_DEFAULT_BRANCH
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+        Write-Host "^^^ +++"
+        $errorMessage = "Tests triggered by branch pushes but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
+        Write-Host $errorMessage
+        throw $errorMessage
+    }
+
+    setManifestUrl -targetBranch $targetBranch
+}
+elseif (-not (Test-Path env:MANIFEST_URL)) {
+    # any other invocation of this script (e.g. from unified release) must supply MANIFEST_URL
     $errorMessage = "Error: Required environment variable [MANIFEST_URL] is missing."
     Write-Host $errorMessage
     throw $errorMessage
+}
+else {
+    Write-Host "~~~ Running via a Buildkite trigger: [$env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG], MANIFEST_URL=[$env:MANIFEST_URL]"
+    $runTests = $false
 }
 
 # workaround path limitation for max 248 characters
@@ -126,12 +199,13 @@ if ($msiCount -ne $expected) {
     Write-Output "Success, found $msiCount artifacts in bin/out."
 }
 
-# temporarily disabling tests; they'll be re added via https://github.com/elastic/elastic-stack-installers/pull/225
-# try {
-#     & (Join-Path $PSScriptRoot "test.ps1")
-#     write-host "Testing Completed"
-# } catch {
-#     write-host "Testing Failed"
-#     write-error $_
-#     exit 1
-# }
+if ($runTests) {
+    try {
+        & (Join-Path $PSScriptRoot "test.ps1")
+        write-host "Testing Completed"
+    } catch {
+        write-host "Testing Failed"
+        write-error $_
+        exit 1
+    }
+}
