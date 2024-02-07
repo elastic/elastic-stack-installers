@@ -160,13 +160,19 @@ Function Has-AgentInstallerProcess {
 }
 
 Function Has-AgentLogged {
-    try {
-        $LogFile = Get-AgentLogFile -Latest $True
-        return $true
+
+    foreach ($i in 0..5) {
+
+        try {
+            $LogFile = Get-AgentLogFile -Latest $True
+            return $true
+        } catch {}
+        
+        write-host "Waiting for agent to log message"
+        start-sleep -seconds 3
     }
-    catch {
-        return $false
-    }
+    
+    return $false
 }
 
 Function Is-AgentLogGrowing {
@@ -196,36 +202,46 @@ Function Is-AgentLogGrowing {
 }
 
 Function Has-AgentStandaloneLog {
-    try {
+    if (-not (Has-AgentLogged)) { return $false }
+
+    foreach ($i in 0..5) {
         $LogFile = Get-AgentLogFile -Latest $True
-    }
-    catch {
-        return $false
+
+        $Content = Get-Content -raw $LogFile
+
+        if ($Content -like "*Parsed configuration and determined agent is managed locally*") {
+            return $True
+        }
+
+        write-host "Waiting for agent to log standalone message"
+        start-sleep -seconds 3
     }
 
-    $Content = Get-Content -raw $LogFile
-
-    if ($Content -like "*Parsed configuration and determined agent is managed locally*") {
-        return $True
-    }
-
+    write-host "Agent did not log standalone message"
+    write-host "Agent Logged to $LogFile :"
+    write-host $Content
     return $false
 }
 
 Function Has-AgentFleetEnrollmentAttempt {
-    try {
+    if (-not (Has-AgentLogged)) { return $false }
+
+    foreach ($i in 0..5) {
         $LogFile = Get-AgentLogFile -Latest $True
-    }
-    catch {
-        return $false
+
+        $Content = Get-Content -raw $LogFile
+
+        if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
+            return $True
+        }
+
+        write-host "Waiting for agent to log fleet message"
+        start-sleep -seconds 3
     }
 
-    $Content = Get-Content -raw $LogFile
-
-    if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
-        return $True
-    }
-
+    write-host "Agent did not log fleet message"
+    write-host "Agent Logged to $LogFile :"
+    write-host $Content
     return $false
 }
 
@@ -345,7 +361,7 @@ Function Clean-ElasticAgentDirectory {
 Function Clean-ElasticAgentUninstallKeys {
     $Keys = Get-AgentUninstallRegistryKey -Passthru
     if ($Keys) {
-        Remove-Item -Path $Keys
+        $Keys | Remove-Item -force -verbose
     }
 }
 
@@ -375,7 +391,7 @@ Function Invoke-MSIExec {
 
     if ($LogToDir) {
         $LoggingDestination = (New-MSIVerboseLoggingDestination -Destination $LogToDir -Suffix $Action)
-        $arglist += " /l*v " + $LoggingDestination
+        $arglist += " /l*v " + """" + $LoggingDestination + """"
     }
 
     write-verbose "Invoking msiexec.exe $arglist"
@@ -425,7 +441,7 @@ Function Install-MSI {
         $LogToDir
     )
 
-    $msiArgs = @(@($Path) + $Interactive + $Flags)
+    $msiArgs = @(@("""$Path""") + $Interactive + $Flags)
 
     Invoke-MSIExec -Action i -Arguments $msiArgs -LogToDir $LogToDir
 }
@@ -444,7 +460,17 @@ Function Uninstall-MSI {
         throw "Uninstall-msi called without path to an MSI or a GUID"
     }
 
-    $msiArgs = @($Path,$Guid).Where{$_} + $Interactive + $Flags
+    $msiargs = @()
+    if (-not [string]::IsNullOrWhiteSpace($Path)) {
+        $msiargs += @("""$Path""")
+    }
+    
+    if (-not [string]::IsNullOrWhiteSpace($Guid)) {
+        $msiargs += @($Guid)
+    }
+
+    $msiArgs += $Interactive
+    $msiArgs += $Flags
     
     $OpenFiles = @(Find-OpenFile | Where-Object {$_.Name -like "*Elastic\Agent*" -or $_.Name -like "*Elastic\Beats*"})
     foreach ($OpenFile in $OpenFiles) {
