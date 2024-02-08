@@ -106,12 +106,14 @@ namespace Elastic.PackageCompiler.Beats
 
             var textInfo = new CultureInfo("en-US", false).TextInfo;
             var serviceDisplayName = $"{companyName} {textInfo.ToTitleCase(ap.TargetName)} {ap.SemVer}";
+            var versionedPathTarget = opts.UseVersionedInstallPath ? Path.Combine(ap.Version, ap.CanonicalTargetName) : ap.CanonicalTargetName;
 
             WixSharp.File service = null;
             if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
-                string installedPath = ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName));
+
+                string installedPath = ("[INSTALLDIR]" + versionedPathTarget);
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -180,7 +182,7 @@ namespace Elastic.PackageCompiler.Beats
                 project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
 
                 // Passing the agent executable path to the action handler which will run it post installation
-                project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
+                project.AddProperty(new Property("exe_folder", versionedPathTarget));
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
 
                 // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
@@ -215,27 +217,28 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
+            // eg. "C:\Program Files\Elastic\Beats"
             var beatsInstallPath =
                 $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
                 Path.Combine(companyName, productSetName);
 
-            project.Dirs = new[]
+            Dir targetFolder = new Dir(ap.CanonicalTargetName, packageContents.ToArray());
+            if (opts.UseVersionedInstallPath)
             {
-                // Binaries
-                new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
-                        new WixSharp.File(cliShimScriptPath))),
-
-            };
+                project.Dirs.Combine(new InstallDir(beatsInstallPath.Replace("Folder]", "Folder]\\"),
+                    new Dir(ap.Version, targetFolder, new WixSharp.File(cliShimScriptPath))));
+            }
+            else
+            {
+                project.Dirs.Combine(new InstallDir(beatsInstallPath.Replace("Folder]", "Folder]\\"),
+                    targetFolder, new WixSharp.File(cliShimScriptPath)));
+            }
 
             if (!pc.IsAgent)
             {
-                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
-                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH)
+                var path = opts.UseVersionedInstallPath ? Path.Combine(beatsInstallPath, ap.Version) : beatsInstallPath;
+                project.Add(new EnvironmentVariable("PATH", path)
                 {
                     Part = EnvVarPart.last
                 });

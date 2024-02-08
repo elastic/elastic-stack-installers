@@ -23,6 +23,9 @@ namespace Elastic.PackageCompiler
         [Option("keep-temp-files", Default = false, HelpText = "Preserve (do not delete) temporary files")]
         public bool KeepTempFiles { get; set; }
 
+        [Option("use-versioned-install-path", Default = true, HelpText = "Include binary version in the installed path")]
+        public bool UseVersionedInstallPath { get; set; }
+
         public string ShortPackageName => MakePackageNameShort(PackageName);
 
         public string PackageInDir => Path.Combine(InDir, PackageName);
