@@ -69,7 +69,7 @@ namespace BeatPackageCompiler.Properties {
         ///)
         ///
         ///set beat_bin=%~dp0%~n0
-        ///set beat_data=%ProgramData%\Elastic\Beats\%~n0
+        ///set beat_data=%beat_bin%
         ///
         ///&quot;%beat_bin%\%~n0.exe&quot; ^
         ///    --path.home &quot;%beat_bin%&quot; ^

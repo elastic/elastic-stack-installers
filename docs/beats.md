@@ -13,7 +13,6 @@ Beats is the platform for single-purpose data shippers. They send data from hund
 
 ### Notes:
 
-- Configuration files (.yml), Kibana dashboards, security and monitoring modules, etc are installed into `%ProgramData%\Elastic\Beats\{beat name}` directory.
 - Beats that support running as Windows Service are registered as such. Service will **not** be started after installation finishes, because configuration file likely lacks proper host information for elasticsearch. In this version, user needs to manually edit the configuration file to point Beats to an elasticsearch cluster.
 - When running as a Windows Service, Beats will create their `logs` and `data` directories in the location mentioned above.
 
