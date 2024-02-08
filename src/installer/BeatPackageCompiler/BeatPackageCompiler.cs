@@ -111,7 +111,7 @@ namespace Elastic.PackageCompiler.Beats
             if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
-                string installedPath = ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName));
+                string installedPath = ("[INSTALLDIR]");
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -215,27 +215,21 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
+            // eg. "[ProgramFiles64Folder]Elastic\Beats\8.11.0\filebeat"
             var beatsInstallPath =
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
-                Path.Combine(companyName, productSetName);
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]\\" +
+                Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
 
+            var l = packageContents.ToArray().Combine(new WixSharp.File(cliShimScriptPath));
             project.Dirs = new[]
             {
-                // Binaries
-                new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
-                        new WixSharp.File(cliShimScriptPath))),
-
+                new InstallDir(beatsInstallPath, l)
             };
 
             if (!pc.IsAgent)
             {
-                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
-                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                // Set path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
+                project.Add(new EnvironmentVariable("PATH", beatsInstallPath)
                 {
                     Part = EnvVarPart.last
                 });
