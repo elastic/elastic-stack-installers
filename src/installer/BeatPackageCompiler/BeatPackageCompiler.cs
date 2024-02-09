@@ -215,8 +215,8 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            var beatsInstallPath = $"c:\\Program Files\\" +
-                Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
+            var programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+            var beatsInstallPath = Path.Combine(programFiles, companyName, productSetName, ap.Version, ap.CanonicalTargetName);
 
             project.AddProperty(new Property("INSTALLDIR", beatsInstallPath));
 
