@@ -215,16 +215,16 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            // eg. "[ProgramFiles64Folder]Elastic\Beats\8.11.0\filebeat"
-            var beatsInstallPath =
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]\\" +
+            var beatsInstallPath = $"c:\\Program Files\\" +
                 Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
+
+            project.AddProperty(new Property("INSTALLDIR", beatsInstallPath));
 
             var l = packageContents.ToArray().Combine(new WixSharp.File(cliShimScriptPath));
 
             project.Dirs = new[]
             {
-                new InstallDir(beatsInstallPath, l)
+                new InstallDir("[INSTALLDIR]", l)
             };
 
             if (!pc.IsAgent)
