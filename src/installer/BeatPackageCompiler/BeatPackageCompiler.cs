@@ -215,22 +215,21 @@ namespace Elastic.PackageCompiler.Beats
 
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
-            var programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
-            var beatsInstallPath = Path.Combine(programFiles, companyName, productSetName, ap.Version, ap.CanonicalTargetName);
-
-            project.AddProperty(new Property("INSTALLDIR", beatsInstallPath));
+            var beatsInstallPath =
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]\\" +
+                Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
 
             var l = packageContents.ToArray().Combine(new WixSharp.File(cliShimScriptPath));
-
             project.Dirs = new[]
             {
-                new InstallDir("[INSTALLDIR]", l)
+                // Binaries
+                new InstallDir(beatsInstallPath, l)
             };
 
             if (!pc.IsAgent)
             {
-                // Set path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
-                project.Add(new EnvironmentVariable("PATH", "[INSTALLDIR]")
+                // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
+                project.Add(new EnvironmentVariable("PATH", beatsInstallPath)
                 {
                     Part = EnvVarPart.last
                 });
