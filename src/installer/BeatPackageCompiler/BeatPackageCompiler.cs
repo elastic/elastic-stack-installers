@@ -221,6 +221,7 @@ namespace Elastic.PackageCompiler.Beats
                 Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
 
             var l = packageContents.ToArray().Combine(new WixSharp.File(cliShimScriptPath));
+
             project.Dirs = new[]
             {
                 new InstallDir(beatsInstallPath, l)
@@ -229,7 +230,7 @@ namespace Elastic.PackageCompiler.Beats
             if (!pc.IsAgent)
             {
                 // Set path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
-                project.Add(new EnvironmentVariable("PATH", beatsInstallPath)
+                project.Add(new EnvironmentVariable("PATH", "[INSTALLDIR]")
                 {
                     Part = EnvVarPart.last
                 });
