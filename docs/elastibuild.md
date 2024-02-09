@@ -4,7 +4,6 @@
 - Discover branches, versions and aliases
 - Fetch any beat from above
 - Build any beat from downloaded archives in non-OSS variant
-- Configuration and misc files installed into ProgramData/Elastic/{version}/Beats/{beat}/
 
 ### Get help:
 ```
