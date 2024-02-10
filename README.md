@@ -53,7 +53,7 @@ Starting version 8.13 It's also possible to override the installation folder by 
 
 Few important notes:
 - For security reasons, it's recommended to keep the installation folder "Program Files"
-- An empty folder will always be created at the default location `...\Beats\<version>\<beat>` to to a known limitation as explained [here](https://github.com/oleg-shilo/wixsharp/issues/790).
+- An empty folder will always be created at the default location `...\Beats\<version>\<beat>` to a known limitation as explained [here](https://github.com/oleg-shilo/wixsharp/issues/790).
 - Custom installation folder is not applicable for Agent MSI (only beats)
 
 ---
