@@ -1,1 +1,4 @@
-*   @elastic/ingest-fp
+* @elastic/ingest-tech-lead
+
+/.buildkite @elastic/ingest-eng-prod
+/catalog-info.yml @elastic/ingest-eng-prod
