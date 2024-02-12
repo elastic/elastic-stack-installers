@@ -257,7 +257,7 @@ Describe 'Elastic Agent MSI Installer' {
                 $arglist = "/x $using:PathToLatestMSI /qn"
 
                 write-information "msiexec $arglist"
-                $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
+                $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -passthru
 
                 write-output $process.ExitCode
             } 
@@ -290,7 +290,7 @@ Describe 'Elastic Agent MSI Installer' {
             $Job = Start-Job -WorkingDirectory $PSScriptRoot -ScriptBlock {
                 $arglist = "/i $using:PathToLatestMSI /qn INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
                 write-information "msiexec $arglist "
-                $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
+                $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -passthru
 
                 write-output $process.ExitCode
             } 
