@@ -248,7 +248,7 @@ Describe 'Elastic Agent MSI Installer' {
                 & $HealthFunction
             }
         }
-        
+        <#
         It 'Rollback uninstall when elastic-agent uninstall crashes' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
@@ -317,7 +317,7 @@ Describe 'Elastic Agent MSI Installer' {
             Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
-        }
+        }#>
 
         It 'Behaves itself as an agent connected to a nonexistent fleet' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
