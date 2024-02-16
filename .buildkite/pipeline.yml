@@ -6,6 +6,9 @@
 steps:
   - group: ":package: Stack installers Snapshot"
     key: "dra-snapshot"
+    if: |
+      // Only run when triggered from Unified Release
+      ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
     steps:
       - label: ":construction_worker: Build stack installers / Snapshot"
         command: ".buildkite/scripts/build.ps1"
@@ -17,9 +20,6 @@ steps:
         env:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
-        if: |
-          // Only run when triggered from Unified Release
-          ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-snapshot"
         depends_on: "build-snapshot"
