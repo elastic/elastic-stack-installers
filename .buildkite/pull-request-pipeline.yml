@@ -1,0 +1,21 @@
+###
+### The following environment variables can be set for testing purposes via the buildkite UI or CLI
+###  ONLY_AGENT: "true" - will build only the elastic-agent msi artifact
+###
+
+steps:
+  - label: ":construction_worker: Build Elastic Stack Installers Packages"
+    command: ".buildkite/scripts/build-pr.ps1"
+    key: "build-packages"
+    artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
+    agents:
+      provider: gcp
+      image: family/ci-windows-2022
+
+  - label: ":test_tube: Test Elastic Stack Installers Packages"
+    command: ".buildkite/scripts/test.ps1"
+    key: "test-packages"
+    artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
+    agents:
+      provider: gcp
+      image: family/ci-windows-2022
