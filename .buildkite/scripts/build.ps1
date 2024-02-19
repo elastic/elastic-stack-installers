@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-$eligibleReleaseBranchesMajor = "^[89]"
+$eligibleReleaseBranchesMajor = "^[89].[0-9]+"
 $runTests = $true
 
 
@@ -46,7 +46,7 @@ if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST
     Write-Host "~~~ Running in pull request mode"
 
     $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
-    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -match $eligibleReleaseBranchesMajor)) {
         Write-Host "^^^ +++"
         $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
         Write-Host $errorMessage
@@ -60,7 +60,7 @@ elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigg
     Write-Host "~~~ Running in branch push mode"
 
     $targetBranch = $env:BUILDKITE_PIPELINE_DEFAULT_BRANCH
-    if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+    if ( ($targetBranch -ne "main") -and -not ($targetBranch -match $eligibleReleaseBranchesMajor)) {
         Write-Host "^^^ +++"
         $errorMessage = "Tests triggered by branch pushes but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
         Write-Host $errorMessage
