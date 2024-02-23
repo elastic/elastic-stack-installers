@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-$eligibleReleaseBranchesMajor = "^[89]"
+$eligibleReleaseBranchesMajorMinor = "^[89]+\.[0-9]+"
 $runTests = $true
 
 function setManifestUrl {
@@ -27,9 +27,9 @@ function setManifestUrl {
 }
 
 $targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
-if ( ($targetBranch -ne "main") -and -not ($targetBranch -like $eligibleReleaseBranchesMajor)) {
+if ( ($targetBranch -ne "main") -and -not ($targetBranch -match $eligibleReleaseBranchesMajorMinor)) {
     Write-Host "^^^ +++"
-    $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajor major branches. Exiting."
+    $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajorMinor branches. Exiting."
     Write-Host $errorMessage
     throw $errorMessage
 }

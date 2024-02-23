@@ -8,7 +8,9 @@ steps:
     key: "dra-snapshot"
     if: |
       // Only run when triggered from Unified Release
-      ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot" )
+      (
+        ( build.env("BUILDKITE_PULL_REQUEST") != "false" && ( build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") == 'main' || build.env("BUILDKITE_PULL_REQUEST_BASE_BRANCH") =~ /^[0-9]+\.[0-9]+\$/ ) )
+      )
     steps:
       - label: ":construction_worker: Build stack installers / Snapshot"
         command: ".buildkite/scripts/build.ps1"
@@ -20,6 +22,7 @@ steps:
         env:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
+        # publish runs in dry-run mode when triggered from PRs, see .buildkite/scripts/dra-publish.sh
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-snapshot"
         depends_on: "build-snapshot"
@@ -30,8 +33,8 @@ steps:
   - group: ":package: Stack installers Staging"
     key: "dra-staging"
     if: |
-      // Only run when triggered from Unified Release
-      ( (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
+      // Staging should only run when triggered from Unified Release
+        ( build.branch =~ /^[0-9]+\.[0-9]+\$/ && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
     steps:
       - label: ":construction_worker: Build stack installers / Staging"
         command: ".buildkite/scripts/build.ps1"

@@ -1,8 +1,6 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-$eligibleReleaseBranchesMajor = "^[89]"
-
 if (-not (Test-Path env:DRA_WORKFLOW)) {
     $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
     Write-Host $errorMessage
