@@ -23,7 +23,12 @@ steps:
         env:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
-        # publish runs in dry-run mode when triggered from PRs, see .buildkite/scripts/dra-publish.sh
+        if: |
+          // Only run when triggered from Unified Release and not from PRs
+          (
+            ( build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ ) &&
+            build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-snapshot"
+          )
         command: ".buildkite/scripts/dra-publish.sh"
         key: "publish-snapshot"
         depends_on: "build-snapshot"
