@@ -1,6 +1,5 @@
 ###
 ### The following environment variables can be set for testing purposes via the buildkite UI or CLI
-###  ONLY_AGENT: "true" - will build only the elastic-agent msi artifact
 ###
 
 steps:
