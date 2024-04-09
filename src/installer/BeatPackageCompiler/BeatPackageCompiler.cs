@@ -111,13 +111,10 @@ namespace Elastic.PackageCompiler.Beats
             if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
+                
+                // [INSTALLDIR] is evaluated at runtime so we cannot easily manipulate it here to remove the trailing slash
                 string installedPath = ("[INSTALLDIR]");
-                // Trim trailing slash if present
-                if (installedPath.EndsWith("\\"))
-                {
-                    installedPath = installedPath.Substring(0, installedPath.Length - 1);
-                }
-
+                
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
                 //                  WixUtilExtension ServiceConfig element.
@@ -137,10 +134,10 @@ namespace Elastic.PackageCompiler.Beats
                     },
 
                     Arguments =
-                        " --path.home " + installedPath.Quote() +
-                        " --path.config " + installedPath.Quote() +
-                        " --path.data " + (installedPath + "\\data").Quote() +
-                        " --path.logs " + (installedPath + "\\logs").Quote() +
+                        " --path.home " + (installedPath + ".").Quote() + // trailing dot is because installedpath ends in a slash
+                        " --path.config " + (installedPath + ".").Quote() + // trailing dot is because installedpath ends in a slash
+                        " --path.data " + (installedPath + "data").Quote() +
+                        " --path.logs " + (installedPath + "logs").Quote() +
                         " -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = false,
