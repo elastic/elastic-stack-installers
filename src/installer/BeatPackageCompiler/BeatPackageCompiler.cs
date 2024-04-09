@@ -112,6 +112,11 @@ namespace Elastic.PackageCompiler.Beats
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
                 string installedPath = ("[INSTALLDIR]");
+                // Trim trailing slash if present
+                if (installedPath.EndsWith("\\"))
+                {
+                    installedPath = installedPath.Substring(0, installedPath.Length - 1);
+                }
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -134,8 +139,8 @@ namespace Elastic.PackageCompiler.Beats
                     Arguments =
                         " --path.home " + installedPath.Quote() +
                         " --path.config " + installedPath.Quote() +
-                        " --path.data " + installedPath.Quote() +
-                        " --path.logs " + installedPath.Quote() +
+                        " --path.data " + (installedPath + "\\data").Quote() +
+                        " --path.logs " + (installedPath + "\\logs").Quote() +
                         " -E logging.files.redirect_stderr=true",
 
                     DelayedAutoStart = false,
