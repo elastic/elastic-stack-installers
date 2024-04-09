@@ -111,7 +111,7 @@ namespace Elastic.PackageCompiler.Beats
             if (pc.IsWindowsService)
             {
                 service = new WixSharp.File(Path.Combine(opts.PackageInDir, exeName));
-                string installedPath = ("[INSTALLDIR]" + Path.Combine(ap.Version, ap.CanonicalTargetName));
+                string installedPath = ("[INSTALLDIR]");
 
                 // TODO: CNDL1150 : ServiceConfig functionality is documented in the Windows Installer SDK to 
                 //                  "not [work] as expected." Consider replacing ServiceConfig with the 
@@ -179,8 +179,6 @@ namespace Elastic.PackageCompiler.Beats
                 project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
                 project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
 
-                // Passing the agent executable path to the action handler which will run it post installation
-                project.AddProperty(new Property("exe_folder", Path.Combine(ap.Version, ap.CanonicalTargetName)));
                 project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
 
                 // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
@@ -216,26 +214,20 @@ namespace Elastic.PackageCompiler.Beats
             System.IO.File.WriteAllText(cliShimScriptPath, Resources.GenericCliShim);
 
             var beatsInstallPath =
-                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]" +
-                Path.Combine(companyName, productSetName);
+                $"[ProgramFiles{(ap.Is64Bit ? "64" : string.Empty)}Folder]\\" +
+                Path.Combine(companyName, productSetName, ap.Version, ap.CanonicalTargetName);
 
+            var l = packageContents.ToArray().Combine(new WixSharp.File(cliShimScriptPath));
             project.Dirs = new[]
             {
                 // Binaries
-                new InstallDir(
-                     // Wix# directory parsing needs forward slash
-                    beatsInstallPath.Replace("Folder]", "Folder]\\"),
-                    new Dir(
-                        ap.Version,
-                        new Dir(ap.CanonicalTargetName, packageContents.ToArray()),
-                        new WixSharp.File(cliShimScriptPath))),
-
+                new InstallDir(beatsInstallPath, l)
             };
 
             if (!pc.IsAgent)
             {
                 // CLI Shim path (In agent MSI te 'elastic-agent install' takes care of the PATH) 
-                project.Add(new EnvironmentVariable("PATH", Path.Combine(beatsInstallPath, ap.Version))
+                project.Add(new EnvironmentVariable("PATH", beatsInstallPath)
                 {
                     Part = EnvVarPart.last
                 });
