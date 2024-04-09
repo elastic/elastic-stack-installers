@@ -148,7 +148,6 @@ namespace Elastic.PackageCompiler.Beats
 
                     // Don't start on install, config file is likely not ready yet
                     //StartOn = SvcEvent.Install,
-
                     StopOn = SvcEvent.InstallUninstall_Wait,
                     RemoveOn = SvcEvent.InstallUninstall_Wait,
                 };
