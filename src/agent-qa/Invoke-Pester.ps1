@@ -54,7 +54,9 @@ $config = [PesterConfiguration] @{
         Throw = $True
         Container = $container
     }
-    Output = "Detailed"
+    Output = @{
+        Verbosity = "Detailed"
+    }
 }
 
 Invoke-Pester -Configuration $config
