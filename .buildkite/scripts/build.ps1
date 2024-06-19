@@ -88,18 +88,6 @@ cd ..
 Copy-Item -Path .\elastic-stack-installers -Destination c:\users\buildkite\esi -Recurse
 cd c:\users\buildkite\esi
 
-# Read the stack version from build properties
-[xml]$xml = Get-Content -Path "Directory.Build.props"
-$ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
-$ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
-$stack_version = $xml.SelectSingleNode("//ns:PropertyGroup/ns:StackVersion", $ns).InnerText
-$workflow = ${env:DRA_WORKFLOW}
-if ($workflow -eq "snapshot") {
-    $version = $stack_version + "-" + $workflow.ToUpper()
-} else {
-    $version = $stack_version
-}
-
 Write-Host "~~~ Building Stack version: $stack_version"
 
 Write-Output "~~~ Installing dotnet-sdk"
@@ -121,6 +109,7 @@ New-Item bin/in -Type Directory -Force
 $manifestUrl = ${env:MANIFEST_URL}
 $response = Invoke-WebRequest -UseBasicParsing -Uri $manifestUrl
 $json = $response.Content | ConvertFrom-Json
+$version = $json.version
 
 Write-Output "~~~ Downloading $workflow dependencies"
 
