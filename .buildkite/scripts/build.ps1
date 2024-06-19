@@ -88,8 +88,6 @@ cd ..
 Copy-Item -Path .\elastic-stack-installers -Destination c:\users\buildkite\esi -Recurse
 cd c:\users\buildkite\esi
 
-Write-Host "~~~ Building Stack version: $stack_version"
-
 Write-Output "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
 ${env:PATH} = "c:\dotnet-sdk;" + ${env:PATH}
@@ -110,6 +108,9 @@ $manifestUrl = ${env:MANIFEST_URL}
 $response = Invoke-WebRequest -UseBasicParsing -Uri $manifestUrl
 $json = $response.Content | ConvertFrom-Json
 $version = $json.version
+$workflow = ${env:DRA_WORKFLOW}
+
+Write-Host "~~~ Building version: $version"
 
 Write-Output "~~~ Downloading $workflow dependencies"
 
