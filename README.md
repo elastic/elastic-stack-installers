@@ -80,4 +80,3 @@ Similarly to the install flow (described above), the MSI will call the `elastic-
 ### Upgrade
 The Agent MSI doesn't support upgrade. Since the agents are fleet managed, upgrades shall be done using fleet (UI / API).
 
- 
