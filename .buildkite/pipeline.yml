@@ -11,7 +11,7 @@ steps:
         artifact_paths: "bin/out/**/*.msi"
         agents:
           provider: gcp
-          image: family/ci-windows-2022
+          image: family/core-windows-2022
         env:
           WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
@@ -33,7 +33,7 @@ steps:
         artifact_paths: "bin/out/**/*.msi"
         agents:
           provider: gcp
-          image: family/ci-windows-2022
+          image: family/core-windows-2022
         env:
           WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
