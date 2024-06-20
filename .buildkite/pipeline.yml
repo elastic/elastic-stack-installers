@@ -19,7 +19,7 @@ steps:
         artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
         agents:
           provider: gcp
-          image: family/ci-windows-2022
+          image: family/core-windows-2022
         env:
           DRA_WORKFLOW: "snapshot"
       - label: ":package: DRA Publish Snapshot"
@@ -48,7 +48,7 @@ steps:
         artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
         agents:
           provider: gcp
-          image: family/ci-windows-2022
+          image: family/core-windows-2022
         env:
           DRA_WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
