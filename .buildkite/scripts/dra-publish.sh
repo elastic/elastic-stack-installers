@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -uo pipefail
+set -euo pipefail
 
 
 # Download artifacts from Buildkite "Build stack installers" step
@@ -20,18 +20,18 @@ VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id')
 BRANCH="${BUILDKITE_BRANCH}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 
-if [ "$DRA_WORKFLOW" == "staging" ]; then
-    MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
-else
-    MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
-fi
-
 # Retrieve version value
 VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
 export VERSION
 if [[ -z $VERSION ]]; then
     echo "+++ Required version property from ${MANIFEST_URL} was empty: [$VERSION]. Exiting."
     exit 1
+fi
+
+if [ "$DRA_WORKFLOW" == "staging" ]; then
+    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
+else
+    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
 fi
 
 # Publish DRA artifacts
@@ -55,7 +55,7 @@ function run_release_manager() {
         --workflow "${DRA_WORKFLOW}" \
         --version "${VERSION}" \
         --artifact-set main \
-        --dependency beats:"${MANIFEST_URL}" \
+        --dependency beats:"${BEATS_MANIFEST_URL}" \
         $dry_run \
         #
 }
