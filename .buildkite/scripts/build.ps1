@@ -4,6 +4,7 @@ Set-Strictmode -version 3
 $eligibleReleaseBranchesMajorMinor = "^[89]+\.[0-9]+"
 $runTests = $true
 
+$env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG = "unified-release-snapshot"
 
 if (-not (Test-Path env:DRA_WORKFLOW)) {
     $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
