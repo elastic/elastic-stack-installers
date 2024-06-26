@@ -26,6 +26,8 @@ export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 
 # Retrieve version value
 VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
+# remove -SNAPSHOT style suffix from VERSION
+VERSION=${VERSION%-*}
 export VERSION
 if [[ -z $VERSION ]]; then
     echo "+++ Required version property from ${MANIFEST_URL} was empty: [$VERSION]. Exiting."
