@@ -27,24 +27,6 @@ See [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/Elast
 **NOTE**: *Building from source should only be done for development purposes. Only the officially distributed and signed Elastic Stack Installers should be used in production. Using unofficial Elastic Stack Installers is not supported.*
 
 ---
-
-## Bumping version
-
-### After a patch release
-
-Update version in `Directory.Build.props` in the branch for the related minor version (ex: https://github.com/elastic/elastic-stack-installers/pull/183).
-
-### After a minor release
-
-1. Create a branch for the next minor release from the main branch
-2. Update the main branch:
-    - Bump version in `Directory.Build.props`
-    - Update `catalog-info.yaml`:
-      - Add a new daily schedule for the new minor branch
-      - Remove the daily schedule for the previous minor branch
-    ex: https://github.com/elastic/elastic-stack-installers/pull/156 and https://github.com/elastic/elastic-stack-installers/pull/172
-
----
 ## Installing to a custom location
 The default target folder for the MSI is typically something like `c:\Program Files\Elastic\Beats\<version>\<beat>` eg. `c:\Program Files\Elastic\Beats\8.12.0\winlogbeat`.
 
