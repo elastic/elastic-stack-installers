@@ -28,11 +28,7 @@ if [[ -z $VERSION ]]; then
     exit 1
 fi
 
-if [ "$DRA_WORKFLOW" == "staging" ]; then
-    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
-else
-    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
-fi
+BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
 
 # Publish DRA artifacts
 function run_release_manager() {
