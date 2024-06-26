@@ -17,7 +17,11 @@ DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
 VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr')
 VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
 VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
-BRANCH="${BUILDKITE_BRANCH}"
+
+# DRA_BRANCH can be used for manually testing packaging with PRs
+# e.g. define `DRA_BRANCH="main"` under Options/Environment Variables in the Buildkite UI after clicking new Build
+BRANCH="${DRA_BRANCH:="${BUILDKITE_BRANCH:=""}"}"
+
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 
 # Retrieve version value
