@@ -55,7 +55,10 @@ if (-not (Test-Path env:MANIFEST_URL) -and (Test-Path env:BUILDKITE_PULL_REQUEST
 
     setManifestUrl -targetBranch $targetBranch
 }
-elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigger_job") -and ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -notlike "unified-release*")) {
+elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigger_job") -and (
+        ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -notlike "unified-release*") -or
+        ($env:BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG -notlike "independent-agent-release*")
+    ) {
     # we got triggered by a branch push
     Write-Host "~~~ Running in branch push mode"
 
