@@ -17,7 +17,7 @@ DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
 VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr')
 VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
 VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
-BRANCH="${BUILDKITE_BRANCH}"
+BRANCH="${DRA_BRANCH:="${BUILDKITE_BRANCH:=""}"}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 
 # Retrieve version value
@@ -39,10 +39,7 @@ fi
 # Publish DRA artifacts
 function run_release_manager() {
     echo "+++ Publishing $BUILDKITE_BRANCH ${DRA_WORKFLOW} DRA artifacts..."
-    dry_run=""
-    if [ "$BUILDKITE_PULL_REQUEST" != "false" ]; then
-        dry_run="--dry-run"
-    fi
+    dry_run="--dry-run"
     docker run --rm \
         --name release-manager \
         -e VAULT_ADDR="${VAULT_ADDR}" \
