@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace ElastiBuild
 
         static async Task Main(string[] args)
         {
+            var envs = Environment.GetEnvironmentVariables();
+            foreach (DictionaryEntry env in envs)
+            {
+                Console.WriteLine("Environment variable " + env.Key + "=" + env.Value);
+            }
             var commands = typeof(Program)
                 .Assembly.GetTypes()
                 .Where(x => x.GetCustomAttributes(typeof(VerbAttribute), inherit: true).Length > 0)
