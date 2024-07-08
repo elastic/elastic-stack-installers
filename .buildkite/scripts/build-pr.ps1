@@ -1,11 +1,8 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-if (-not (Test-Path env:DRA_WORKFLOW)) {
-    $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] is missing."
-    Write-Host $errorMessage
-    throw $errorMessage
-}
+$eligibleReleaseBranchesMajorMinor = "^[89]+\.[0-9]+"
+$runTests = $true
 
 function setManifestUrl {
     param (
@@ -15,15 +12,7 @@ function setManifestUrl {
     # the API url (snapshot or staging) expects master where we normally use main
     $ApiTargetBranch = if ($targetBranch -eq "main") { "master" } else { $targetBranch }
 
-    if ($env:DRA_WORKFLOW -like "*snapshot*") {
-       $artifactsUrl = "https://snapshots.elastic.co/latest/${ApiTargetBranch}.json"
-    } elseif ($env:DRA_WORKFLOW -like "*staging*") {
-       $artifactsUrl = "https://staging.elastic.co/latest/${ApiTargetBranch}.json"
-    } else {
-        $errorMessage = "Error: Required environment variable [DRA_WORKFLOW] must be snapshot or staging but it was [${env:DRA_WORKFLOW}]."
-        Write-Host $errorMessage
-        throw $errorMessage
-    }
+    $artifactsUrl = "https://snapshots.elastic.co/latest/${ApiTargetBranch}.json"
 
     Write-Host "Artifacts url is: $artifactsUrl"
     try {
@@ -37,11 +26,15 @@ function setManifestUrl {
     }
 }
 
-if (-not (Test-Path env:MANIFEST_URL)) {
-    $errorMessage = "Error: Required environment variable [MANIFEST_URL] is missing."
+$targetBranch = $env:BUILDKITE_PULL_REQUEST_BASE_BRANCH
+if ( ($targetBranch -ne "main") -and -not ($targetBranch -match $eligibleReleaseBranchesMajorMinor)) {
+    Write-Host "^^^ +++"
+    $errorMessage = "This PR is targetting the [$targetBranch] branch, but running tests is only supported against `main` or $eligibleReleaseBranchesMajorMinor branches. Exiting."
     Write-Host $errorMessage
     throw $errorMessage
 }
+
+setManifestUrl -targetBranch $targetBranch
 
 # workaround path limitation for max 248 characters
 # example: https://buildkite.com/elastic/elastic-stack-installers/builds/3104#018c5e1b-23a7-4330-ad5d-4acc69157822/74-180
@@ -50,6 +43,15 @@ cd ..
 # Rename-Item : The process cannot access the file because it is being used by another process.
 Copy-Item -Path .\elastic-stack-installers -Destination c:\users\buildkite\esi -Recurse
 cd c:\users\buildkite\esi
+
+# Read the stack version from build properties
+[xml]$xml = Get-Content -Path "Directory.Build.props"
+$ns = New-Object Xml.XmlNamespaceManager($xml.NameTable)
+$ns.AddNamespace("ns", "http://schemas.microsoft.com/developer/msbuild/2003")
+$stack_version = $xml.SelectSingleNode("//ns:PropertyGroup/ns:StackVersion", $ns).InnerText
+$version = $stack_version + "-SNAPSHOT"
+
+Write-Host "~~~ Building Stack version: $stack_version"
 
 Write-Output "~~~ Installing dotnet-sdk"
 & "./tools/dotnet-install.ps1" -NoPath -JSonFile global.json -Architecture "x64" -InstallDir c:/dotnet-sdk
@@ -70,10 +72,6 @@ New-Item bin/in -Type Directory -Force
 $manifestUrl = ${env:MANIFEST_URL}
 $response = Invoke-WebRequest -UseBasicParsing -Uri $manifestUrl
 $json = $response.Content | ConvertFrom-Json
-$version = $json.version
-$workflow = ${env:DRA_WORKFLOW}
-
-Write-Host "~~~ Building version: $version"
 
 Write-Output "~~~ Downloading $workflow dependencies"
 
