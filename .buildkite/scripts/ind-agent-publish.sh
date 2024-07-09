@@ -28,7 +28,7 @@ done
 # The defined "artifacts_path" will pick up "stack-installers-output/**/*"
 
 # Check and set trigger id
-if [[ -z "${TRIGGER_JOB_ID}" ]]; then
+if [[ -z "${TRIGGER_JOB_ID-}" ]]; then
     echo "--- TRIGGER_JOB_ID is not set, so not setting metadata"
 else
     # If a pipeline that triggered this build passes in a "TRIGGER_JOB_ID" env var, that
