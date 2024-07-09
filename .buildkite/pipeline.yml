@@ -59,3 +59,27 @@ steps:
           provider: gcp
         env:
           DRA_WORKFLOW: "staging"
+  - group: ":package: Stack installers Independent Agent Staging"
+    key: "independent-agent-staging"
+    if: |
+      // This should only run when triggered from Independent Agent Staging
+        build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") != "independent-agent-release-staging"
+    steps:
+      - label: ":construction_worker: Build stack installers / Independent Agent Staging"
+        command: ".buildkite/scripts/build.ps1"
+        key: "build-staging-independent-agent"
+        artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
+        agents:
+          provider: gcp
+          image: family/core-windows-2022
+        env:
+          DRA_WORKFLOW: "staging"
+      - label: ":package: DRA Publish staging"
+        command: ".buildkite/scripts/ind-agent-publish.sh"
+        key: "publish-staging-independent-agent"
+        artifact_paths: "stack-installers-output/**/*"
+        depends_on: "build-staging-independent-agent"
+        agents:
+          provider: gcp
+        env:
+          DRA_WORKFLOW: "staging"
