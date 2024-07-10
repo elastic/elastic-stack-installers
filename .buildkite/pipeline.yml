@@ -74,7 +74,7 @@ steps:
           image: family/core-windows-2022
         env:
           DRA_WORKFLOW: "staging"
-      - label: ":package: DRA Publish staging"
+      - label: ":package: Publishing via BK API for Independent Agent Release"
         command: ".buildkite/scripts/ind-agent-publish.sh"
         key: "publish-staging-independent-agent"
         artifact_paths: "stack-installers-output/**/*"
