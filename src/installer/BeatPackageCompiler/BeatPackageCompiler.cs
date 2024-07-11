@@ -40,6 +40,7 @@ namespace Elastic.PackageCompiler.Beats
             // Generate UUID v5 from product properties.
             // This UUID *must* be stable and unique between Beats.
             var upgradeCode = Uuid5.FromString(ap.CanonicalTargetName);
+            string version = SupportBuildVersionForAgent(ap.Version);
 
             var project = new Project(displayName)
             {
@@ -52,7 +53,7 @@ namespace Elastic.PackageCompiler.Beats
                 Description = pc.Description,
 
                 OutFileName = Path.Combine(opts.PackageOutDir, opts.PackageName),
-                Version = new Version(ap.Version),
+                Version = new Version(version),
 
                 // We massage LICENSE.txt into .rtf below
                 LicenceFile = Path.Combine(
@@ -289,6 +290,22 @@ namespace Elastic.PackageCompiler.Beats
         Value=""CA_SelectExampleYamlInExplorer"">WIXUI_EXITDIALOGOPTIONALCHECKBOX=1 and NOT Installed
     </Publish>
 </UI>"));
+        }
+
+        private static string SupportBuildVersionForAgent(string originalVersion)
+        {
+            if (!originalVersion.Contains("+build"))
+                return originalVersion;
+
+            string version = originalVersion.Replace("+build", ".");
+            string[] arr = version.Split(new char[] { '.' });
+            if (arr.Length == 4 && arr[3].Length > 4)
+            {
+                arr[3] = arr[3].Substring(4);
+                return arr.Join(".");
+            }
+
+            return originalVersion;
         }
 
         private static void RenameConfigFile(CmdLineOptions opts, ArtifactPackage ap, List<WixEntity> packageContents, string beatConfigExampleFileName, string beatConfigExampleFileId)

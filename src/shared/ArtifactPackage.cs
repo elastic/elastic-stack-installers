@@ -38,7 +38,7 @@ namespace Elastic.Installer
         static readonly Regex rx = new Regex(
             /* 0 full capture, 7 groups total */
             /* 1 */ @$"(?<target>[^-]+({MagicStrings.Files.DashOssSuffix})?)" +
-            /* 2 */ @$"-(?<version>\d+\.\d+\.\d+)" +
+            /* 2 */ @$"-(?<version>\d+\.\d+\.\d+(?:\+build\d+)?)" +
             /* 3 */ @$"(-(?<qualifier>(?!\b(?:{MagicStrings.Ver.Snapshot})\b)[^-]+))?" +
             /* 4 */ @$"(-(?<snapshot>{MagicStrings.Ver.Snapshot}))?" +
             /* 5 */ @$"-(?<os>[^-]+)" +
