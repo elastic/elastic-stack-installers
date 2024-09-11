@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-Strictmode -version 3
 
-$eligibleReleaseBranchesMajorMinor = "^[89]+\.[0-9]+"
+$eligibleReleaseBranchesMajorMinor = "^[89]+\.[0-9x]+"
 $runTests = $true
 
 
