@@ -33,7 +33,6 @@ New-Item bin/in -Type Directory -Force
 if ($workflow -eq "snapshot") {
     $version = $stack_version + "-" + $workflow.ToUpper()
     $hostname = "artifacts-snapshot.elastic.co"
-    Write-Host "Downloading list from https://$hostname/beats/latest/$version.json"
     $response = Invoke-WebRequest -UseBasicParsing -Uri "https://$hostname/beats/latest/$version.json"
     $json = $response.Content | ConvertFrom-Json
     $buildId = $json.build_id
