@@ -19,22 +19,19 @@ VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
 VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
 BRANCH="${BUILDKITE_BRANCH}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
+VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
 
 # Retrieve version value
-VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
-# remove -SNAPSHOT style suffix from VERSION
-VERSION=${VERSION%-*}
+MANIFEST_VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
+# remove -SNAPSHOT or -alpha1 style suffix from MANIFEST_VERSION
+VERSION=${MANIFEST_VERSION%-*}
 export VERSION
 if [[ -z $VERSION ]]; then
     echo "+++ Required version property from ${MANIFEST_URL} was empty: [$VERSION]. Exiting."
     exit 1
 fi
 
-if [ "$DRA_WORKFLOW" == "staging" ]; then
-    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION".json | jq -r '.manifest_url')
-else
-    BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$VERSION"-SNAPSHOT.json | jq -r '.manifest_url')
-fi
+BEATS_MANIFEST_URL=$(curl https://artifacts-"$DRA_WORKFLOW".elastic.co/beats/latest/"$MANIFEST_VERSION".json | jq -r '.manifest_url')
 
 # Publish DRA artifacts
 function run_release_manager() {
@@ -58,6 +55,7 @@ function run_release_manager() {
         --version "${VERSION}" \
         --artifact-set main \
         --dependency beats:"${BEATS_MANIFEST_URL}" \
+        --qualifier "${VERSION_QUALIFIER}" \
         $dry_run \
         #
 }
