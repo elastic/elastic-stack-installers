@@ -43,7 +43,9 @@ steps:
         ( (build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env('VERSION_QUALIFIER') != null) && build.env("BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG") == "unified-release-staging" )
     steps:
       - label: ":construction_worker: Build stack installers / Staging"
-        command: ".buildkite/scripts/build.ps1"
+        command: |
+          . ./buildkite/scripts/version_qualifier.ps1
+          .buildkite/scripts/build.ps1
         key: "build-staging"
         artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
         agents:
@@ -52,7 +54,9 @@ steps:
         env:
           DRA_WORKFLOW: "staging"
       - label: ":package: DRA Publish staging"
-        command: ".buildkite/scripts/dra-publish.sh"
+        command: |
+          source .buildkite/scripts/version_qualifier.sh
+          .buildkite/scripts/dra-publish.sh
         key: "publish-staging"
         depends_on: "build-staging"
         agents:
