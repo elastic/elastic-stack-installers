@@ -44,7 +44,7 @@ steps:
     steps:
       - label: ":construction_worker: Build stack installers / Staging"
         command: |
-          . ./buildkite/scripts/version_qualifier.ps1
+          . .buildkite/scripts/version_qualifier.ps1
           .buildkite/scripts/build.ps1
         key: "build-staging"
         artifact_paths: "c:/users/buildkite/esi/bin/out/**/*.msi"
