@@ -120,6 +120,7 @@ try {
     $packageName = "elastic-agent"
     $projectName = "$packageName-package"
     $urls += $json.projects.$projectName.packages."$packageName-$version-windows-x86_64.zip".url
+    $urls += $json.projects.$projectName.packages."$packageName-$version-windows-arm64.zip".url
 
     if ($onlyAgent -eq "true") {
         Write-Output "Skipping beats because env var ONLY_AGENT is set to [$env:ONLY_AGENT]"
