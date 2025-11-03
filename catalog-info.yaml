@@ -93,10 +93,6 @@ spec:
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
       schedules:
-        Daily 8_12:
-          branch: "8.12"
-          cronline: "*/10 * * * *"
-          message: Checking for new beats artifacts for `8.12`
         # trigger for 7_17 still needed for now, details in https://elasticco.atlassian.net/browse/REL-1004?focusedCommentId=107973
         Daily 7_17:
           branch: "7.17"
