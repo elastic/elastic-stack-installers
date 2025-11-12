@@ -16,11 +16,12 @@ namespace ElastiBuild.Commands
         , ISupportRequiredTargets
         , ISupportRequiredContainerId
         , ISupportForceSwitch
+        , ISupportArchitecture
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
         public bool ForceSwitch { get; set; }
-
+        public string Architecture { get; set; } = "x86_64";
         public async Task RunAsync()
         {
             if (Targets.Any(t => t.ToLower() == "all"))
