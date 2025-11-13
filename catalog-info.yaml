@@ -49,7 +49,11 @@ spec:
       provider_settings:
         build_branches: true
         build_pull_request_forks: false
-        build_pull_requests: true
+        build_pull_requests: true # requires filter_enabled and filter_condition settings as below when used with buildkite-pr-bot
+        build_tags: false
+        filter_enabled: true
+        filter_condition: >-
+          build.creator.name == 'elasticmachine' && build.pull_request.id != null
         publish_commit_status: true
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
@@ -58,7 +62,9 @@ spec:
           access_level: BUILD_AND_READ
         ingest-fp: {}
         release-eng: {}
+        observablt-robots: {}
       env:
+        ELASTIC_PR_COMMENTS_ENABLED: 'true'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#ingest-notifications'
         SLACK_NOTIFICATIONS_ON_SUCCESS: 'false'
@@ -93,10 +99,6 @@ spec:
         publish_commit_status_per_step: false
       repository: elastic/elastic-stack-installers
       schedules:
-        Daily 8_12:
-          branch: "8.12"
-          cronline: "*/10 * * * *"
-          message: Checking for new beats artifacts for `8.12`
         # trigger for 7_17 still needed for now, details in https://elasticco.atlassian.net/browse/REL-1004?focusedCommentId=107973
         Daily 7_17:
           branch: "7.17"
@@ -107,3 +109,4 @@ spec:
           access_level: BUILD_AND_READ
         ingest-fp: {}
         release-eng: {}
+        observablt-robots: {}
