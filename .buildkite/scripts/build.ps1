@@ -120,6 +120,7 @@ try {
     $packageName = "elastic-agent"
     $projectName = "$packageName-package"
     $urls += $json.projects.$projectName.packages."$packageName-$version-windows-x86_64.zip".url
+    $urls += $json.projects.$projectName.packages."$packageName-$version-windows-arm64.zip".url
 
     if ($onlyAgent -eq "true") {
         Write-Output "Skipping beats because env var ONLY_AGENT is set to [$env:ONLY_AGENT]"
@@ -149,7 +150,7 @@ try {
 
 Remove-Item bin/out -Recurse -Force -ErrorAction Ignore
 
-Write-Output "--- Building $workflow msi"
+# Common CLI args
 $cliArgs = @(
     "run",
     "--project",
@@ -161,12 +162,37 @@ $cliArgs = @(
     "--cid",
     $version
 )
-$cliArgs += "elastic-agent"
-if ($onlyAgent -ne "true") {
-    $cliArgs += ($beats + $ossBeats)
+
+# Elastic Agent is the only artifact (currently) needing an ARM64 MSI build
+$buildArch = "arm64"
+$armAgentCliArgs = $cliArgs + @(
+    "--arch",
+    $buildArch,
+    "elastic-agent"
+)
+
+Write-Output "--- Building $workflow elastic-agent msi for $buildArch"
+&dotnet $armAgentCliArgs
+if ($LastExitcode -ne 0) {
+    Write-Error "Build $workflow elastic-agent msi for $buildArch failed with exit code $LastExitcode"
+    exit $LastExitcode
+} else {
+    Write-Output "Build $workflow elastic-agent msi for $buildArch completed with exit code $LastExitcode"
 }
 
-&dotnet $cliArgs
+# Now build the rest of the artifacts for x86_64
+$buildArch = "x86_64"
+$x64CliArgs = $cliArgs + @(
+    "--arch",
+    $buildArch,
+    "elastic-agent"
+)
+if ($onlyAgent -ne "true") {
+    $x64CliArgs += ($beats + $ossBeats)
+}
+
+Write-Output "--- Building $workflow msi for $buildArch"
+&dotnet $x64CliArgs
 if ($LastExitcode -ne 0) {
     Write-Error "Build $workflow failed with exit code $LastExitcode"
     exit $LastExitcode
@@ -177,7 +203,8 @@ if ($LastExitcode -ne 0) {
 Write-Output "--- Checking that all artifacts are there"
 $msiCount = Get-ChildItem bin/out -Include "*.msi" -Recurse | Measure-Object | Select-Object -ExpandProperty Count
 
-$expected = 1
+# always expect 2 elastic-agent (x86_64 + arm64)
+$expected = 2
 if ($onlyAgent -ne "true") {
     $expected += (2 * $beats.Length)
 }
