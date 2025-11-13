@@ -67,9 +67,7 @@ elseif (-not (Test-Path env:MANIFEST_URL) -and ($env:BUILDKITE_SOURCE -ne "trigg
         throw $errorMessage
     }
 
-    # XXX: TEMP DO NOT MERGE
-    # setManifestUrl -targetBranch $targetBranch
-    setManifestUrl -targetBranch "9.2"
+    setManifestUrl -targetBranch $targetBranch
 }
 elseif (-not (Test-Path env:MANIFEST_URL)) {
     # any other invocation of this script (e.g. from unified release) must supply MANIFEST_URL
