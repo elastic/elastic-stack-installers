@@ -11,15 +11,18 @@ buildkite-agent artifact download 'users\buildkite\esi\bin\out\**\*.msi' . --ste
 mv users/buildkite/esi/bin bin
 chmod -R 777 bin/out
 
-echo "+++ Setting DRA params" 
+echo "+++ Setting DRA params"
 # Shared secret path containing the dra creds for project teams
 DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
 VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr')
 VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id')
-VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') 
+VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id')
 BRANCH="${BUILDKITE_BRANCH}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
+
+# XXX: DO NOT MERGE
+BRANCH="9.2"
 
 # Retrieve version value
 MANIFEST_VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
