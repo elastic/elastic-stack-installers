@@ -21,9 +21,6 @@ BRANCH="${BUILDKITE_BRANCH}"
 export VAULT_ADDR VAULT_ROLE_ID VAULT_SECRET_ID
 VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
 
-# XXX: DO NOT MERGE
-BRANCH="9.2"
-
 # Retrieve version value
 MANIFEST_VERSION=$(curl -s --retry 5 --retry-delay 10 "$MANIFEST_URL" | jq -r '.version')
 # remove -SNAPSHOT or -alpha1 style suffix from MANIFEST_VERSION
