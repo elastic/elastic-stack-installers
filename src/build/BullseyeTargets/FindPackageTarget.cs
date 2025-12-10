@@ -12,7 +12,7 @@ namespace ElastiBuild.BullseyeTargets
 {
     public class FindPackageTarget : BullseyeTargetBase<FindPackageTarget>
     {
-        public static async Task RunAsync(BuildContext ctx, string targetName)
+        public static async Task RunAsync(BuildContext ctx, string targetName, string arch = "x86_64")
         {
             var cmd = ctx.GetCommand();
             bool forceSwitch = (cmd as ISupportForceSwitch)?.ForceSwitch ?? false;
@@ -50,6 +50,9 @@ namespace ElastiBuild.BullseyeTargets
                             return null;
 
                         if (!fi.Name.Contains("-windows", StringComparison.OrdinalIgnoreCase))
+                            return null;
+
+                        if (ap.Architecture != arch)
                             return null;
 
                         return ap;
