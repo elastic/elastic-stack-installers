@@ -18,12 +18,14 @@ namespace ElastiBuild.Commands
         , ISupportRequiredContainerId
         , ISupportCodeSigning
         , ISupportWxsOnlySwitch
+        , ISupportArchitecture
     {
         public IEnumerable<string> Targets { get; set; }
         public string ContainerId { get; set; }
         public string CertFile { get; set; }
         public string CertPass { get; set; }
         public bool WxsOnly { get; set; }
+        public string Architecture { get; set; } = "x86_64";
 
         public async Task RunAsync()
         {
@@ -64,7 +66,7 @@ namespace ElastiBuild.Commands
 
                 bt.Add(
                     FindPackageTarget.NameWith(target),
-                    async () => await FindPackageTarget.RunAsync(ctx, target));
+                    async () => await FindPackageTarget.RunAsync(ctx, target, Architecture));
 
                 bt.Add(
                     FetchPackageTarget.NameWith(target),

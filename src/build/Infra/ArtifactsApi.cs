@@ -54,7 +54,7 @@ namespace ElastiBuild.Infra
             return namedItems;
         }
 
-        public static async Task<IEnumerable<ArtifactPackage>> DiscoverArtifacts(string target, string containerId)
+        public static async Task<IEnumerable<ArtifactPackage>> DiscoverArtifacts(string target, string containerId, string arch = "x86_64")
         {
             using var http = new HttpClient()
             {
@@ -62,7 +62,7 @@ namespace ElastiBuild.Infra
                 Timeout = TimeSpan.FromMilliseconds(3000)
             };
 
-            var query = $"search/{containerId}/{target},windows,zip,x86_64";
+            var query = $"search/{containerId}/{target},windows,zip,{arch}";
             using var stm = await http.GetStreamAsync(query);
 
             using var sr = new StreamReader(stm);
