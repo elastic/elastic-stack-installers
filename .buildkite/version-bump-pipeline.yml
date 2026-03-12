@@ -18,7 +18,16 @@ notify:
     if: build.state == "blocked"
 
 steps:
-  # TODO: replace this block step by real version bump logic
+  - label: "Bump version minor"
+    # NOTE: a new minor is X.Y.0, so we check if the version ends with 0
+    #       to decide if it's a minor or patch release
+    if: build.env("NEW_VERSION") !~ /0$/
+    command: "make release-major-minor CURRENT_RELEASE=${NEW_VERSION}"
+    plugins:
+      - elastic/vault-github-token#v0.1.0:
+    agents:
+      image: "docker.elastic.co/ci-agent-images/observability-robots/ubuntu-build-essential:latest"
+
   - block: "Ready to fetch for DRA artifacts?"
     prompt: |
       Unblock when your team is ready to proceed.
