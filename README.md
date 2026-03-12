@@ -27,6 +27,18 @@ See [ElastiBuild](https://github.com/elastic/elastic-stack-installers/wiki/Elast
 **NOTE**: *Building from source should only be done for development purposes. Only the officially distributed and signed Elastic Stack Installers should be used in production. Using unofficial Elastic Stack Installers is not supported.*
 
 ---
+
+## Release Process
+
+This repository uses a simple Makefile for release automation. To create a new release:
+
+```bash
+make release-major-minor CURRENT_RELEASE=9.5.0
+```
+
+For detailed release documentation, including DRY_RUN mode and troubleshooting, see [RELEASE.md](./RELEASE.md).
+
+---
 ## Installing to a custom location
 The default target folder for the MSI is typically something like `c:\Program Files\Elastic\Beats\<version>\<beat>` eg. `c:\Program Files\Elastic\Beats\8.12.0\winlogbeat`.
 
