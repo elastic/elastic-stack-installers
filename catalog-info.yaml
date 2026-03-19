@@ -128,6 +128,7 @@ spec:
       name: elastic-stack-installers-version-bump
     spec:
       pipeline_file: ".buildkite/version-bump-pipeline.yml"
+      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
       repository: elastic/elastic-stack-installers
