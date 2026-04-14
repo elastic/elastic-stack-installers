@@ -177,6 +177,11 @@ namespace Elastic.PackageCompiler.Beats
             // When uninstalling, the 'elastic-agent uninstall' command.
             if (pc.IsAgent)
             {
+                // Hide from Add/Remove Programs and suppress the uninstall registry entry.
+                // The elastic-agent handles its own lifecycle and should not expose a
+                // standard MSI uninstall entry in the Windows registry.
+                project.AddProperty(new Property("ARPSYSTEMCOMPONENT", "1"));
+
                 // https://stackoverflow.com/a/311837
                 project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
                 project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
