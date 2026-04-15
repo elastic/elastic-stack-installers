@@ -20,7 +20,8 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentUninstallKeyPresent | Should -BeTrue
+                Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                Is-AgentMSIUninstallKeyPresent | Should -BeFalse
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
                 Is-AgentServiceRunning -Resolve | Should -BeTrue # Start the service if it's not running and expect it to remain running
@@ -42,11 +43,12 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentUninstallKeyPresent | Should -BeTrue
+                Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                Is-AgentMSIUninstallKeyPresent | Should -BeFalse
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
 
-                # Start the service but don't expect it to be running as our fleet config causes agent to stop right away 
+                # Start the service but don't expect it to be running as our fleet config causes agent to stop right away
                 Is-AgentServiceRunning -Resolve -WaitForExit
 
                 Has-AgentLogged | Should -BeTrue
@@ -73,7 +75,7 @@ BeforeAll {
         Is-AgentFleetEnrolled | Should -BeFalse -Because "The agent should have been cleaned up already"
         Is-AgentServiceRunning | Should -BeFalse -Because "The agent should have been cleaned up already"
         Is-AgentServicePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentUninstallKeyPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
+        Is-AgentManagedUninstallKeyPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
         Is-AgentInstallCachePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
     }
 
@@ -83,7 +85,7 @@ BeforeAll {
     }
     catch {
         write-warning "Found Agent remnants before tests started. Removing Agent."
-        Clean-ElasticAgent
+        Clean-ElasticAgent -MSIPath $PathToLatestMSI
     }
 }
 
@@ -96,7 +98,7 @@ Describe 'Elastic Agent MSI Installer' {
         }
         catch {
             write-warning "Found Agent remnants between tests. Removing Agent."
-            Clean-ElasticAgent
+            Clean-ElasticAgent -MSIPath $PathToLatestMSI
         }
 
         # Reduce filesystem async race conditions - spooky voodoo
@@ -130,19 +132,6 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
 
-        It 'Can be installed and uninstalled via GUID, without installargs, in <Mode> mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters
-
-            Check-AgentRemnants
-        }
-        
         It 'Gracefully handles existing agent components' {
 
             # Create a fake service
@@ -167,10 +156,11 @@ Describe 'Elastic Agent MSI Installer' {
             Assert-AgentHealthy
 
             # We clean-up with a clean-up script so that we can differentiate installer from uninstaller failures with the next test
-            Clean-ElasticAgent
+            Clean-ElasticAgent -MSIPath $PathToLatestMSI
 
             Check-AgentRemnants
         }
+
         It 'Blocks downgrades and upgrades in <Mode> mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
@@ -206,25 +196,13 @@ Describe 'Elastic Agent MSI Installer' {
                 & $HealthFunction
             }
         }
+
         It 'Behaves itself as a standalone agent' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
             Assert-AgentHealthy
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
-
-            Check-AgentRemnants
-        }
-        
-        It 'Can be installed in Standalone mode and uninstalled via GUID in default mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters
 
             Check-AgentRemnants
         }
@@ -280,7 +258,7 @@ Describe 'Elastic Agent MSI Installer' {
             $Result | Should -Be 1603
 
             # QUIRK: Clean-up the leftovers as elastic-agent uninstall does not fully rollback during failure
-            Clean-ElasticAgent
+            Clean-ElasticAgent -MSIPath $PathToLatestMSI
             
             Check-AgentRemnants
         }
@@ -330,7 +308,6 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
 
-
         It 'Can be installed and uninstalled via MSI, with invalid installargs, in fleet mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
@@ -339,19 +316,6 @@ Describe 'Elastic Agent MSI Installer' {
             { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
             
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
-
-            Check-AgentRemnants
-        }
-
-        It 'Can be installed in Fleet mode and uninstalled via GUID in default mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters -Flags '/norestart'
 
             Check-AgentRemnants
         }

@@ -8,7 +8,7 @@ Function Get-LogDir {
     return $Script:LogDir
 }
 
-Function Get-AgentUninstallRegistryKey {
+Function Get-AgentMSIUninstallRegistryKey {
     param (
         [switch] $Passthru
     )
@@ -23,14 +23,19 @@ Function Get-AgentUninstallRegistryKey {
     return $Result.Name
 }
 
-Function Get-AgentUninstallGUID {
-    $RegistryKey = Get-AgentUninstallRegistryKey -Passthru
+Function Get-AgentManagedUninstallRegistryKey {
+    param (
+        [switch] $Passthru
+    )
 
-    try {
-        $GUID = $RegistryKey.PSChildName
-        return $GUID
-    }
-    catch {}
+    $KeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent"
+    if (-not (Test-Path $KeyPath)) { return; }
+
+    $Result = Get-Item $KeyPath
+
+    if ($Passthru) { return $Result }
+
+    return $Result.Name
 }
 
 Function Run-AgentChecks {
@@ -253,9 +258,17 @@ Function Is-AgentFleetEnrolled {
     return $false
 }
 
-Function Is-AgentUninstallKeyPresent {
+Function Is-AgentMSIUninstallKeyPresent {
+    $RegistryKey = @(Get-AgentMSIUninstallRegistryKey)
+    if ($RegistryKey.length -ne 0) {
+        return $true
+    }
 
-    $RegistryKey = @(Get-AgentUninstallRegistryKey)
+    Return $false
+}
+
+Function Is-AgentManagedUninstallKeyPresent {
+    $RegistryKey = @(Get-AgentManagedUninstallRegistryKey)
     if ($RegistryKey.length -ne 0) {
         return $true
     }
@@ -312,10 +325,15 @@ Function Get-AgentLogFile {
 
 
 Function Clean-ElasticAgent {
+    param (
+        [string] $MSIPath
+    )
 
-    try { Clean-ElasticAgentInstaller } catch { }
+    if ($MSIPath) {
+        try { Clean-ElasticAgentInstaller -Path $MSIPath } catch { }
+    }
 
-    Clean-ElasticAgentUninstallKeys
+    Clean-ElasticAgentManagedUninstallKey
 
     Clean-ElasticAgentService
 
@@ -325,11 +343,11 @@ Function Clean-ElasticAgent {
 }
 
 Function Clean-ElasticAgentInstaller {
-    
-    $UninstallGuid = Get-AgentUninstallGUID
-    if (-not $UninstallGuid) { return }
+    param (
+        [string] $Path
+    )
 
-    Uninstall-MSI -Guid $UninstallGuid -LogToDir (Get-LogDir)
+    Uninstall-MSI -Path $Path -LogToDir (Get-LogDir)
 }
 
 Function Clean-ElasticAgentService {
@@ -358,10 +376,10 @@ Function Clean-ElasticAgentDirectory {
     }
 }
 
-Function Clean-ElasticAgentUninstallKeys {
-    $Keys = Get-AgentUninstallRegistryKey -Passthru
-    if ($Keys) {
-        $Keys | Remove-Item -force -verbose
+Function Clean-ElasticAgentManagedUninstallKey {
+    $ManagedKey = Get-AgentManagedUninstallRegistryKey -Passthru
+    if ($ManagedKey) {
+        $ManagedKey | Remove-Item -force -verbose
     }
 }
 
