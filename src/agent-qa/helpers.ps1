@@ -334,8 +334,26 @@ Function Clean-ElasticAgentInstaller {
 
 Function Clean-ElasticAgentService {
 
-    if (Get-Service 'Elastic Agent' -ErrorAction SilentlyContinue) {
-        Stop-Service 'Elastic Agent'
+    $service = Get-Service 'Elastic Agent' -ErrorAction SilentlyContinue
+    if ($service) {
+        # Wait up to 30 seconds for any transient state (e.g. StartPending, StopPending) to resolve
+        # before attempting to stop the service, otherwise Stop-Service throws a Win32Exception.
+        $timeout = (Get-Date).AddSeconds(30)
+        $service.Refresh()
+        while ($service.Status -notin @('Running', 'Stopped') -and (Get-Date) -lt $timeout) {
+            Start-Sleep -Seconds 1
+            $service.Refresh()
+        }
+        if ($service.Status -notin @('Running', 'Stopped')) {
+            Write-Warning "Timed out waiting for 'Elastic Agent' service to reach a stable state. Current status: $($service.Status)"
+        }
+        if ($service.Status -ne 'Stopped') {
+            try {
+                Stop-Service 'Elastic Agent' -Force
+            } catch {
+                Write-Warning "Failed to stop 'Elastic Agent' service: $_"
+            }
+        }
         Remove-Service 'Elastic Agent'
     }
 }
