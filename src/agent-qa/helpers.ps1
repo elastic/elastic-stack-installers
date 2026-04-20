@@ -276,6 +276,18 @@ Function Is-AgentManagedUninstallKeyPresent {
     Return $false
 }
 
+Function Get-AgentVersion {
+    $path = (Join-Path $Script:AgentPath $Script:AgentBinary)
+    if (-not (Test-Path $path)) {
+        throw "Agent binary not found at $path; cannot determine version"
+    }
+    $versionString = (Get-Item $path).VersionInfo.ProductVersion
+    if (-not $versionString) {
+        throw "Could not read ProductVersion from $path"
+    }
+    return [version](($versionString -split '[-+]')[0])
+}
+
 Function Is-AgentInstallCacheGone {
     return (-not (Is-AgentInstallCachePresent))
 }

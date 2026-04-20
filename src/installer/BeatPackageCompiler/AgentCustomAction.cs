@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Deployment.WindowsInstaller;
+using Microsoft.Win32;
 
 namespace Elastic.PackageCompiler.Beats
 {
@@ -30,6 +31,10 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     // If agent got installed properly, we can go ahead and remove all the files installed by the MSI (best effort)
                     RemoveFolder(session, session["INSTALLDIR"]);
+
+                    // elastic-agent manages its own uninstall key at HKLM\...\Uninstall\Elastic Agent,
+                    // so the MSI's GUID-based ARP entry written by RegisterProduct is redundant.
+                    RemoveARPKey(session);
                 }
 
                 return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
@@ -64,6 +69,21 @@ namespace Elastic.PackageCompiler.Beats
             catch (Exception ex)
             {
                 session.Log("Failed to remove folder: " + folder + ", exception: " + ex.ToString());
+            }
+        }
+
+        private static void RemoveARPKey(Session session)
+        {
+            try
+            {
+                string productCode = session["ProductCode"];
+                string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\" + productCode;
+                Registry.LocalMachine.DeleteSubKeyTree(keyPath, false);
+                session.Log("Removed ARP registry key: HKLM\\" + keyPath);
+            }
+            catch (Exception ex)
+            {
+                session.Log("Failed to remove ARP registry key: " + ex.ToString());
             }
         }
 

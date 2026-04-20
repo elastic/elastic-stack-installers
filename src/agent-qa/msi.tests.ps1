@@ -20,8 +20,13 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentManagedUninstallKeyPresent | Should -BeTrue
-                Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                if ((Get-AgentVersion) -ge [version]'9.4.0') {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                    Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                } else {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeFalse
+                    Is-AgentMSIUninstallKeyPresent | Should -BeTrue
+                }
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
                 Is-AgentServiceRunning -Resolve | Should -BeTrue # Start the service if it's not running and expect it to remain running
@@ -43,8 +48,13 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentManagedUninstallKeyPresent | Should -BeTrue
-                Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                if ((Get-AgentVersion) -ge [version]'9.4.0') {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                    Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                } else {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeFalse
+                    Is-AgentMSIUninstallKeyPresent | Should -BeTrue
+                }
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
 
