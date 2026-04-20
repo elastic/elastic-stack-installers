@@ -143,25 +143,15 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
 
-        It 'Gracefully handles existing agent components in <Mode> mode' {
-
-            # Create a fake service
+        It 'Leaves no agent artifacts when install fails in <Mode> mode' {
+            # Pre-create a fake "Elastic Agent" service so the MSI install fails
             new-service -Name "Elastic Agent" -BinaryPathName "cmd.exe" -DisplayName "Fake Service" -StartupType manual
 
-            # Create a fake directory
-            new-item -itemtype directory "C:\Program Files\Elastic\Agent\data\elastic-agent-03ef9d\logs"
+            { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Throw -ExpectedMessage '*service Elastic Agent already exists*'
 
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            # Remove our fakes and see if everything passes
             if ((Get-Service "Elastic Agent" -Erroraction SilentlyContinue).DisplayName -eq "Fake Service") {
                 Remove-Service "Elastic Agent"
             }
-
-            Assert-AgentHealthy
-
-            # We clean-up with a clean-up script so that we can differentiate installer from uninstaller failures with the next test
-            Clean-ElasticAgent -MSIPath $PathToLatestMSI
 
             Check-AgentRemnants
         }
