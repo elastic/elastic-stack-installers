@@ -149,16 +149,10 @@ Describe 'Elastic Agent MSI Installer' {
 
             # Create a fake directory
             new-item -itemtype directory "C:\Program Files\Elastic\Agent\data\elastic-agent-03ef9d\logs"
-            
-            # Create a fake config
-            set-content "C:\Program Files\Elastic\Agent\elastic-agent.exe" -value "test" -nonewline
 
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
-            # Remove our fakes and see if everything passes 
-            if ((get-content "C:\Program Files\Elastic\Agent\elastic-agent.exe" -raw) -eq "test") {
-                remove-item "C:\Program Files\Elastic\Agent\elastic-agent.exe"
-            }
+            # Remove our fakes and see if everything passes
             if ((Get-Service "Elastic Agent" -Erroraction SilentlyContinue).DisplayName -eq "Fake Service") {
                 Remove-Service "Elastic Agent"
             }

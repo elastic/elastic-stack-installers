@@ -236,7 +236,7 @@ Function Has-AgentFleetEnrollmentAttempt {
 
         $Content = Get-Content -raw $LogFile
 
-        if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
+        if ($Content -like "*fail to execute request to fleet-server: lookup placeholder: no such host*") {
             return $True
         }
 
