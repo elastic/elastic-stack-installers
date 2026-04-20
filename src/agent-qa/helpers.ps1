@@ -321,7 +321,7 @@ Function Get-AgentLogFile {
         $Latest
     )
 
-    
+
     $LogFiles = @(Get-ChildItem -Path (get-item "C:\Program Files\Elastic\Agent\data\*\logs").fullname -Filter "*.ndjson" | Where-Object {$_.name -notlike "*watcher*"} | Sort-Object LastWriteTime)
 
     if ($LogFiles.Count -eq 0) {
@@ -330,9 +330,29 @@ Function Get-AgentLogFile {
 
     if ($Latest) {
         return $LogFiles | Select-Object -last 1
-    } 
+    }
 
     return $LogFiles
+}
+
+Function Show-AgentLogs {
+    $DataRoot = Join-Path $Script:AgentPath "data"
+    if (-not (Test-Path $DataRoot)) {
+        write-host "No agent data directory at $DataRoot"
+        return
+    }
+
+    $LogFiles = @(Get-ChildItem -Path "$DataRoot\*\logs" -Filter "*.ndjson" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+    if ($LogFiles.Count -eq 0) {
+        write-host "No agent log files under $DataRoot"
+        return
+    }
+
+    foreach ($LogFile in $LogFiles) {
+        write-host "===== $($LogFile.FullName) ====="
+        Get-Content -Path $LogFile.FullName -ErrorAction SilentlyContinue | write-host
+        write-host "===== end $($LogFile.FullName) ====="
+    }
 }
 
 
@@ -441,12 +461,12 @@ Function Invoke-MSIExec {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
         try {
             if ($LogToDir -and $Action -eq "x") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,30
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,100
                 write-warning "Elastic Agent uninstall returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             } elseif ($LogToDir -and $Action -eq "i") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,30
-                write-warning "Elastic Agent uninstall returned:"
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,100
+                write-warning "Elastic Agent install returned:"
                 write-warning ($CustomActionLog.Context.PostContext -join "`n")
             }
         } catch {
@@ -454,6 +474,9 @@ Function Invoke-MSIExec {
             write-warning "Dumping full MSI Log"
             write-host (Get-Content $LoggingDestination -raw)
         }
+
+        write-warning "Dumping elastic-agent logs for troubleshooting"
+        Show-AgentLogs
 
         write-verbose $Message
 

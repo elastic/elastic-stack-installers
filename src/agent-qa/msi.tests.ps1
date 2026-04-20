@@ -81,12 +81,13 @@ BeforeAll {
     Import-Module (Join-Path $PSScriptRoot "helpers.ps1") -Force -Verbose:$False
 
     Function Check-AgentRemnants {
-        Is-AgentBinaryPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentFleetEnrolled | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentServiceRunning | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentServicePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentManagedUninstallKeyPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentInstallCachePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
+        Is-AgentBinaryPresent | Should -BeFalse -Because "elastic-agent.exe is still on disk under C:\Program Files\Elastic\Agent"
+        Is-AgentFleetEnrolled | Should -BeFalse -Because "fleet.enc is still present, fleet enrollment was not torn down"
+        Is-AgentServiceRunning | Should -BeFalse -Because "the 'Elastic Agent' Windows service is still running"
+        Is-AgentServicePresent | Should -BeFalse -Because "the 'Elastic Agent' Windows service is still registered"
+        Is-AgentMSIUninstallKeyPresent | Should -BeFalse -Because "the MSI ARP uninstall entry (HKLM\...\Uninstall\{ProductCode}) is still present"
+        Is-AgentManagedUninstallKeyPresent | Should -BeFalse -Because "the agent-managed uninstall entry (HKLM\...\Uninstall\Elastic Agent) is still present"
+        Is-AgentInstallCachePresent | Should -BeFalse -Because "the MSI install cache at C:\Program Files\Elastic\Beats still exists"
     }
 
     # Perform an initial environment cleanup
@@ -142,7 +143,7 @@ Describe 'Elastic Agent MSI Installer' {
             Check-AgentRemnants
         }
 
-        It 'Gracefully handles existing agent components' {
+        It 'Gracefully handles existing agent components in <Mode> mode' {
 
             # Create a fake service
             new-service -Name "Elastic Agent" -BinaryPathName "cmd.exe" -DisplayName "Fake Service" -StartupType manual
