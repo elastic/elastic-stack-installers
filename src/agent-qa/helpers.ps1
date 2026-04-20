@@ -396,6 +396,16 @@ Function Clean-ElasticAgentProcess {
     }
 }
 
+Function ForceStop-ElasticAgent {
+    try {
+        Stop-Service -Name 'Elastic Agent' -Force -ErrorAction Stop
+    }
+    catch {
+        Get-Process -Name 'elastic-agent' -ErrorAction SilentlyContinue | Stop-Process -Force
+    }
+    Wait-Process -Name 'elastic-agent' -Timeout 30 -ErrorAction SilentlyContinue
+}
+
 Function Clean-ElasticAgentDirectory {
     $Path = Join-Path ($Env:ProgramFiles) "Elastic\Agent"
     if (Test-Path $Path) {

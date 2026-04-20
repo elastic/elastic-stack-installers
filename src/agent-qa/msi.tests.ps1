@@ -138,6 +138,12 @@ Describe 'Elastic Agent MSI Installer' {
 
             Assert-AgentHealthy
 
+            if ($Mode -eq 'Fleet') {
+                # Stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                ForceStop-ElasticAgent
+            }
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
             Check-AgentRemnants
@@ -160,10 +166,16 @@ Describe 'Elastic Agent MSI Installer' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
             Assert-AgentHealthy
-            
+
             { Install-MSI -Path $PathToEarlyMSI -Interactive "/qn" @MSIInstallParameters } | Should -Throw
 
             Assert-AgentHealthy
+
+            if ($Mode -eq 'Fleet') {
+                # Stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                ForceStop-ElasticAgent
+            }
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
 
@@ -178,6 +190,12 @@ Describe 'Elastic Agent MSI Installer' {
             { Install-MSI -Path $PathToLatestMSI -Interactive "/qn" @MSIInstallParameters } | Should -Throw
 
             Assert-AgentHealthy
+
+            if ($Mode -eq 'Fleet') {
+                # Stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                ForceStop-ElasticAgent
+            }
 
             Uninstall-MSI -Path $PathToEarlyMSI
 
@@ -298,6 +316,10 @@ Describe 'Elastic Agent MSI Installer' {
             Assert-AgentHealthy
             Has-AgentFleetEnrollmentAttempt | Should -BeTrue
 
+            # Stop the agent to avoid the > 10 minute uninstall timeout while it's
+            # trying to enroll to a fake fleet server (https://placeholder:443)
+            ForceStop-ElasticAgent
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
 
             Check-AgentRemnants
@@ -308,8 +330,12 @@ Describe 'Elastic Agent MSI Installer' {
 
             Assert-AgentHealthy
 
+            # Stop the agent to avoid the > 10 minute uninstall timeout while it's
+            # trying to enroll to a fake fleet server (https://placeholder:443)
+            ForceStop-ElasticAgent
+
             { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
-            
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
             Check-AgentRemnants
