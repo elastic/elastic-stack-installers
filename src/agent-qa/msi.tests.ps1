@@ -155,6 +155,10 @@ Describe 'Elastic Agent MSI Installer' {
 
             { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Throw -ExpectedMessage '*service Elastic Agent already exists*'
 
+            if (Test-Path "C:\Program Files\Elastic\Agent\elastic-agent.exe") {
+                remove-item "C:\Program Files\Elastic\Agent\elastic-agent.exe"
+            }
+
             if ((Get-Service "Elastic Agent" -Erroraction SilentlyContinue).DisplayName -eq "Fake Service") {
                 Remove-Service "Elastic Agent"
             }
