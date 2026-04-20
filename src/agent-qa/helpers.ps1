@@ -342,7 +342,7 @@ Function Show-AgentLogs {
         return
     }
 
-    $LogFiles = @(Get-ChildItem -Path "$DataRoot\*\logs" -Filter "*.ndjson" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+    $LogFiles = @(Get-ChildItem -Path $DataRoot -Recurse -Filter "*.ndjson" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
     if ($LogFiles.Count -eq 0) {
         write-host "No agent log files under $DataRoot"
         return
