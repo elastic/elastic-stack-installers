@@ -397,12 +397,11 @@ Function Clean-ElasticAgentProcess {
 }
 
 Function ForceStop-ElasticAgent {
-    try {
-        Stop-Service -Name 'Elastic Agent' -Force -ErrorAction Stop
-    }
-    catch {
-        Get-Process -Name 'elastic-agent' -ErrorAction SilentlyContinue | Stop-Process -Force
-    }
+    # Clear SCM recovery actions so Windows does not auto-restart the service
+    # after we kill its process.
+    & sc.exe failure 'Elastic Agent' reset= 0 actions= '' | Out-Null
+
+    Get-Process -Name 'elastic-agent' -ErrorAction SilentlyContinue | Stop-Process -Force
     Wait-Process -Name 'elastic-agent' -Timeout 30 -ErrorAction SilentlyContinue
 }
 
