@@ -228,7 +228,7 @@ Describe 'Elastic Agent MSI Installer' {
 
             Assert-AgentHealthy
 
-            { Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
+            { Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="--invalid-flag"' } | Should -Throw
             
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
@@ -264,11 +264,14 @@ Describe 'Elastic Agent MSI Installer' {
 
             $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
-            Stop-Process -name "elastic-agent"
-            
+            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back,
+            # and so the test doesn't throw if the process has already exited between the poll
+            # check and the kill call.
+            ForceStop-ElasticAgent
+
             $Job | Wait-Job
 
-            $Result = $Job | Receive-Job 
+            $Result = $Job | Receive-Job
 
             # The interrupted uninstall should fail with a 1603
             $Result | Should -Be 1603
@@ -280,32 +283,22 @@ Describe 'Elastic Agent MSI Installer' {
         }
 
         It 'Rollback install when elastic-agent install crashes' {
-            # Capture the background MSI's verbose log so we can see what happened inside the Start-Job
-            $JobMsiLog = Join-Path (Get-LogDir) ("rollback-install-bg-" + (Get-Date -Format 'HHmmss') + "-i.log")
-
             # Start the MSI in a background job so that we can kill a child process and measure success
             $Job = Start-Job -WorkingDirectory $PSScriptRoot -ScriptBlock {
-                $arglist = "/i $using:PathToLatestMSI /qn /l*v ""$using:JobMsiLog"" INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
+                $arglist = "/i $using:PathToLatestMSI /qn INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
                 write-information "msiexec $arglist "
                 $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
 
                 write-output $process.ExitCode
-            }
+            } 
 
             $Time = 0
             while (-not (get-process "elastic-agent" -erroraction silentlycontinue) -and $Time -lt 45) {
-                if ($Time % 5 -eq 0) {
-                    $procs = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*elastic*' -or $_.Name -like '*msi*' } | ForEach-Object { "$($_.Name)(pid=$($_.Id))" }) -join ', '
-                    write-host "[${Time}s] Waiting for elastic-agent; job state=$($Job.State), procs: $procs"
-                }
                 start-sleep -seconds 1
                 $Time ++
             }
 
-            write-host "Finished waiting after ${Time}s; job state=$($Job.State). Partial job output follows:"
-            $Job | Receive-Job -Keep -ErrorAction SilentlyContinue | write-host
-
-            $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent (bg msi log: $JobMsiLog)"
+            $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
 
             # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
@@ -347,7 +340,7 @@ Describe 'Elastic Agent MSI Installer' {
             # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
             ForceStop-ElasticAgent
 
-            { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
+            { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--invalid-flag"' } | Should -Throw
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
