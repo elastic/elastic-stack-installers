@@ -280,35 +280,43 @@ Describe 'Elastic Agent MSI Installer' {
         }
 
         It 'Rollback install when elastic-agent install crashes' {
+            # Capture the background MSI's verbose log so we can see what happened inside the Start-Job
+            $JobMsiLog = Join-Path (Get-LogDir) ("rollback-install-bg-" + (Get-Date -Format 'HHmmss') + "-i.log")
+
             # Start the MSI in a background job so that we can kill a child process and measure success
             $Job = Start-Job -WorkingDirectory $PSScriptRoot -ScriptBlock {
-                $arglist = "/i $using:PathToLatestMSI /qn INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
+                $arglist = "/i $using:PathToLatestMSI /qn /l*v ""$using:JobMsiLog"" INSTALLARGS=""--delay-enroll --url=https://placeholder:443 --enrollment-token=token"""
                 write-information "msiexec $arglist "
                 $process = start-process -FilePath "msiexec.exe" -ArgumentList $arglist -wait -passthru
 
                 write-output $process.ExitCode
-            } 
+            }
 
             $Time = 0
             while (-not (get-process "elastic-agent" -erroraction silentlycontinue) -and $Time -lt 45) {
+                if ($Time % 5 -eq 0) {
+                    $procs = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*elastic*' -or $_.Name -like '*msi*' } | ForEach-Object { "$($_.Name)(pid=$($_.Id))" }) -join ', '
+                    write-host "[${Time}s] Waiting for elastic-agent; job state=$($Job.State), procs: $procs"
+                }
                 start-sleep -seconds 1
                 $Time ++
             }
 
-            $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
+            write-host "Finished waiting after ${Time}s; job state=$($Job.State). Partial job output follows:"
+            $Job | Receive-Job -Keep -ErrorAction SilentlyContinue | write-host
+
+            $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent (bg msi log: $JobMsiLog)"
 
 
-            Stop-Process -name "elastic-agent"
-            
+            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
+            ForceStop-ElasticAgent
+
             $Job | Wait-Job
 
-            $Result = $Job | Receive-Job 
+            $Result = $Job | Receive-Job
 
             # The interrupted install should fail with a 1603
             $Result | Should -Be 1603
-
-            # QUIRK: Clean-up the leftovers as elastic-agent install does not fully rollback during failure
-            Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
         }

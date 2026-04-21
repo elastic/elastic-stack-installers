@@ -32,11 +32,17 @@ namespace Elastic.PackageCompiler.Beats
                     // If agent got installed properly, we can go ahead and remove all the files installed by the MSI (best effort)
                     RemoveFolder(session, session["INSTALLDIR"]);
 
-                    // elastic-agent manages its own uninstall key so the MSI's written can be removed
+                    // The agent handles its own lifecycle and should not expose a standard MSI uninstall entry
+                    // in the Windows registry
                     RemoveMSIUninstallKey(session);
                 }
                 else
                 {
+                    // The MSI install cache is left behind when installation fails and must be removed manually
+                    string installDir = session["INSTALLDIR"].TrimEnd('\\');
+                    string beatsRoot = Path.GetDirectoryName(Path.GetDirectoryName(installDir));
+                    RemoveFolder(session, beatsRoot);
+
                     // The agent binary is left behind when installation fails and must be removed manually
                     RemoveFile(session, @"C:\Program Files\Elastic\Agent\elastic-agent.exe");
 
@@ -84,8 +90,11 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
+                bool existedBefore = File.Exists(file);
+                session.Log("RemoveFile: File.Exists(" + file + ") = " + existedBefore);
                 File.Delete(file);
-                session.Log("Successfully removed file: " + file);
+                bool existsAfter = File.Exists(file);
+                session.Log("RemoveFile: after delete, File.Exists = " + existsAfter);
             }
             catch (Exception ex)
             {
@@ -113,8 +122,15 @@ namespace Elastic.PackageCompiler.Beats
             try
             {
                 const string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent";
+                using (var existing = Registry.LocalMachine.OpenSubKey(keyPath))
+                {
+                    session.Log("RemoveManagedUninstallKey: key exists before delete = " + (existing != null));
+                }
                 Registry.LocalMachine.DeleteSubKeyTree(keyPath, false);
-                session.Log("Removed agent-managed uninstall registry key: HKLM\\" + keyPath);
+                using (var afterDelete = Registry.LocalMachine.OpenSubKey(keyPath))
+                {
+                    session.Log("RemoveManagedUninstallKey: key exists after delete = " + (afterDelete != null));
+                }
             }
             catch (Exception ex)
             {
