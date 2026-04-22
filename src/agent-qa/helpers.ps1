@@ -8,7 +8,7 @@ Function Get-LogDir {
     return $Script:LogDir
 }
 
-Function Get-AgentUninstallRegistryKey {
+Function Get-AgentMSIUninstallRegistryKey {
     param (
         [switch] $Passthru
     )
@@ -23,14 +23,19 @@ Function Get-AgentUninstallRegistryKey {
     return $Result.Name
 }
 
-Function Get-AgentUninstallGUID {
-    $RegistryKey = Get-AgentUninstallRegistryKey -Passthru
+Function Get-AgentManagedUninstallRegistryKey {
+    param (
+        [switch] $Passthru
+    )
 
-    try {
-        $GUID = $RegistryKey.PSChildName
-        return $GUID
-    }
-    catch {}
+    $KeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent"
+    if (-not (Test-Path $KeyPath)) { return; }
+
+    $Result = Get-Item $KeyPath
+
+    if ($Passthru) { return $Result }
+
+    return $Result.Name
 }
 
 Function Run-AgentChecks {
@@ -231,7 +236,7 @@ Function Has-AgentFleetEnrollmentAttempt {
 
         $Content = Get-Content -raw $LogFile
 
-        if ($Content -like "*failed to perform delayed enrollment: fail to enroll: fail to execute request to fleet-server: lookup placeholder: no such host*") {
+        if ($Content -like "*fail to execute request to fleet-server: lookup placeholder: no such host*") {
             return $True
         }
 
@@ -253,14 +258,34 @@ Function Is-AgentFleetEnrolled {
     return $false
 }
 
-Function Is-AgentUninstallKeyPresent {
-
-    $RegistryKey = @(Get-AgentUninstallRegistryKey)
+Function Is-AgentMSIUninstallKeyPresent {
+    $RegistryKey = @(Get-AgentMSIUninstallRegistryKey)
     if ($RegistryKey.length -ne 0) {
         return $true
     }
 
     Return $false
+}
+
+Function Is-AgentManagedUninstallKeyPresent {
+    $RegistryKey = @(Get-AgentManagedUninstallRegistryKey)
+    if ($RegistryKey.length -ne 0) {
+        return $true
+    }
+
+    Return $false
+}
+
+Function Get-AgentVersion {
+    $path = (Join-Path $Script:AgentPath $Script:AgentBinary)
+    if (-not (Test-Path $path)) {
+        throw "Agent binary not found at $path; cannot determine version"
+    }
+    $versionString = (Get-Item $path).VersionInfo.ProductVersion
+    if (-not $versionString) {
+        throw "Could not read ProductVersion from $path"
+    }
+    return [version](($versionString -split '[-+]')[0])
 }
 
 Function Is-AgentInstallCacheGone {
@@ -296,7 +321,7 @@ Function Get-AgentLogFile {
         $Latest
     )
 
-    
+
     $LogFiles = @(Get-ChildItem -Path (get-item "C:\Program Files\Elastic\Agent\data\*\logs").fullname -Filter "*.ndjson" | Where-Object {$_.name -notlike "*watcher*"} | Sort-Object LastWriteTime)
 
     if ($LogFiles.Count -eq 0) {
@@ -305,17 +330,42 @@ Function Get-AgentLogFile {
 
     if ($Latest) {
         return $LogFiles | Select-Object -last 1
-    } 
+    }
 
     return $LogFiles
 }
 
+Function Show-AgentLogs {
+    $DataRoot = Join-Path $Script:AgentPath "data"
+    if (-not (Test-Path $DataRoot)) {
+        write-host "No agent data directory at $DataRoot"
+        return
+    }
+
+    $LogFiles = @(Get-ChildItem -Path $DataRoot -Recurse -Filter "*.ndjson" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+    if ($LogFiles.Count -eq 0) {
+        write-host "No agent log files under $DataRoot"
+        return
+    }
+
+    foreach ($LogFile in $LogFiles) {
+        write-host "===== $($LogFile.FullName) ====="
+        Get-Content -Path $LogFile.FullName -ErrorAction SilentlyContinue | write-host
+        write-host "===== end $($LogFile.FullName) ====="
+    }
+}
+
 
 Function Clean-ElasticAgent {
+    param (
+        [string] $MSIPath
+    )
 
-    try { Clean-ElasticAgentInstaller } catch { }
+    if ($MSIPath) {
+        try { Clean-ElasticAgentInstaller -Path $MSIPath } catch { }
+    }
 
-    Clean-ElasticAgentUninstallKeys
+    Clean-ElasticAgentManagedUninstallKey
 
     Clean-ElasticAgentService
 
@@ -325,11 +375,11 @@ Function Clean-ElasticAgent {
 }
 
 Function Clean-ElasticAgentInstaller {
-    
-    $UninstallGuid = Get-AgentUninstallGUID
-    if (-not $UninstallGuid) { return }
+    param (
+        [string] $Path
+    )
 
-    Uninstall-MSI -Guid $UninstallGuid -LogToDir (Get-LogDir)
+    Uninstall-MSI -Path $Path -LogToDir (Get-LogDir)
 }
 
 Function Clean-ElasticAgentService {
@@ -346,6 +396,14 @@ Function Clean-ElasticAgentProcess {
     }
 }
 
+Function ForceStop-ElasticAgent {
+    # Clear SCM recovery actions to prevent auto-restart after we kill the process.
+    & sc.exe failure 'Elastic Agent' reset= 0 actions= '' | Out-Null
+
+    Get-Process -Name 'elastic-agent' -ErrorAction SilentlyContinue | Stop-Process -Force
+    Wait-Process -Name 'elastic-agent' -Timeout 30 -ErrorAction SilentlyContinue
+}
+
 Function Clean-ElasticAgentDirectory {
     $Path = Join-Path ($Env:ProgramFiles) "Elastic\Agent"
     if (Test-Path $Path) {
@@ -358,10 +416,10 @@ Function Clean-ElasticAgentDirectory {
     }
 }
 
-Function Clean-ElasticAgentUninstallKeys {
-    $Keys = Get-AgentUninstallRegistryKey -Passthru
-    if ($Keys) {
-        $Keys | Remove-Item -force -verbose
+Function Clean-ElasticAgentManagedUninstallKey {
+    $ManagedKey = Get-AgentManagedUninstallRegistryKey -Passthru
+    if ($ManagedKey) {
+        $ManagedKey | Remove-Item -force -verbose
     }
 }
 
@@ -409,20 +467,30 @@ Function Invoke-MSIExec {
 
     if ($process.ExitCode -ne 0) {
         $Message = "msiexec reports error $($process.ExitCode) = $(Get-MSIErrorMessage -Code $Process.ExitCode)"
+        $CustomActionOutput = ""
         try {
             if ($LogToDir -and $Action -eq "x") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,30
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.UnInstallAction' -Context 0,100
+                $CustomActionOutput = ($CustomActionLog.Context.PostContext -join "`n")
                 write-warning "Elastic Agent uninstall returned:"
-                write-warning ($CustomActionLog.Context.PostContext -join "`n")
+                write-warning $CustomActionOutput
             } elseif ($LogToDir -and $Action -eq "i") {
-                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,30
-                write-warning "Elastic Agent uninstall returned:"
-                write-warning ($CustomActionLog.Context.PostContext -join "`n")
+                $CustomActionLog = Select-String -Path $LoggingDestination -Pattern 'Calling custom action BeatPackageCompiler!Elastic.PackageCompiler.Beats.AgentCustomAction.InstallAction' -Context 0,100
+                $CustomActionOutput = ($CustomActionLog.Context.PostContext -join "`n")
+                write-warning "Elastic Agent install returned:"
+                write-warning $CustomActionOutput
             }
         } catch {
             write-warning "Failed to parse msi log for errors"
             write-warning "Dumping full MSI Log"
             write-host (Get-Content $LoggingDestination -raw)
+        }
+
+        write-warning "Dumping elastic-agent logs for troubleshooting"
+        Show-AgentLogs
+
+        if ($CustomActionOutput) {
+            $Message += "`n" + $CustomActionOutput
         }
 
         write-verbose $Message
