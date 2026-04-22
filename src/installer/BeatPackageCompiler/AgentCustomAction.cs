@@ -38,11 +38,6 @@ namespace Elastic.PackageCompiler.Beats
                 }
                 else
                 {
-                    // The MSI install cache is left behind when installation fails and must be removed manually
-                    string installDir = session["INSTALLDIR"].TrimEnd('\\');
-                    string beatsRoot = Path.GetDirectoryName(Path.GetDirectoryName(installDir));
-                    RemoveFolder(session, beatsRoot);
-
                     // The agent binary is left behind when installation fails and must be removed manually
                     RemoveFile(session, @"C:\Program Files\Elastic\Agent\elastic-agent.exe");
 
@@ -90,11 +85,8 @@ namespace Elastic.PackageCompiler.Beats
         {
             try
             {
-                bool existedBefore = File.Exists(file);
-                session.Log("RemoveFile: File.Exists(" + file + ") = " + existedBefore);
                 File.Delete(file);
-                bool existsAfter = File.Exists(file);
-                session.Log("RemoveFile: after delete, File.Exists = " + existsAfter);
+                session.Log("Successfully removed file: " + file);
             }
             catch (Exception ex)
             {
@@ -122,15 +114,8 @@ namespace Elastic.PackageCompiler.Beats
             try
             {
                 const string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent";
-                using (var existing = Registry.LocalMachine.OpenSubKey(keyPath))
-                {
-                    session.Log("RemoveManagedUninstallKey: key exists before delete = " + (existing != null));
-                }
                 Registry.LocalMachine.DeleteSubKeyTree(keyPath, false);
-                using (var afterDelete = Registry.LocalMachine.OpenSubKey(keyPath))
-                {
-                    session.Log("RemoveManagedUninstallKey: key exists after delete = " + (afterDelete != null));
-                }
+                session.Log("Removed agent-managed uninstall registry key: HKLM\\" + keyPath);
             }
             catch (Exception ex)
             {

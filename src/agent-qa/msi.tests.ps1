@@ -160,6 +160,9 @@ Describe 'Elastic Agent MSI Installer' {
                 Remove-Service "Elastic Agent"
             }
 
+            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
+            Clean-ElasticAgentDirectory
+
             Check-AgentRemnants
         }
 
@@ -264,9 +267,7 @@ Describe 'Elastic Agent MSI Installer' {
 
             $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
-            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back,
-            # and so the test doesn't throw if the process has already exited between the poll
-            # check and the kill call.
+            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
             ForceStop-ElasticAgent
 
             $Job | Wait-Job
@@ -300,7 +301,6 @@ Describe 'Elastic Agent MSI Installer' {
 
             $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
-
             # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
             ForceStop-ElasticAgent
 
@@ -310,6 +310,9 @@ Describe 'Elastic Agent MSI Installer' {
 
             # The interrupted install should fail with a 1603
             $Result | Should -Be 1603
+
+            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
+            Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
         }
