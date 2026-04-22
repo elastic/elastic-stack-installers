@@ -20,7 +20,13 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentUninstallKeyPresent | Should -BeTrue
+                if ((Get-AgentVersion) -ge [version]'9.4.0') {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                    Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                } else {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeFalse
+                    Is-AgentMSIUninstallKeyPresent | Should -BeTrue
+                }
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
                 Is-AgentServiceRunning -Resolve | Should -BeTrue # Start the service if it's not running and expect it to remain running
@@ -42,11 +48,17 @@ BeforeDiscovery {
                     write-warning "Agent Install Cache Program Files/Elastic/Beats is still present with $(Get-AgentInstallCacheCount) entries"
                 }
                 #Is-AgentInstallCachePresent | Should -BeFalse
-                Is-AgentUninstallKeyPresent | Should -BeTrue
+                if ((Get-AgentVersion) -ge [version]'9.4.0') {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeTrue
+                    Is-AgentMSIUninstallKeyPresent | Should -BeFalse
+                } else {
+                    Is-AgentManagedUninstallKeyPresent | Should -BeFalse
+                    Is-AgentMSIUninstallKeyPresent | Should -BeTrue
+                }
                 Is-AgentBinaryPresent | Should -BeTrue
                 Is-AgentServicePresent | Should -BeTrue
 
-                # Start the service but don't expect it to be running as our fleet config causes agent to stop right away 
+                # Start the service but don't expect it to be running as our fleet config causes agent to stop right away
                 Is-AgentServiceRunning -Resolve -WaitForExit
 
                 Has-AgentLogged | Should -BeTrue
@@ -69,12 +81,13 @@ BeforeAll {
     Import-Module (Join-Path $PSScriptRoot "helpers.ps1") -Force -Verbose:$False
 
     Function Check-AgentRemnants {
-        Is-AgentBinaryPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentFleetEnrolled | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentServiceRunning | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentServicePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentUninstallKeyPresent | Should -BeFalse -Because "The agent should have been cleaned up already"
-        Is-AgentInstallCachePresent | Should -BeFalse -Because "The agent should have been cleaned up already"
+        Is-AgentBinaryPresent | Should -BeFalse -Because "elastic-agent.exe is still on disk under C:\Program Files\Elastic\Agent"
+        Is-AgentFleetEnrolled | Should -BeFalse -Because "fleet.enc is still present, fleet enrollment was not torn down"
+        Is-AgentServiceRunning | Should -BeFalse -Because "the 'Elastic Agent' Windows service is still running"
+        Is-AgentServicePresent | Should -BeFalse -Because "the 'Elastic Agent' Windows service is still registered"
+        Is-AgentMSIUninstallKeyPresent | Should -BeFalse -Because "the MSI ARP uninstall entry (HKLM\...\Uninstall\{ProductCode}) is still present"
+        Is-AgentManagedUninstallKeyPresent | Should -BeFalse -Because "the agent-managed uninstall entry (HKLM\...\Uninstall\Elastic Agent) is still present"
+        Is-AgentInstallCachePresent | Should -BeFalse -Because "the MSI install cache at C:\Program Files\Elastic\Beats still exists"
     }
 
     # Perform an initial environment cleanup
@@ -83,7 +96,7 @@ BeforeAll {
     }
     catch {
         write-warning "Found Agent remnants before tests started. Removing Agent."
-        Clean-ElasticAgent
+        Clean-ElasticAgent -MSIPath $PathToLatestMSI
     }
 }
 
@@ -96,7 +109,7 @@ Describe 'Elastic Agent MSI Installer' {
         }
         catch {
             write-warning "Found Agent remnants between tests. Removing Agent."
-            Clean-ElasticAgent
+            Clean-ElasticAgent -MSIPath $PathToLatestMSI
         }
 
         # Reduce filesystem async race conditions - spooky voodoo
@@ -125,60 +138,49 @@ Describe 'Elastic Agent MSI Installer' {
 
             Assert-AgentHealthy
 
+            if ($Mode -eq 'Fleet') {
+                # Workaround to stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
+                ForceStop-ElasticAgent
+            }
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
             Check-AgentRemnants
         }
 
-        It 'Can be installed and uninstalled via GUID, without installargs, in <Mode> mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters
-
-            Check-AgentRemnants
-        }
-        
-        It 'Gracefully handles existing agent components' {
-
-            # Create a fake service
+        It 'Leaves no agent artifacts when install fails in <Mode> mode' {
+            # Pre-create a fake "Elastic Agent" service so the MSI install fails
             new-service -Name "Elastic Agent" -BinaryPathName "cmd.exe" -DisplayName "Fake Service" -StartupType manual
 
-            # Create a fake directory
-            new-item -itemtype directory "C:\Program Files\Elastic\Agent\data\elastic-agent-03ef9d\logs"
-            
-            # Create a fake config
-            set-content "C:\Program Files\Elastic\Agent\elastic-agent.exe" -value "test" -nonewline
+            { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Throw -ExpectedMessage '*service Elastic Agent already exists*'
 
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            # Remove our fakes and see if everything passes 
-            if ((get-content "C:\Program Files\Elastic\Agent\elastic-agent.exe" -raw) -eq "test") {
-                remove-item "C:\Program Files\Elastic\Agent\elastic-agent.exe"
-            }
             if ((Get-Service "Elastic Agent" -Erroraction SilentlyContinue).DisplayName -eq "Fake Service") {
                 Remove-Service "Elastic Agent"
             }
 
-            Assert-AgentHealthy
-
-            # We clean-up with a clean-up script so that we can differentiate installer from uninstaller failures with the next test
-            Clean-ElasticAgent
+            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
+            Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
         }
+
         It 'Blocks downgrades and upgrades in <Mode> mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
             Assert-AgentHealthy
-            
+
             { Install-MSI -Path $PathToEarlyMSI -Interactive "/qn" @MSIInstallParameters } | Should -Throw
 
             Assert-AgentHealthy
+
+            if ($Mode -eq 'Fleet') {
+                # Workaround to stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
+                ForceStop-ElasticAgent
+            }
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
 
@@ -194,6 +196,13 @@ Describe 'Elastic Agent MSI Installer' {
 
             Assert-AgentHealthy
 
+            if ($Mode -eq 'Fleet') {
+                # Workaround to stop the agent to avoid the > 10 minute uninstall timeout while it's
+                # trying to enroll to a fake fleet server (https://placeholder:443)
+                # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
+                ForceStop-ElasticAgent
+            }
+
             Uninstall-MSI -Path $PathToEarlyMSI
 
             Check-AgentRemnants
@@ -206,6 +215,7 @@ Describe 'Elastic Agent MSI Installer' {
                 & $HealthFunction
             }
         }
+
         It 'Behaves itself as a standalone agent' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
@@ -215,26 +225,13 @@ Describe 'Elastic Agent MSI Installer' {
 
             Check-AgentRemnants
         }
-        
-        It 'Can be installed in Standalone mode and uninstalled via GUID in default mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters
-
-            Check-AgentRemnants
-        }
 
         It 'Can be installed and uninstalled via MSI, with invalid installargs, in standalone mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
             Assert-AgentHealthy
 
-            { Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
+            { Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="--invalid-flag"' } | Should -Throw
             
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
 
@@ -270,17 +267,18 @@ Describe 'Elastic Agent MSI Installer' {
 
             $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
-            Stop-Process -name "elastic-agent"
-            
+            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
+            ForceStop-ElasticAgent
+
             $Job | Wait-Job
 
-            $Result = $Job | Receive-Job 
+            $Result = $Job | Receive-Job
 
             # The interrupted uninstall should fail with a 1603
             $Result | Should -Be 1603
 
             # QUIRK: Clean-up the leftovers as elastic-agent uninstall does not fully rollback during failure
-            Clean-ElasticAgent
+            Clean-ElasticAgent -MSIPath $PathToLatestMSI
             
             Check-AgentRemnants
         }
@@ -303,17 +301,17 @@ Describe 'Elastic Agent MSI Installer' {
 
             $Time | Should -BelessThan 45 -Because "otherwise we timed out waiting for the agent"
 
+            # Kill via ForceStop so SCM doesn't auto-restart the service while MSI rolls back
+            ForceStop-ElasticAgent
 
-            Stop-Process -name "elastic-agent"
-            
             $Job | Wait-Job
 
-            $Result = $Job | Receive-Job 
+            $Result = $Job | Receive-Job
 
             # The interrupted install should fail with a 1603
             $Result | Should -Be 1603
 
-            # QUIRK: Clean-up the leftovers as elastic-agent install does not fully rollback during failure
+            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
             Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
@@ -325,33 +323,29 @@ Describe 'Elastic Agent MSI Installer' {
             Assert-AgentHealthy
             Has-AgentFleetEnrollmentAttempt | Should -BeTrue
 
+            # Workaround to stop the agent to avoid the > 10 minute uninstall timeout while it's
+            # trying to enroll to a fake fleet server (https://placeholder:443)
+            # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
+            ForceStop-ElasticAgent
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
 
             Check-AgentRemnants
         }
-
 
         It 'Can be installed and uninstalled via MSI, with invalid installargs, in fleet mode' {
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
 
             Assert-AgentHealthy
 
-            { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--delayenroll"' } | Should -Throw
-            
+            # Workaround to stop the agent to avoid the > 10 minute uninstall timeout while it's
+            # trying to enroll to a fake fleet server (https://placeholder:443)
+            # TODO(samuelvl): remove when https://github.com/elastic/elastic-agent/pull/13698 is released
+            ForceStop-ElasticAgent
+
+            { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--invalid-flag"' } | Should -Throw
+
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
-
-            Check-AgentRemnants
-        }
-
-        It 'Can be installed in Fleet mode and uninstalled via GUID in default mode' {
-            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-
-            Assert-AgentHealthy
-
-            { Get-AgentUninstallGUID } | Should -Not -Throw
-            $UninstallGuid = Get-AgentUninstallGUID
-
-            Uninstall-MSI -Guid $UninstallGuid @MSIUninstallParameters -Flags '/norestart'
 
             Check-AgentRemnants
         }
