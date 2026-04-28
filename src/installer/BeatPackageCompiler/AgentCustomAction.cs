@@ -105,20 +105,6 @@ namespace Elastic.PackageCompiler.Beats
             }
         }
 
-        private static void RemoveManagedUninstallKey(Session session)
-        {
-            try
-            {
-                const string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent";
-                Registry.LocalMachine.DeleteSubKeyTree(keyPath, false);
-                session.Log("Removed agent-managed uninstall registry key: HKLM\\" + keyPath);
-            }
-            catch (Exception ex)
-            {
-                session.Log("Failed to remove agent-managed uninstall registry key: " + ex.ToString());
-            }
-        }
-
         [CustomAction]
         public static ActionResult UpgradeAction(Session session)
         {

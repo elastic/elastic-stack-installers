@@ -149,9 +149,7 @@ Describe 'Elastic Agent MSI Installer' {
 
             { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Throw -ExpectedMessage '*service Elastic Agent already exists*'
 
-            if ((Get-Service "Elastic Agent" -Erroraction SilentlyContinue).DisplayName -eq "Fake Service") {
-                Remove-Service "Elastic Agent"
-            }
+            Get-Service "Elastic Agent" -ErrorAction SilentlyContinue | Should -BeNullOrEmpty -Because "the agent's rollback on install failure should have removed the 'Elastic Agent' service"
 
             # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
             Clean-ElasticAgentDirectory
