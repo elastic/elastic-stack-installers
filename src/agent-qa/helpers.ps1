@@ -355,7 +355,6 @@ Function Show-AgentLogs {
     }
 }
 
-
 Function Clean-ElasticAgent {
     param (
         [string] $MSIPath

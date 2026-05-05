@@ -40,10 +40,6 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     // The agent binary is left behind when installation fails and must be removed manually
                     RemoveFile(session, @"C:\Program Files\Elastic\Agent\elastic-agent.exe");
-
-                    // The agent's managed uninstall key is left behind when installation fails and must be removed manually
-                    // TODO(samuevl): remove when https://github.com/elastic/elastic-agent/pull/13705 is released
-                    RemoveManagedUninstallKey(session);
                 }
 
                 return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
@@ -106,20 +102,6 @@ namespace Elastic.PackageCompiler.Beats
             catch (Exception ex)
             {
                 session.Log("Failed to remove ARP registry key: " + ex.ToString());
-            }
-        }
-
-        private static void RemoveManagedUninstallKey(Session session)
-        {
-            try
-            {
-                const string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Elastic Agent";
-                Registry.LocalMachine.DeleteSubKeyTree(keyPath, false);
-                session.Log("Removed agent-managed uninstall registry key: HKLM\\" + keyPath);
-            }
-            catch (Exception ex)
-            {
-                session.Log("Failed to remove agent-managed uninstall registry key: " + ex.ToString());
             }
         }
 
