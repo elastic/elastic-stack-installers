@@ -61,7 +61,7 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
@@ -102,7 +102,7 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
 
 ---
@@ -136,5 +136,5 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
