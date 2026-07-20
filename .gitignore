@@ -66,3 +66,11 @@ src/*.pdb
 src/*.dll
 pwsh
 pwsh.zip
+# Local secrets and credentials -- never commit these
+.env
+.env.*
+*.pem
+*.key
+*credentials*
+*secret*
+kubeconfig
