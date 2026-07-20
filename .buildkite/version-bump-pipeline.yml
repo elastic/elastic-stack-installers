@@ -2,15 +2,16 @@ notify:
   - slack:
       channels:
         - "#ingest-notifications"
+      message: "<!subteam^S03HZQJLA2D|robots-dx> Version bump to ${NEW_VERSION} — ${BUILDKITE_BUILD_URL}"
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
         - "#ingest-notifications"
       message: |
-        🚦 Pipeline waiting for approval 🚦
+        <!subteam^S03HZQJLA2D|robots-dx>
+        🚦 Pipeline waiting to be unblocked 🚦
         Repo: `${REPO}`
 
-        Ready to fetch DRA artifacts - please unblock when ready.
         New version: `${NEW_VERSION}`
         Branch: `${BRANCH}`
         Workflow: `${WORKFLOW}`
@@ -18,17 +19,7 @@ notify:
     if: build.state == "blocked"
 
 steps:
-  - label: "Bump version minor"
-    # NOTE: a new minor is X.Y.0, so we check if the version ends with 0
-    #       to decide if it's a minor or patch release
-    if: build.env("NEW_VERSION") !~ /0$/
-    command: "make release-major-minor CURRENT_RELEASE=${NEW_VERSION}"
-    plugins:
-      - elastic/vault-github-token#v0.1.0:
-    agents:
-      image: "docker.elastic.co/ci-agent-images/observability-robots/ubuntu-build-essential:latest"
-
-  - block: "Ready to fetch for DRA artifacts?"
+  - block: "Placeholder blocked step"
     prompt: |
       Unblock when your team is ready to proceed.
 
@@ -39,32 +30,10 @@ steps:
     key: block-get-dra-artifacts
     blocked_state: running
 
-  - label: "Fetch DRA Artifacts"
-    key: fetch-dra-artifacts
-    depends_on: block-get-dra-artifacts
-    agents:
-      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
-      cpu: 250m
-      memory: 512Mi
-      ephemeralStorage: 1Gi
-    command:
-      - echo "Starting DRA artifacts retrieval..."
-    timeout_in_minutes: 240
-    retry:
-      automatic:
-        - exit_status: "*"
-          limit: 2
-      manual:
-        permit_on_passed: true
-
+  - label: "Create branch for version bump"
+    if: build.env("WORKFLOW") == "minor"
+    command: "make release-major-minor CURRENT_RELEASE=${NEW_VERSION}"
     plugins:
-      - elastic/json-watcher#v1.0.0:
-          url: "https://artifacts-staging.elastic.co/elastic-stack-installers/latest/${BRANCH}.json"
-          field: ".version"
-          expected_value: "${NEW_VERSION}"
-          polling_interval: "30"
-      - elastic/json-watcher#v1.0.0:
-          url: "https://storage.googleapis.com/elastic-artifacts-snapshot/elastic-stack-installers/latest/${BRANCH}.json"
-          field: ".version"
-          expected_value: "${NEW_VERSION}-SNAPSHOT"
-          polling_interval: "30"
+      - elastic/vault-github-token#v0.1.0:
+    agents:
+      image: "docker.elastic.co/ci-agent-images/observability-robots/ubuntu-build-essential:latest"

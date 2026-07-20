@@ -61,7 +61,7 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
@@ -102,7 +102,7 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
 
 ---
@@ -128,6 +128,7 @@ spec:
       name: elastic-stack-installers-version-bump
     spec:
       pipeline_file: ".buildkite/version-bump-pipeline.yml"
+      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
       repository: elastic/elastic-stack-installers
@@ -135,5 +136,5 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
         ingest-fp: {}
-        release-eng: {}
+        artifact-management: {}
         observablt-robots: {}
