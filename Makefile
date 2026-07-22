@@ -57,11 +57,14 @@ create-release-branch: check-requirements
 	@echo "Creating release branch $(RELEASE_BRANCH) from $(BASE_BRANCH)..."
 	$(GIT) checkout $(BASE_BRANCH)
 	$(GIT) pull origin $(BASE_BRANCH)
-	$(GIT) checkout -b $(RELEASE_BRANCH)
-	@if [ "$(DRY_RUN)" = "true" ]; then \
+	@if $(GIT) ls-remote --heads origin $(RELEASE_BRANCH) | grep -q .; then \
+		echo "$(YELLOW)⚠ Branch $(RELEASE_BRANCH) already exists on remote, skipping$(NC)"; \
+	elif [ "$(DRY_RUN)" = "true" ]; then \
+		echo "[DRY_RUN] git checkout -b $(RELEASE_BRANCH)"; \
 		echo "[DRY_RUN] git push origin $(RELEASE_BRANCH)"; \
 		echo "$(YELLOW)⚠ DRY_RUN mode: Branch created locally but NOT pushed to remote$(NC)"; \
 	else \
+		$(GIT) checkout -b $(RELEASE_BRANCH); \
 		$(GIT) push origin $(RELEASE_BRANCH); \
 		echo "$(GREEN)✓ Created and pushed branch $(RELEASE_BRANCH)$(NC)"; \
 	fi
