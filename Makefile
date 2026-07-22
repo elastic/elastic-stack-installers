@@ -52,11 +52,14 @@ check-requirements:
 	fi
 	@echo "$(GREEN)✓ Requirements check passed$(NC)"
 
-.PHONY: create-release-branch
-create-release-branch: check-requirements
+.PHONY: prepare-base-branch
+prepare-base-branch:
 	@echo "Creating release branch $(RELEASE_BRANCH) from $(BASE_BRANCH)..."
 	$(GIT) checkout $(BASE_BRANCH)
 	$(GIT) pull origin $(BASE_BRANCH)
+
+.PHONY: create-release-branch
+create-release-branch: check-requirements prepare-base-branch
 	@if $(GIT) ls-remote --heads origin $(RELEASE_BRANCH) | grep -q .; then \
 		echo "$(YELLOW)⚠ Branch $(RELEASE_BRANCH) already exists on remote, skipping$(NC)"; \
 	elif [ "$(DRY_RUN)" = "true" ]; then \
@@ -68,12 +71,12 @@ create-release-branch: check-requirements
 		$(GIT) push origin $(RELEASE_BRANCH); \
 		echo "$(GREEN)✓ Created and pushed branch $(RELEASE_BRANCH)$(NC)"; \
 	fi
+
+.PHONY: release-major-minor
+release-major-minor: create-release-branch
+	@echo "$(GREEN)✓ Major/minor release branch created successfully$(NC)"
 	@echo ""
 	@echo "Next steps:"
 	@echo "1. Create branch protection rules at:"
 	@echo "   https://github.com/$(PROJECT_OWNER)/$(PROJECT_REPO)/settings/branch_protection_rules/new"
 	@echo "2. Notify release team in #mission-control"
-
-.PHONY: release-major-minor
-release-major-minor: create-release-branch
-	@echo "$(GREEN)✓ Major/minor release branch created successfully$(NC)"
