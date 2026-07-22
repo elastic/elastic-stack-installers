@@ -11,7 +11,7 @@ PROJECT_MAJOR_VERSION ?= $(shell echo $(CURRENT_RELEASE) | cut -d. -f1)
 
 # DRY_RUN mode - set to "true" to preview commands without executing
 DRY_RUN ?= false
-GIT := $(if $(filter true,$(DRY_RUN)),@echo "[DRY_RUN] git", git)
+GIT := git
 
 # Colors for output
 GREEN := \033[0;32m
@@ -35,7 +35,6 @@ help:
 	@echo ""
 	@echo "Example usage:"
 	@echo "  make release-major-minor CURRENT_RELEASE=9.5.0"
-	@echo "  DRY_RUN=true make release-major-minor CURRENT_RELEASE=9.5.0"
 	@echo "  make release-major-minor CURRENT_RELEASE=9.5.0 BASE_BRANCH=main"
 
 .PHONY: check-requirements
@@ -55,28 +54,19 @@ check-requirements:
 .PHONY: prepare-base-branch
 prepare-base-branch:
 	@echo "Creating release branch $(RELEASE_BRANCH) from $(BASE_BRANCH)..."
-	$(GIT) checkout $(BASE_BRANCH)
-	$(GIT) pull origin $(BASE_BRANCH)
+	$(GIT) checkout --quiet $(BASE_BRANCH)
+	$(GIT) pull --quiet origin $(BASE_BRANCH)
 
 .PHONY: create-release-branch
 create-release-branch: check-requirements prepare-base-branch
 	@if $(GIT) ls-remote --heads origin $(RELEASE_BRANCH) | grep -q .; then \
 		echo "$(YELLOW)⚠ Branch $(RELEASE_BRANCH) already exists on remote, skipping$(NC)"; \
 	else \
-		$(GIT) checkout -b $(RELEASE_BRANCH); \
-		$(GIT) push origin $(RELEASE_BRANCH); \
-		if [ "$(DRY_RUN)" = "true" ]; then \
-			echo "$(YELLOW)⚠ DRY_RUN mode: Branch created locally but NOT pushed to remote$(NC)"; \
-		else \
-			echo "$(GREEN)✓ Created and pushed branch $(RELEASE_BRANCH)$(NC)"; \
-		fi; \
+		$(GIT) checkout --quiet -b $(RELEASE_BRANCH); \
+		$(GIT) push --quiet origin $(RELEASE_BRANCH); \
+		echo "  $(GREEN)✓ Created and pushed branch $(RELEASE_BRANCH)$(NC)"; \
+		echo "$(GREEN)✓ Major/minor release branch created successfully$(NC)"; \
 	fi
 
 .PHONY: release-major-minor
 release-major-minor: create-release-branch
-	@echo "  $(GREEN)✓ Major/minor release branch created successfully$(NC)"
-	@echo ""
-	@echo "Next steps:"
-	@echo "1. Create branch protection rules at:"
-	@echo "   https://github.com/$(PROJECT_OWNER)/$(PROJECT_REPO)/settings/branch_protection_rules/new"
-	@echo "2. Notify release team in #mission-control"
