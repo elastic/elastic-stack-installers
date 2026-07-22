@@ -19,17 +19,6 @@ notify:
     if: build.state == "blocked"
 
 steps:
-  - block: "Placeholder blocked step"
-    prompt: |
-      Unblock when your team is ready to proceed.
-
-      Trigger parameters:
-      - NEW_VERSION: ${NEW_VERSION}
-      - BRANCH: ${BRANCH}
-      - WORKFLOW: ${WORKFLOW}
-    key: block-get-dra-artifacts
-    blocked_state: running
-
   - label: "Create branch for version bump"
     if: build.env("WORKFLOW") == "minor"
     command: "make release-major-minor CURRENT_RELEASE=${NEW_VERSION}"

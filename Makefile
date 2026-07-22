@@ -62,7 +62,7 @@ create-release-branch: check-requirements
 		echo "[DRY_RUN] git push origin $(RELEASE_BRANCH)"; \
 		echo "$(YELLOW)⚠ DRY_RUN mode: Branch created locally but NOT pushed to remote$(NC)"; \
 	else \
-		git push origin $(RELEASE_BRANCH); \
+		$(GIT) push origin $(RELEASE_BRANCH); \
 		echo "$(GREEN)✓ Created and pushed branch $(RELEASE_BRANCH)$(NC)"; \
 	fi
 	@echo ""
