@@ -10,7 +10,6 @@ RELEASE_BRANCH ?= $(shell echo $(CURRENT_RELEASE) | sed -E 's/^([0-9]+\.[0-9]+)\
 PROJECT_MAJOR_VERSION ?= $(shell echo $(CURRENT_RELEASE) | cut -d. -f1)
 
 # DRY_RUN mode - set to "true" to preview commands without executing
-DRY_RUN ?= false
 GIT := git
 
 # Colors for output

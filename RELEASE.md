@@ -29,7 +29,6 @@ After running the command, you'll need to manually:
 | `BASE_BRANCH` | No | `main` | Base branch to create release from |
 | `PROJECT_OWNER` | No | `elastic` | GitHub organization/owner |
 | `PROJECT_REPO` | No | `elastic-stack-installers` | Repository name |
-| `DRY_RUN` | No | `false` | Set to `true` for dry-run mode |
 
 ## Available Targets
 
@@ -65,19 +64,6 @@ Complete major/minor release workflow (runs all the above).
 make release-major-minor CURRENT_RELEASE=9.5.0
 ```
 
-## DRY_RUN Mode
-
-Test the release workflow without making changes:
-
-```bash
-# Preview what would happen
-DRY_RUN=true make release-major-minor CURRENT_RELEASE=9.5.0
-
-# Review the dry-run output
-# If everything looks good, run for real:
-make release-major-minor CURRENT_RELEASE=9.5.0
-```
-
 ## Testing on Your Fork
 
 To test the release automation on your fork:
@@ -85,11 +71,6 @@ To test the release automation on your fork:
 ```bash
 # Fork the repository first, then:
 cd elastic-stack-installers
-
-# Test with dry-run first
-DRY_RUN=true make release-major-minor \
-  CURRENT_RELEASE=9.5.0-test \
-  PROJECT_OWNER=your-username
 
 # If dry-run looks good, test for real
 make release-major-minor \
