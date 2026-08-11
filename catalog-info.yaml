@@ -9,7 +9,7 @@ metadata:
   annotations:
     backstage.io/source-location: url:https://github.com/elastic/elastic-stack-installers/
     github.com/project-slug: elastic/elastic-stack-installers
-    github.com/team-slug: elastic/Streams
+    github.com/team-slug: elastic/streams
 
   tags:
     - buildkite
@@ -19,7 +19,7 @@ metadata:
 
 spec:
   type: tool
-  owner: group:Streams
+  owner: group:streams
   lifecycle: beta
   dependsOn:
     - resource:github-repository-elastic-stack-installers
@@ -36,7 +36,7 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:Streams
+  owner: group:streams
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -60,7 +60,7 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
-        Streams: {}
+        streams: {}
         artifact-management: {}
         observablt-robots: {}
       env:
@@ -81,7 +81,7 @@ metadata:
       url: https://buildkite.com/elastic/elastic-stack-installers-trigger
 spec:
   type: buildkite-pipeline
-  owner: group:Streams
+  owner: group:streams
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -101,7 +101,7 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
-        Streams: {}
+        streams: {}
         artifact-management: {}
         observablt-robots: {}
 
@@ -118,7 +118,7 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:Streams
+  owner: group:streams
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -135,6 +135,6 @@ spec:
       teams:
         everyone:
           access_level: BUILD_AND_READ
-        Streams: {}
+        streams: {}
         artifact-management: {}
         observablt-robots: {}
