@@ -7,16 +7,8 @@ notify:
   - slack:
       channels:
         - "#ingest-notifications"
-      message: |
-        <!subteam^S03HZQJLA2D|robots-dx>
-        🚦 Pipeline waiting to be unblocked 🚦
-        Repo: `${REPO}`
-
-        New version: `${NEW_VERSION}`
-        Branch: `${BRANCH}`
-        Workflow: `${WORKFLOW}`
-        ${BUILDKITE_BUILD_URL}
-    if: build.state == "blocked"
+      message: "<!subteam^S03HZQJLA2D|robots-dx> Version bump to ${NEW_VERSION} started — ${BUILDKITE_BUILD_URL}"
+    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && build.state == 'running'
 
 steps:
   - label: "Create branch for version bump"
