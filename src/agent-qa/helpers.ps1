@@ -4,10 +4,6 @@ $Script:AgentBinary = "elastic-agent.exe"
 
 $Script:LogDir = (Join-Path $PSScriptRoot "logs")
 
-$ProductStateUnknown = -1
-$ProductStateAdvertised = 1
-$ProductStateInstalled = 5
-
 Function Get-LogDir {
     return $Script:LogDir
 }
@@ -280,13 +276,28 @@ Function Is-AgentManagedUninstallKeyPresent {
     Return $false
 }
 
-# Checks if Windows Installer still has the MSI product registered, installed or advertised.
 Function Is-AgentMSIRegistrationPresent {
     param (
         [string] $ProductCode
     )
 
-    return (Get-MSIProductState -ProductCode $ProductCode) -ne $ProductStateUnknown
+    return (Get-MSIProductState -ProductCode $ProductCode) -ne -1
+}
+
+Function Is-AgentMSIAdvertised {
+    param (
+        [string] $ProductCode
+    )
+
+    return (Get-MSIProductState -ProductCode $ProductCode) -eq 1
+}
+
+Function Is-AgentMSIInstalled {
+    param (
+        [string] $ProductCode
+    )
+
+    return (Get-MSIProductState -ProductCode $ProductCode) -eq 5
 }
 
 Function Get-AgentVersion {

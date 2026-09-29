@@ -333,10 +333,10 @@ Describe 'Elastic Agent MSI Installer' {
             Invoke-MSIAdvertise -Path $PathToLatestMSI
 
             { Install-MSI -Path $PathToLatestMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
-            Get-MSIProductState -ProductCode $LatestProductCode | Should -Be $ProductStateAdvertised
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
 
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-            Get-MSIProductState -ProductCode $LatestProductCode | Should -Be $ProductStateInstalled
+            Is-AgentMSIInstalled -ProductCode $LatestProductCode | Should -BeTrue
 
             Assert-AgentHealthy
 
@@ -349,13 +349,13 @@ Describe 'Elastic Agent MSI Installer' {
             Invoke-MSIAdvertise -Path $UpgradeFromMSI
 
             { Install-MSI -Path $UpgradeFromMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
-            Get-MSIProductState -ProductCode $UpgradeFromProductCode | Should -Be $ProductStateAdvertised
+            Is-AgentMSIAdvertised -ProductCode $UpgradeFromProductCode | Should -BeTrue
 
             Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
-            Get-MSIProductState -ProductCode $LatestProductCode | Should -Be $ProductStateInstalled
+            Is-AgentMSIInstalled -ProductCode $LatestProductCode | Should -BeTrue
 
             Assert-AgentHealthy
-            Get-MSIProductState -ProductCode $UpgradeFromProductCode | Should -Be $ProductStateUnknown -Because "the install of the newer version removes the earlier version"
+            Is-AgentMSIRegistrationPresent -ProductCode $UpgradeFromProductCode | Should -BeFalse -Because "the install of the newer version removes the earlier version"
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
 
@@ -364,7 +364,7 @@ Describe 'Elastic Agent MSI Installer' {
 
         It 'Can be uninstalled when it is only advertised' {
             Invoke-MSIAdvertise -Path $PathToLatestMSI
-            Get-MSIProductState -ProductCode $LatestProductCode | Should -Be $ProductStateAdvertised
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
 
             Uninstall-MSI -Guid $LatestProductCode @MSIUninstallParameters
 
@@ -375,7 +375,7 @@ Describe 'Elastic Agent MSI Installer' {
             Invoke-MSIAdvertise -Path $PathToLatestMSI
 
             { Install-MSI -Path $PathToLatestMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
-            Get-MSIProductState -ProductCode $LatestProductCode | Should -Be $ProductStateAdvertised
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
 
             Uninstall-MSI -Guid $LatestProductCode @MSIUninstallParameters
 
