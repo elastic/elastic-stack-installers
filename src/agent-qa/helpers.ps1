@@ -4,6 +4,10 @@ $Script:AgentBinary = "elastic-agent.exe"
 
 $Script:LogDir = (Join-Path $PSScriptRoot "logs")
 
+$ProductStateUnknown = -1
+$ProductStateAdvertised = 1
+$ProductStateInstalled = 5
+
 Function Get-LogDir {
     return $Script:LogDir
 }
@@ -276,6 +280,15 @@ Function Is-AgentManagedUninstallKeyPresent {
     Return $false
 }
 
+# Checks if Windows Installer still has the MSI product registered, installed or advertised.
+Function Is-AgentMSIRegistrationPresent {
+    param (
+        [string] $ProductCode
+    )
+
+    return (Get-MSIProductState -ProductCode $ProductCode) -ne $ProductStateUnknown
+}
+
 Function Get-AgentVersion {
     $path = (Join-Path $Script:AgentPath $Script:AgentBinary)
     if (-not (Test-Path $path)) {
@@ -322,7 +335,7 @@ Function Get-AgentLogFile {
     )
 
 
-    $LogFiles = @(Get-ChildItem -Path (get-item "C:\Program Files\Elastic\Agent\data\*\logs").fullname -Filter "*.ndjson" | Where-Object {$_.name -notlike "*watcher*"} | Sort-Object LastWriteTime)
+    $LogFiles = @(Get-ChildItem -Path (get-item "C:\Program Files\Elastic\Agent\data\*\logs").fullname -Filter "*.ndjson" | Where-Object Name -match '^elastic-agent-\d{8}(-\d+)?\.ndjson$' | Sort-Object LastWriteTime)
 
     if ($LogFiles.Count -eq 0) {
         throw "No log files found"
@@ -558,7 +571,81 @@ Function Uninstall-MSI {
     
 }
 
+# Registers the MSI in Windows Installer without installing any files, like SCCM does before it installs an MSI.
+Function Invoke-MSIAdvertise {
+    param (
+        [string] $Path
+    )
 
+    Add-Type -Namespace Win32 -Name Msi -MemberDefinition '[DllImport("msi.dll", CharSet = CharSet.Unicode)] public static extern uint MsiAdvertiseProduct(string szPackagePath, IntPtr szScriptfilePath, string szTransforms, ushort lgidLanguage);'
+
+    $rc = [Win32.Msi]::MsiAdvertiseProduct($Path, [IntPtr]::Zero, $null, 0)
+    if ($rc -ne 0) {
+        throw "MsiAdvertiseProduct returned $rc for $Path"
+    }
+}
+
+# Reads a property of an MSI file.
+Function Get-MSIProperty {
+    param (
+        [string] $Path,
+        [string] $Name
+    )
+
+    $Installer = New-Object -ComObject WindowsInstaller.Installer
+    $Database = $Installer.OpenDatabase($Path, 0)
+    $View = $Database.OpenView("SELECT Value FROM Property WHERE Property='$Name'")
+    [void]$View.Execute()
+    $Record = $View.Fetch()
+    $Value = $Record.StringData(1)
+    [void]$View.Close()
+    # Release the handles, or the MSI file stays locked.
+    $Record, $View, $Database | ForEach-Object { [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_) }
+    return $Value
+}
+
+# The Windows Installer state of a product.
+Function Get-MSIProductState {
+    param (
+        [string] $ProductCode
+    )
+
+    return (New-Object -ComObject WindowsInstaller.Installer).ProductState($ProductCode)
+}
+
+# Makes a copy of the MSI that Windows Installer sees as another version of the same product.
+Function Copy-MSIWithVersion {
+    param (
+        [string] $Path,
+        [string] $Destination,
+        [string] $Version
+    )
+
+    Copy-Item $Path $Destination -Force
+
+    $Installer = New-Object -ComObject WindowsInstaller.Installer
+    $Database = $Installer.OpenDatabase($Destination, 1)
+    $SetProperty = {
+        param ($Name, $Value)
+        $View = $Database.OpenView("UPDATE Property SET Value='$Value' WHERE Property='$Name'")
+        [void]$View.Execute()
+        [void]$View.Close()
+        [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($View)
+    }
+
+    $ProductCode = "{$([guid]::NewGuid().ToString().ToUpper())}"
+    & $SetProperty ProductVersion $Version
+    & $SetProperty ProductCode $ProductCode
+
+    # Summary information property 9 is the package code. A new MSI must have a new one.
+    $Summary = $Database.SummaryInformation(1)
+    [void]$Summary.GetType().InvokeMember("Property", "SetProperty", $null, $Summary, @(9, "{$([guid]::NewGuid().ToString().ToUpper())}"))
+    [void]$Summary.Persist()
+    [void]$Database.Commit()
+    $Summary, $Database | ForEach-Object { [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($_) }
+
+    return $ProductCode
+}
 
 Function Get-MSIErrorMessage {
     param (
