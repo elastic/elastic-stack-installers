@@ -80,6 +80,8 @@ BeforeAll {
     #$VerbosePreference = "Continue"
     Import-Module (Join-Path $PSScriptRoot "helpers.ps1") -Force -Verbose:$False
 
+    $LatestProductCode = Get-MSIProperty -Path $PathToLatestMSI -Name ProductCode
+
     Function Check-AgentRemnants {
         Is-AgentBinaryPresent | Should -BeFalse -Because "elastic-agent.exe is still on disk under C:\Program Files\Elastic\Agent"
         Is-AgentFleetEnrolled | Should -BeFalse -Because "fleet.enc is still present, fleet enrollment was not torn down"
@@ -88,6 +90,7 @@ BeforeAll {
         Is-AgentMSIUninstallKeyPresent | Should -BeFalse -Because "the MSI ARP uninstall entry (HKLM\...\Uninstall\{ProductCode}) is still present"
         Is-AgentManagedUninstallKeyPresent | Should -BeFalse -Because "the agent-managed uninstall entry (HKLM\...\Uninstall\Elastic Agent) is still present"
         Is-AgentInstallCachePresent | Should -BeFalse -Because "the MSI install cache at C:\Program Files\Elastic\Beats still exists"
+        Is-AgentMSIRegistrationPresent -ProductCode $LatestProductCode | Should -BeFalse -Because "the Windows Installer registration of the MSI ({ProductCode}) is still present"
     }
 
     # Perform an initial environment cleanup
@@ -150,9 +153,6 @@ Describe 'Elastic Agent MSI Installer' {
             { Install-MSI -Path $PathToLatestMSI @MSIInstallParameters } | Should -Throw -ExpectedMessage '*service Elastic Agent already exists*'
 
             Get-Service "Elastic Agent" -ErrorAction SilentlyContinue | Should -BeNullOrEmpty -Because "the agent's rollback on install failure should have removed the 'Elastic Agent' service"
-
-            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
-            Clean-ElasticAgentDirectory
 
             Check-AgentRemnants
         }
@@ -288,9 +288,6 @@ Describe 'Elastic Agent MSI Installer' {
             # The interrupted install should fail with a 1603
             $Result | Should -Be 1603
 
-            # QUIRK: The MSI install cache is left behind when installation fails and must be removed manually
-            Clean-ElasticAgentDirectory
-
             Check-AgentRemnants
         }
 
@@ -313,6 +310,74 @@ Describe 'Elastic Agent MSI Installer' {
             { Uninstall-MSI -Path $PathToLatestMSI -LogToDir $MSIUninstallParameters.LogToDir -Flags 'INSTALLARGS="--invalid-flag"' } | Should -Throw
 
             Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters -Flags 'INSTALLARGS="-v"'
+
+            Check-AgentRemnants
+        }
+    }
+
+    Context "Specific tests for Standalone Mode with an advertised product" -Foreach $Testcases[0] {
+        BeforeAll {
+            Function Assert-AgentHealthy {
+                & $HealthFunction
+            }
+
+            # Force the enrollment to fail because the URL does not resolve.
+            $FailedInstallFlags = '/norestart INSTALLARGS="--url=https://placeholder:443 --enrollment-token=token --enroll-timeout=5s"'
+
+            # Build an MSI with the same files that Windows Installer sees as an earlier release of the product
+            $UpgradeFromMSI = Join-Path $TestDrive "elastic-agent-0.0.1.msi"
+            $UpgradeFromProductCode = Copy-MSIWithVersion -Path $PathToLatestMSI -Destination $UpgradeFromMSI -Version "0.0.1"
+        }
+
+        It 'Can be installed after a failed install of the same version' {
+            Invoke-MSIAdvertise -Path $PathToLatestMSI
+
+            { Install-MSI -Path $PathToLatestMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
+
+            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
+            Is-AgentMSIInstalled -ProductCode $LatestProductCode | Should -BeTrue
+
+            Assert-AgentHealthy
+
+            Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
+
+            Check-AgentRemnants
+        }
+
+        It 'Can be upgraded after a failed install of an earlier version' {
+            Invoke-MSIAdvertise -Path $UpgradeFromMSI
+
+            { Install-MSI -Path $UpgradeFromMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
+            Is-AgentMSIAdvertised -ProductCode $UpgradeFromProductCode | Should -BeTrue
+
+            Install-MSI -Path $PathToLatestMSI @MSIInstallParameters
+            Is-AgentMSIInstalled -ProductCode $LatestProductCode | Should -BeTrue
+
+            Assert-AgentHealthy
+            Is-AgentMSIRegistrationPresent -ProductCode $UpgradeFromProductCode | Should -BeFalse -Because "the install of the newer version removes the earlier version"
+
+            Uninstall-MSI -Path $PathToLatestMSI @MSIUninstallParameters
+
+            Check-AgentRemnants
+        }
+
+        It 'Can be uninstalled when it is only advertised' {
+            Invoke-MSIAdvertise -Path $PathToLatestMSI
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
+
+            Uninstall-MSI -Guid $LatestProductCode @MSIUninstallParameters
+
+            Check-AgentRemnants
+        }
+
+        It 'Can be uninstalled after a failed install' {
+            Invoke-MSIAdvertise -Path $PathToLatestMSI
+
+            { Install-MSI -Path $PathToLatestMSI -Flags $FailedInstallFlags -LogToDir (Get-LogDir) } | Should -Throw -ExpectedMessage '*error 1603*'
+            Is-AgentMSIAdvertised -ProductCode $LatestProductCode | Should -BeTrue
+
+            Uninstall-MSI -Guid $LatestProductCode @MSIUninstallParameters
 
             Check-AgentRemnants
         }
