@@ -40,6 +40,9 @@ namespace Elastic.PackageCompiler.Beats
                 {
                     // The agent binary is left behind when installation fails and must be removed manually
                     RemoveFile(session, @"C:\Program Files\Elastic\Agent\elastic-agent.exe");
+
+                    // The data folder is left behind when installation fails and must be removed manually
+                    RemoveFolder(session, Path.Combine(session["INSTALLDIR"], "data"));
                 }
 
                 return process.ExitCode == 0 ? ActionResult.Success : ActionResult.Failure;
@@ -47,6 +50,7 @@ namespace Elastic.PackageCompiler.Beats
             catch (Exception ex)
             {
                 session.Log("Exception: " + ex.ToString());
+                RemoveFolder(session, Path.Combine(session["INSTALLDIR"], "data"));
                 return ActionResult.Failure;
             }
         }
@@ -108,8 +112,17 @@ namespace Elastic.PackageCompiler.Beats
         [CustomAction]
         public static ActionResult UpgradeAction(Session session)
         {
-            session.Log("Detected an agent upgrade via MSI, which is not supported. Aborting.");
-            return ActionResult.Failure;
+            // FindRelatedProducts also finds advertised products. RemoveExistingProducts removes them, so only an installed one blocks the install.
+            foreach (var code in session["WIX_UPGRADE_DETECTED"].Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (new ProductInstallation(code).IsInstalled)
+                {
+                    session.Log("Detected an agent upgrade via MSI, which is not supported. Aborting.");
+                    return ActionResult.Failure;
+                }
+                session.Log("Related product " + code + " is advertised, not installed. RemoveExistingProducts removes it.");
+            }
+            return ActionResult.Success;
         }
 
         [CustomAction]
