@@ -75,6 +75,8 @@ namespace Elastic.PackageCompiler.Beats
                     AllowDowngrades = false,
                     AllowSameVersionUpgrades = false,
                     DowngradeErrorMessage = MagicStrings.Errors.NewerVersionInstalled,
+                    // Do a fresh install instead of reusing the install state of an older version that failed to install.
+                    MigrateFeatures = false,
                 },
             };
 
@@ -181,7 +183,8 @@ namespace Elastic.PackageCompiler.Beats
                 project.LaunchConditions.Add(new LaunchCondition("Privileged", "Elastic Agent MSI must run as an administrator"));
                 project.AddProperty(new Property("MSIUSEREALADMINDETECTION", "1"));
 
-                project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, Condition.NOT_Installed));
+                // Run the agent install only during an install, never during an uninstall.
+                project.AddAction(new ManagedAction(AgentCustomAction.InstallAction, Return.check, When.After, Step.InstallExecute, new Condition("NOT Installed AND NOT (REMOVE~=\"ALL\")")));
 
                 // https://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
                 // We invoke the custom action before the "RemoveFiles" step so in case the action fails we can fail the whole MSI uninstall flow
